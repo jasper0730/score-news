@@ -4,7 +4,7 @@ import axios from "axios";
 const API_KEY = process.env.NEWSDATA_API_KEY;
 
 export async function GET() {
-  const API_URL = `https://newsdata.io/api/1/latest?country=tw&category=world&apikey=${API_KEY}0`;
+  const API_URL = `https://newsdata.io/api/1/latest?country=tw&category=world&apikey=${API_KEY}`;
   try {
     const { data } = await axios.get(API_URL);
     return NextResponse.json(
