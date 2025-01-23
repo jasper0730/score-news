@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --navH: 80px;
+}
+body {
+  color: rgb(0, 0, 0);
+  background: rgb(255, 255, 255);
+}
+
+[class='dark'],
+[class='dark'] body {
+  color: rgb(255, 255, 255);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+::backdrop {
+  display: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 0px;
+  background: rgba(100, 100, 100, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 0px;
+  border-radius: 2em;
+  background: rgba(100, 100, 100, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.3);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: rgba(100, 100, 100, 0.8);
+}
+
+.thick-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+.input-base {
+  @apply w-full font-light border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed;
+}
+
+.bg-gradient-basic {
+  @apply bg-gradient-to-tl from-gray-200 to-gray-50;
+}
+
+.bg-gradient-blue-rose {
+  @apply bg-gradient-to-tl from-blue-100 to-rose-100;
+}
+
+.bg-gradient-lime {
+  @apply bg-gradient-to-tl from-teal-100 to-yellow-50;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.auto-rows-10 {
+  grid-auto-rows: 10px;
+}
+
+.break-inside-avoid {
+  break-inside: avoid;
+}
