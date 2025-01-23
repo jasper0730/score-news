@@ -5,14 +5,14 @@ import Logo from "@/components/ui/Logo";
 import RegisterButton from "@/components/auth/RegisterButton";
 import ThemeSwitcher from "@/components/themeSwitcher/ThemeSwitcher";
 import SortButton from "@/components/buttons/SortButton";
-import { SessionType } from "@/app/types/SessionType";
 import Avatars from "@/components/ui/Avatars";
+import { User } from "@/providers/UserProvider";
 
-interface HomeHeaderProps {
-  session: SessionType | null
+type HomeHeaderProps = {
+  user: User | null
 }
 
-const HomeHeader = ({ session }: HomeHeaderProps) => {
+const HomeHeader = ({ user }: HomeHeaderProps) => {
 
   return (
     <div className="fixed top-0 left-0 w-full bg-white dark:bg-black z-10">
@@ -25,10 +25,10 @@ const HomeHeader = ({ session }: HomeHeaderProps) => {
         </div>
         <SearchBar />
         <div className="flex items-center gap-5 shrink-0">
-          <RegisterButton type={session ? "logout" : "login"} />
+          <RegisterButton type={user ? "logout" : "login"} />
           <ThemeSwitcher />
-          {session && <Link href="/dashboard" className="w-[35px] h-[35px] rounded-full relative">
-            <Avatars src={session.image} />
+          {user && <Link href="/dashboard" className="w-[35px] h-[35px] rounded-full relative">
+            <Avatars src={user.image} />
           </Link>}
         </div>
       </div>

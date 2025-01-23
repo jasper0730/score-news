@@ -29,7 +29,7 @@ const Modal = ({
       <>
         <dialog
           ref={dialogRef}
-          className={`modal overflow-hidden bg-transparent ${className} `}
+          className={`modal overflow-hidden bg-transparent focus:outline-none ${className}`}
           onClose={onClose}
         >
           <motion.div

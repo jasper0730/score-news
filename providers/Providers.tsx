@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { ThemeProvider } from "./ThemeProvider";
 import ToasterProvider from "./ToastProvider";
 import SessionProvider from "./SessionProvider";
+import { UserProvider } from "./UserProvider";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -9,14 +10,16 @@ interface ProvidersProps {
 const Providers = ({ children }: ProvidersProps) => {
   return (
     <SessionProvider>
-      <ToasterProvider />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange>
-        {children}
-      </ThemeProvider>
+      <UserProvider>
+        <ToasterProvider />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
+      </UserProvider>
     </SessionProvider>
   );
 };

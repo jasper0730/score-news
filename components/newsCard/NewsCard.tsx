@@ -31,7 +31,7 @@ const NewsCard = ({
 
   return (
     <div key={title} className="p-4 border rounded-lg shadow-lg">
-      <div className="mt-4 text-gray-600 dark:text-">
+      <div className="mt-4 text-gray-600 dark:text-white">
         <h2 className="text-lg font-bold line-clamp-2">{title}</h2>
         <p className="mt-2  line-clamp-3">{description}</p>
         <p className="mt-2 text-sm">日期：{date}</p>
@@ -40,7 +40,7 @@ const NewsCard = ({
             {Array.from({ length: rate }).map((_, index) => (
               <div
                 key={index}
-                className={`text-yellow-500 text-xl opacity-50`}
+                className={`text-yellow-500 text-xl`}
               >
                 <FaStar />
               </div>

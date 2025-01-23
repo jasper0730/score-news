@@ -1,17 +1,16 @@
-import { getUser } from "@/actions/getUser";
-import { SessionType } from "../types/SessionType";
 import HomeHeader from "@/components/pages/home/HomeHeader";
+import { useUser } from "@/providers/UserProvider";
 
-export default async function Dashboard({
+export default function Dashboard({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session: SessionType | null = await getUser();
+  const { user } = useUser();
 
   return (
     <>
-      <HomeHeader session={session} />
+      <HomeHeader user={user} />
       <section className="pt-[256px]">
         {children}
       </section>

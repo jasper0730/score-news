@@ -4,10 +4,12 @@ import { useEffect, useRef } from "react";
 
 interface MasonryItemProps {
   item: NewsDataType;
+  className: string,
   onResize: (height: number) => void;
+  onClick: () => void;
 }
 
-const MasonryItem = ({ item, onResize }: MasonryItemProps) => {
+const MasonryItem = ({ item, onResize, className, onClick }: MasonryItemProps) => {
   const itemRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
@@ -28,7 +30,10 @@ const MasonryItem = ({ item, onResize }: MasonryItemProps) => {
   }, [onResize]);
 
   return (
-    <div ref={itemRef} className="masonry-item mb-[24px]">
+    <div
+      ref={itemRef}
+      className={`masonry-item mb-[24px] ${className}`}
+      onClick={onClick}>
       <NewsCard
         title={item.title}
         description={item.description}
