@@ -6,7 +6,7 @@ import { signIn } from "next-auth/react";
 import { toastBox } from "@/utils/toast";
 import Logo from "../ui/Logo";
 import Input from "../input/Input";
-import Button from "../buttons/Button";
+import Button from "../button/Button";
 import { z } from 'zod'
 
 interface RegisterClientProps {
@@ -123,17 +123,17 @@ const RegisterClient = ({
       <div className={className}>
         <div className="flex flex-col items-center justify-center mb-5">
           <Logo />
-          {type === "login" && <h2 className={titleClass}>登入 NewsSearch</h2>}
+          {type === "login" && <h2 className={titleClass}>登入 ScoreNews </h2>}
           {type === "signup" && <h2 className={titleClass}>創建一個帳戶</h2>}
         </div>
-        {type === "login" && <p className="text-sm text-center">還沒加入NewsSearch嗎?
+        {type === "login" && <p className="text-sm text-center">還沒加入ScoreNews 嗎?
           <span
             className="text-red-600 cursor-pointer"
             onClick={setOpenModal
               ? () => setOpenModal("signup")
               : () => router.push('/signup')}> 註冊</span>
         </p>}
-        {type === "signup" && <p className="text-sm text-center">已經加入NewsSearch嗎?
+        {type === "signup" && <p className="text-sm text-center">已經加入ScoreNews 嗎?
           <span
             className="text-red-600 cursor-pointer"
             onClick={setOpenModal

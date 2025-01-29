@@ -1,16 +1,14 @@
-import HomeHeader from "@/components/pages/home/HomeHeader";
-import { useUser } from "@/providers/UserProvider";
+import HomeHeader from "@/app/(root)/HomeHeader";
 
-export default function Dashboard({
+export default async function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { user } = useUser();
 
   return (
     <>
-      <HomeHeader user={user} />
+      <HomeHeader />
       <section className="pt-[256px]">
         {children}
       </section>

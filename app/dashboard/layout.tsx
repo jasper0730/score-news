@@ -1,9 +1,8 @@
 
 import { getUser } from "@/actions/getUser";
-import NavBar from "@/components/navbar/NavBar";
+import NavBar from "@/app/dashboard/NavBar";
 
-
-export default async function Dashboard({
+export default async function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;

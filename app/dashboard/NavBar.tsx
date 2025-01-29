@@ -1,10 +1,10 @@
 
 import Link from "next/link";
-import Logo from "../ui/Logo";
-import ThemeSwitcher from "../themeSwitcher/ThemeSwitcher";
-import RegisterButton from "../auth/RegisterButton";
+import Logo from "../../components/ui/Logo";
+import ThemeSwitcher from "../../components/themeSwitcher/ThemeSwitcher";
+import RegisterButton from "../../components/register/RegisterButton";
 import { SessionType } from "@/app/types/SessionType";
-import Avatars from "../ui/Avatars";
+import Avatars from "../../components/ui/Avatars";
 
 
 interface NavBarProps {

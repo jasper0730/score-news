@@ -8,7 +8,7 @@ export interface StateProps {
 
 export const useNewsStore = create<StateProps>((set) => ({
   query: "",
-  setNewsQuery: (query) => set({ query }),
   sortType: "date",
+  setNewsQuery: (query) => set({ query }),
   setSortType: (type: 'rating' | 'date') => set({ sortType: type })
 }));

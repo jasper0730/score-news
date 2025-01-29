@@ -1,19 +1,20 @@
 'use client'
 import Link from "next/link";
-import SearchBar from "@/components/searchBar/SearchBar";
+import SearchBar from "@/app/(root)/SearchBar";
 import Logo from "@/components/ui/Logo";
-import RegisterButton from "@/components/auth/RegisterButton";
+import RegisterButton from "@/components/register/RegisterButton";
 import ThemeSwitcher from "@/components/themeSwitcher/ThemeSwitcher";
-import SortButton from "@/components/buttons/SortButton";
+import SortButton from "@/app/(root)/SortButton";
 import Avatars from "@/components/ui/Avatars";
-import { User } from "@/providers/UserProvider";
+import { useSession } from "next-auth/react";
 
-type HomeHeaderProps = {
-  user: User | null
-}
+export type User = {
+  id: string
+  image?: string
+} | null
 
-const HomeHeader = ({ user }: HomeHeaderProps) => {
-
+const HomeHeader = () => {
+  const currentUser = useSession()
   return (
     <div className="fixed top-0 left-0 w-full bg-white dark:bg-black z-10">
       <div className="px-5 pt-5 flex justify-between items-start gap-5">
@@ -25,11 +26,13 @@ const HomeHeader = ({ user }: HomeHeaderProps) => {
         </div>
         <SearchBar />
         <div className="flex items-center gap-5 shrink-0">
-          <RegisterButton type={user ? "logout" : "login"} />
+          <RegisterButton type={currentUser.status === "authenticated" ? "logout" : "login"} />
           <ThemeSwitcher />
-          {user && <Link href="/dashboard" className="w-[35px] h-[35px] rounded-full relative">
-            <Avatars src={user.image} />
-          </Link>}
+          {currentUser.status === "authenticated" && (
+            <Link href="/dashboard" className="w-[35px] h-[35px] rounded-full relative">
+              <Avatars src={currentUser.data.user?.image} />
+            </Link>
+          )}
         </div>
       </div>
       <div className="flex mt-5 ml-auto px-5 justify-end">

@@ -1,4 +1,4 @@
-import RegisterClient from "@/components/auth/RegisterClient";
+import RegisterClient from "@/components/register/RegisterClient";
 import Link from "next/link";
 
 const LoginPage = () => {

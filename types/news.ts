@@ -7,4 +7,5 @@ export interface NewsDataType {
   source_name: string;
   source_url: string;
   rate: number;
+  favorite: boolean;
 }

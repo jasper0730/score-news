@@ -1,6 +1,6 @@
 "use client"
 import RegisterClient from "./RegisterClient";
-import Modal from "../modals/Modal";
+import Modal from "../modal/Modal";
 
 interface RegisterModalProps {
   open: boolean;

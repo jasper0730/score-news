@@ -2,8 +2,6 @@
 import { getUser } from "@/actions/getUser";
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
 
-
-
 export type User = {
   id: string
   image?: string

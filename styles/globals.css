@@ -53,31 +53,4 @@ body {
   height: 0px;
 }
 
-.input-base {
-  @apply w-full font-light border-2 rounded-md outline-none transition disabled:opacity-70 disabled:cursor-not-allowed;
-}
 
-.bg-gradient-basic {
-  @apply bg-gradient-to-tl from-gray-200 to-gray-50;
-}
-
-.bg-gradient-blue-rose {
-  @apply bg-gradient-to-tl from-blue-100 to-rose-100;
-}
-
-.bg-gradient-lime {
-  @apply bg-gradient-to-tl from-teal-100 to-yellow-50;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
-}
-
-.auto-rows-10 {
-  grid-auto-rows: 10px;
-}
-
-.break-inside-avoid {
-  break-inside: avoid;
-}
