@@ -50,17 +50,24 @@ const NewsCards = ({ data }: NewsCardsProps) => {
   }, [newsData, queryValue, sortType])
 
   const handleFavoriteClick = async (id: string) => {
+    // 樂觀更新
+    setFavorites((prevFavorites) =>
+      prevFavorites.includes(id)
+        ? prevFavorites.filter((favId) => favId !== id)
+        : [...prevFavorites, id]
+    );
     try {
       const res = await axios.post("/api/favorite", { id });
-      if (res.data.success) {
-        setFavorites((prevFavorites) =>
-          res.data.message === "Favorite added"
-            ? [...prevFavorites, id]
-            : prevFavorites.filter((favId) => favId !== id)
-        );
+      if (!res.data.success) {
+        throw new Error("Failed to update favorite");
       }
     } catch (error) {
       console.error("Failed to update favorite:", error);
+      setFavorites((prevFavorites) =>
+        prevFavorites.includes(id)
+          ? prevFavorites.filter((favId) => favId !== id)
+          : [...prevFavorites, id]
+      );
     }
   };
 
@@ -75,25 +82,30 @@ const NewsCards = ({ data }: NewsCardsProps) => {
   if (!data.success) {
     return <p>Failed to fetch</p>;
   }
+
   return (
     <div className="min-h-screen p-4">
-      <div className="grid grid-cols-4 gap-4">
-        {sortedData.map((data) => (
-          <NewsCard
-            key={data.article_id}
-            articleId={data.article_id}
-            title={data.title}
-            description={data.description}
-            date={data.pubDate}
-            sourceIcon={data.source_icon}
-            sourceName={data.source_name}
-            sourceUrl={data.source_url}
-            rate={data.rate}
-            favorite={favorites.includes(data.article_id)}
-            onFavoriteClick={handleFavoriteClick}
-          />
-        ))}
-      </div>
+      {sortedData.length ? (
+        <div className="grid grid-cols-4 gap-4">
+          {sortedData.map((data) => (
+            <NewsCard
+              key={data.article_id}
+              articleId={data.article_id}
+              title={data.title}
+              description={data.description}
+              date={data.pubDate}
+              sourceIcon={data.source_icon}
+              sourceName={data.source_name}
+              sourceUrl={data.source_url}
+              rate={data.rate}
+              favorite={favorites.includes(data.article_id)}
+              onFavoriteClick={handleFavoriteClick}
+            />
+          ))}
+        </div>
+      )
+        : <p className="p-5 pt-10 flex justify-center items-center text-xl">無相符的資料,請重新搜尋</p>
+      }
     </div>
   );
 };
