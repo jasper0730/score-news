@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useNewsStore } from "@/store/newsStore";
 import { useShallow } from "zustand/shallow";
 import { NewsDataType } from "@/types/news";
-import NewsCard from "@/components/newsCard/NewsCard";
+import Card from "@/components/Card/Card";
 import axios from "axios";
-
+import Modal from "@/components/modal/Modal";
 interface NewsCardsProps {
   data: {
     data: NewsDataType[];
@@ -15,6 +15,7 @@ interface NewsCardsProps {
 }
 
 const NewsCards = ({ data }: NewsCardsProps) => {
+  const [selectedNews, setSelectedNews] = useState<NewsDataType | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const { query, sortType } = useNewsStore(
     useShallow((state) => ({
@@ -88,25 +89,34 @@ const NewsCards = ({ data }: NewsCardsProps) => {
       {sortedData.length ? (
         <div className="grid grid-cols-4 gap-4">
           {sortedData.map((data) => (
-            <NewsCard
-              key={data.article_id}
-              articleId={data.article_id}
-              title={data.title}
-              description={data.description}
-              date={data.pubDate}
-              sourceIcon={data.source_icon}
-              sourceName={data.source_name}
-              sourceUrl={data.source_url}
-              rate={data.rate}
-              favorite={favorites.includes(data.article_id)}
-              onFavoriteClick={handleFavoriteClick}
-            />
+            <div key={data.article_id} onClick={() => setSelectedNews(data)}>
+              <Card
+                articleId={data.article_id}
+                title={data.title}
+                description={data.description}
+                date={data.pubDate}
+                sourceIcon={data.source_icon}
+                sourceName={data.source_name}
+                sourceUrl={data.source_url}
+                rate={data.rate}
+                favorite={favorites.includes(data.article_id)}
+                onFavoriteClick={handleFavoriteClick}
+              />
+
+            </div>
           ))}
         </div>
       )
         : <p className="p-5 pt-10 flex justify-center items-center text-xl">無相符的資料,請重新搜尋</p>
       }
-    </div>
+      {selectedNews && (
+        <Modal open={true} onClose={() => setSelectedNews(null)}>
+          <h1 className="text-xl font-bold">{selectedNews.title}</h1>
+          <p className="mt-2">{selectedNews.description}</p>
+          <p className="mt-2 text-sm text-gray-500">來源: {selectedNews.source_name}</p>
+        </Modal>
+      )}
+    </div >
   );
 };
 
