@@ -15,6 +15,7 @@ interface NewsCardProps {
   rate: number;
   favorite: boolean;
   onFavoriteClick: (articleId: string) => void;
+  onMoreClick: () => void;
 }
 
 const Card = ({
@@ -28,6 +29,7 @@ const Card = ({
   rate,
   favorite,
   onFavoriteClick,
+  onMoreClick
 }: NewsCardProps) => {
   const currentUser = useSession()
   const isAdmin = currentUser.status === "authenticated"
@@ -55,7 +57,7 @@ const Card = ({
             </a>
           </div>
         </div>
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between my-4">
           <div className="flex items-center">
             {Array.from({ length: rate }).map((_, index) => (
               <div key={index} className="text-yellow-500 text-xl">
@@ -72,6 +74,7 @@ const Card = ({
             </button>
           )}
         </div>
+        <div className="mt-auto text-blue-500 cursor-pointer w-[60px] hover:opacity-70" onClick={onMoreClick}>More</div>
       </div>
     </div>
   );

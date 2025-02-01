@@ -72,6 +72,10 @@ const NewsCards = ({ data }: NewsCardsProps) => {
     }
   };
 
+  const handleMoreClick = (data: NewsDataType) => {
+    setSelectedNews(data)
+  }
+
   useEffect(() => {
     const favoriteIds = sortedData
       .filter((item) => item.favorite === true)
@@ -89,28 +93,27 @@ const NewsCards = ({ data }: NewsCardsProps) => {
       {sortedData.length ? (
         <div className="grid grid-cols-4 gap-4">
           {sortedData.map((data) => (
-            <div key={data.article_id} onClick={() => setSelectedNews(data)}>
-              <Card
-                articleId={data.article_id}
-                title={data.title}
-                description={data.description}
-                date={data.pubDate}
-                sourceIcon={data.source_icon}
-                sourceName={data.source_name}
-                sourceUrl={data.source_url}
-                rate={data.rate}
-                favorite={favorites.includes(data.article_id)}
-                onFavoriteClick={handleFavoriteClick}
-              />
-
-            </div>
+            <Card
+              key={data.article_id}
+              articleId={data.article_id}
+              title={data.title}
+              description={data.description}
+              date={data.pubDate}
+              sourceIcon={data.source_icon}
+              sourceName={data.source_name}
+              sourceUrl={data.source_url}
+              rate={data.rate}
+              favorite={favorites.includes(data.article_id)}
+              onFavoriteClick={handleFavoriteClick}
+              onMoreClick={() => handleMoreClick(data)}
+            />
           ))}
         </div>
       )
         : <p className="p-5 pt-10 flex justify-center items-center text-xl">無相符的資料,請重新搜尋</p>
       }
       {selectedNews && (
-        <Modal open={true} onClose={() => setSelectedNews(null)}>
+        <Modal open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
           <h1 className="text-xl font-bold">{selectedNews.title}</h1>
           <p className="mt-2">{selectedNews.description}</p>
           <p className="mt-2 text-sm text-gray-500">來源: {selectedNews.source_name}</p>
