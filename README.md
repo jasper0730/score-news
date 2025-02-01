@@ -20,8 +20,7 @@
 - **[Axios](https://axios-http.com/)** - 用於處理 HTTP 請求，獲取新聞與使用者資料。
 - **[NextAuth.js](https://next-auth.js.org/)** - 提供簡單、安全的身份驗證系統，支援 OAuth 和密碼登入。
 - **[Vercel](https://vercel.com/)** - 最佳化的 Next.js 部署平台，確保穩定與快速的網站運行。
-- **[Mongoose](https://mongoosejs.com/)** - 用於與 MongoDB 互動的 ODM 庫。
-
+- **[MongoDB](https://www.mongodb.com/)** - NoSQL 資料庫，存儲用戶、新聞、評論等數據。
 
 ## 聯絡我們 (Contact Us)
 - Github Repository：[Score News](https://github.com/jasper0730/next-news-tw)
