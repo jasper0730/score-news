@@ -17,8 +17,8 @@
 - **[TypeScript](https://www.typescriptlang.org/)** - 增強 JavaScript 的型別安全性。
 - **[Tailwind CSS](https://tailwindcss.com/)** - 高效、易用的 CSS 框架，實現現代化 UI 設計。
 - **[Zustand](https://zustand-demo.pmnd.rs/)** - 輕量級的狀態管理庫，簡化應用狀態管理。
-- - **[Axios](https://axios-http.com/)** - 用於處理 HTTP 請求，獲取新聞與使用者資料。
-- - **[NextAuth.js](https://next-auth.js.org/)** - 提供簡單、安全的身份驗證系統，支援 OAuth 和密碼登入。
+- **[Axios](https://axios-http.com/)** - 用於處理 HTTP 請求，獲取新聞與使用者資料。
+- **[NextAuth.js](https://next-auth.js.org/)** - 提供簡單、安全的身份驗證系統，支援 OAuth 和密碼登入。
 - **[Vercel](https://vercel.com/)** - 最佳化的 Next.js 部署平台，確保穩定與快速的網站運行。
 
 ## 聯絡我們 (Contact Us)
