@@ -15,7 +15,7 @@ interface NewsCardProps {
   rate: number;
   favorite: boolean;
   onFavoriteClick: (articleId: string) => void;
-  onMoreClick: () => void;
+  onMoreClick?: () => void;
 }
 
 const Card = ({
@@ -59,7 +59,7 @@ const Card = ({
         </div>
         <div className="flex items-center justify-between my-4">
           <div className="flex items-center">
-            {Array.from({ length: rate }).map((_, index) => (
+            {Array.from({ length: rate ?? 0 }).map((_, index) => (
               <div key={index} className="text-yellow-500 text-xl">
                 <FaStar />
               </div>

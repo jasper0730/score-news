@@ -7,7 +7,7 @@ import { NewsDataType } from "@/types/news";
 import Card from "@/components/Card/Card";
 import axios from "axios";
 import Modal from "@/components/modal/Modal";
-interface NewsCardsProps {
+type NewsCardsProps = {
   data: {
     data: NewsDataType[];
     success: boolean;

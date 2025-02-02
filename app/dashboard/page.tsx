@@ -1,5 +1,13 @@
+import { getUser } from "@/actions/getUser";
+import DashboardNewsCards from "./DashboardNewsCards";
+
 const DashboardPage = async () => {
-  return (<h1 className="text-5xl">DashboardPage</h1>);
+  const currentUser = await getUser()
+  return (
+    <>
+      <DashboardNewsCards user={currentUser}/>
+    </>
+  );
 }
 
 export default DashboardPage;

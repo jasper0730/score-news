@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
       if (userFavorites && userFavorites.postIds) {
         const favoriteSet = new Set(userFavorites.postIds);
-        const updatedData = allData.results.map((item) => ({
+        const filterdData = allData.results.map((item) => ({
           ...item,
           favorite: favoriteSet.has(item.article_id),
         }));
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
         return NextResponse.json(
           {
             success: true,
-            data: updatedData,
+            data: filterdData,
           },
           { status: 200 }
         );
