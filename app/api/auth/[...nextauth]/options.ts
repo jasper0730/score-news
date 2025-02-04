@@ -79,17 +79,17 @@ export const options: NextAuthOptions = {
           provider: account?.provider,
         });
 
-        // if (!existingAccount) {
-        //   await accountsCollection.insertOne({
-        //     provider: account?.provider,
-        //     type: account?.type,
-        //     providerAccountId: account?.providerAccountId,
-        //     userId: existingUser._id,
-        //     access_token: account?.access_token,
-        //     expires_at: account?.expires_at,
-        //     refresh_token: account?.refresh_token,
-        //   });
-        // }
+        if (!existingAccount) {
+          await accountsCollection.insertOne({
+            provider: account?.provider,
+            type: account?.type,
+            providerAccountId: account?.providerAccountId,
+            userId: existingUser._id,
+            access_token: account?.access_token,
+            expires_at: account?.expires_at,
+            refresh_token: account?.refresh_token,
+          });
+        }
       }
 
       return true;
