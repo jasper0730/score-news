@@ -6,6 +6,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import clientPromise from "@/libs/mongodb";
 import bcrypt from "bcrypt";
 import { MongoDBAdapter } from "@auth/mongodb-adapter"
+import { ObjectId } from "mongodb";
 
 export const options: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
@@ -74,7 +75,7 @@ export const options: NextAuthOptions = {
       if (existingUser && existingUser.provider !== account?.provider) {
         // 如果已有相同 Email 的帳號但不同 Provider，則更新它的 provider 資料
         await usersCollection.updateOne(
-          { _id: new Object(existingUser._id) },
+          { _id: new ObjectId(existingUser._id) },
           { $set: { provider: account?.provider } }
         );
       }
