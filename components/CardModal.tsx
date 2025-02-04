@@ -1,3 +1,5 @@
+"use client"
+
 import { NewsDataType } from "@/types/news";
 import { IoIosCloseCircle } from "react-icons/io";
 
