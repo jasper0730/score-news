@@ -1,62 +1,52 @@
 "use client"
-import { useEffect, useRef } from "react";
+
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { motion } from "motion/react"
+import { motion, AnimatePresence } from "framer-motion";
 
 type ModalProps = {
   open: boolean;
   onClose: () => void;
   children?: React.ReactNode;
   className?: string;
-}
-const Modal = ({
-  children,
-  open,
-  className = '',
-  onClose
-}: ModalProps) => {
+};
 
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-
+const Modal = ({ children, open, className = "", onClose }: ModalProps) => {
   useEffect(() => {
     if (open) {
-      dialogRef.current?.showModal();
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
-  return (
-    createPortal(
-      <>
-        <dialog
-          ref={dialogRef}
-          className={`modal overflow-hidden bg-transparent focus:outline-none ${className}`}
-          onClose={onClose}
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-10 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={onClose}
         >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="top-0 left-0 w-full h-[100dvh] fixed"
-            onClick={onClose}>
-          </motion.div>
-          <motion.div
-            className="z-10 relative bg-white dark:bg-black"
+            className={` ${className}`}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
+            onClick={(e) => e.stopPropagation()}
           >
             {children}
           </motion.div>
-        </dialog>
-      </>,
-      document.body
-    )
-  )
-}
-
-
-
-
-
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+};
 
 export default Modal;

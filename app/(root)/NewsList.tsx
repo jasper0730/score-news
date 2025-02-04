@@ -8,6 +8,7 @@ import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { toastBox } from "@/utils/toast";
 import axios from "axios";
+import CardModal from "@/components/CardModal";
 
 type NewsListProps = {
   data: {
@@ -122,14 +123,10 @@ const NewsList = ({ data }: NewsListProps) => {
           無相符的資料，請重新搜尋
         </p>
       )}
+      <Modal className="max-w-[1000px] w-full" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
+        <CardModal data={selectedNews} onClose={() => setSelectedNews(null)} />
+      </Modal>
 
-      {selectedNews && (
-        <Modal open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
-          <h1 className="text-xl font-bold">{selectedNews.title}</h1>
-          <p className="mt-2">{selectedNews.description}</p>
-          <p className="mt-2 text-sm text-gray-500">來源: {selectedNews.source_name}</p>
-        </Modal>
-      )}
     </div>
   );
 };
