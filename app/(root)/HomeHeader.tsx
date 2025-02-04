@@ -3,7 +3,7 @@ import Link from "next/link";
 import SearchBar from "@/app/(root)/SearchBar";
 import Logo from "@/components/ui/Logo";
 import RegisterButton from "@/components/register/RegisterButton";
-import ThemeSwitcher from "@/components/themeSwitcher/ThemeSwitcher";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import SortButton from "@/app/(root)/SortButton";
 import Avatars from "@/components/ui/Avatars";
 import { useSession } from "next-auth/react";

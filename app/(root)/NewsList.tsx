@@ -4,18 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import { useNewsStore } from "@/store/newsStore";
 import { useShallow } from "zustand/shallow";
 import { NewsDataType } from "@/types/news";
-import Card from "@/components/Card/Card";
+import Card from "@/components/Card";
+import Modal from "@/components/Modal";
+import { toastBox } from "@/utils/toast";
 import axios from "axios";
-import Modal from "@/components/modal/Modal";
 
-type NewsCardsProps = {
+type NewsListProps = {
   data: {
     data: NewsDataType[];
     success: boolean;
   };
 };
 
-const NewsCards = ({ data }: NewsCardsProps) => {
+const NewsList = ({ data }: NewsListProps) => {
   const [selectedNews, setSelectedNews] = useState<NewsDataType | null>(null);
   const [newsData, setNewsData] = useState<NewsDataType[]>(data.data || []);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -41,18 +42,22 @@ const NewsCards = ({ data }: NewsCardsProps) => {
 
   const handleFavoriteClick = async (id: string) => {
     // 樂觀更新
-    setFavorites((prevFavorites) => {
-      const newFavorites = prevFavorites.includes(id)
+    setFavorites((prevFavorites) => (
+      prevFavorites.includes(id)
         ? prevFavorites.filter((favId) => favId !== id)
-        : [...prevFavorites, id];
-
-      return newFavorites;
-    });
+        : [...prevFavorites, id]
+    ));
 
     try {
       const res = await axios.post("/api/favorite", { id });
       if (!res.data.success) {
         throw new Error("Failed to update favorite");
+      }
+      if(res.data.message === "Favorite removed") {
+        toastBox("移除收藏", "success")
+      }
+      if(res.data.message === "Favorite added") {
+        toastBox("已收藏", "success")
       }
     } catch (error) {
       console.error("Failed to update favorite:", error);
@@ -100,14 +105,7 @@ const NewsCards = ({ data }: NewsCardsProps) => {
           {sortedData.map((article) => (
             <Card
               key={article.article_id}
-              articleId={article.article_id}
-              title={article.title}
-              description={article.description}
-              date={article.pubDate}
-              sourceIcon={article.source_icon}
-              sourceName={article.source_name}
-              sourceUrl={article.source_url}
-              rate={article.rate}
+              article={article}
               favorite={favorites.includes(article.article_id)}
               onFavoriteClick={handleFavoriteClick}
               onMoreClick={() => handleMoreClick(article)}
@@ -131,4 +129,4 @@ const NewsCards = ({ data }: NewsCardsProps) => {
   );
 };
 
-export default NewsCards;
+export default NewsList;

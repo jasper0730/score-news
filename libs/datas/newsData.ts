@@ -4,7 +4,6 @@ export const newsData = {
   results: [
     {
       article_id: "bbf54f6fcf54decb5d81ed53095e834c",
-      rate: "1",
       title: "德國看特朗普上任",
       link: "https://www.rfi.fr/tw/%E6%AD%90%E6%B4%B2/20250120-%E5%BE%B7%E5%9C%8B%E7%9C%8B%E7%89%B9%E6%9C%97%E6%99%AE%E4%B8%8A%E4%BB%BB",
       keywords: [
@@ -86,7 +85,6 @@ export const newsData = {
     },
     {
       article_id: "794cdcd5cdff07e947a7b435c66a315b",
-      rate: "3",
       title: "6.4 magnitude earthquake jolts southern Taiwan",
       link: "https://www.indiatodayne.in/international/story/64-magnitude-earthquake-jolts-southern-taiwan-1157851-2025-01-20",
       keywords: null,
@@ -118,7 +116,6 @@ export const newsData = {
     },
     {
       article_id: "3a484d034a0421940bb9999b97b6fdaa",
-      rate: null,
       title: "分析:特朗普強勢回歸將給全球帶來四年“顛簸期”",
       link: "https://www.rfi.fr/tw/%E5%B0%88%E6%AC%84%E6%AA%A2%E7%B4%A2/%E5%9C%8B%E9%9A%9B%E7%B8%B1%E6%A9%AB/20250120-%E5%88%86%E6%9E%90-%E7%89%B9%E6%9C%97%E6%99%AE%E5%9B%9E%E6%AD%B8%E5%B0%87%E7%B5%A6%E5%85%A8%E7%90%83%E5%B8%B6%E4%BE%86%E5%9B%9B%E5%B9%B4-%E9%A1%9B%E7%B0%B8%E6%9C%9F",
       keywords: [
@@ -186,7 +183,6 @@ export const newsData = {
     },
     {
       article_id: "62a3b776fe83c5af6058a7e764de07bf",
-      rate: "5",
       title: "歐盟據報考慮撤銷一樁對華貿易訴訟 立陶宛總統促歐委會莫放棄",
       link: "https://www.rfi.fr/tw/%E6%AD%90%E6%B4%B2/20250120-%E6%AD%90%E7%9B%9F%E6%93%9A%E5%A0%B1%E8%80%83%E6%85%AE%E6%92%A4%E9%8A%B7%E4%B8%80%E6%A8%81%E5%B0%8D%E8%8F%AF%E8%B2%BF%E6%98%93%E8%A8%B4%E8%A8%9F-%E7%AB%8B%E9%99%B6%E5%AE%9B%E7%B8%BD%E7%B5%B1%E6%95%A6%E4%BF%83%E6%AD%90%E5%A7%94%E6%9C%83%E8%8E%AB%E6%94%BE%E6%A3%84",
       keywords: [
@@ -268,7 +264,6 @@ export const newsData = {
     },
     {
       article_id: "a25f22f78f640f66a12db6f3fbf87073",
-      rate: "5",
       title: "法國總理警告:或將被美國特朗普新政策“擊垮”",
       link: "https://www.rfi.fr/tw/%E4%B8%AD%E5%9C%8B/20250120-%E6%B3%95%E5%9C%8B%E7%B8%BD%E7%90%86%E8%AD%A6%E5%91%8A-%E6%88%96%E5%B0%87%E8%A2%AB%E7%BE%8E%E5%9C%8B%E7%89%B9%E6%9C%97%E6%99%AE%E6%96%B0%E6%94%BF%E7%AD%96-%E6%93%8A%E5%9E%AE",
       keywords: [
@@ -305,7 +300,6 @@ export const newsData = {
     },
     {
       article_id: "1f6d05ddef1124db7dd1709336db1c95",
-      rate: "3",
       title: "美國華人如何看特朗普回歸?",
       link: "https://www.rfi.fr/tw/%E5%B0%88%E6%AC%84%E6%AA%A2%E7%B4%A2/%E8%A6%81%E8%81%9E%E8%A7%A3%E8%AA%AA/20250120-%E7%BE%8E%E5%9C%8B%E8%8F%AF%E4%BA%BA%E5%A6%82%E4%BD%95%E7%9C%8B%E7%89%B9%E6%9C%97%E6%99%AE%E5%9B%9E%E6%AD%B8",
       keywords: [
@@ -373,7 +367,6 @@ export const newsData = {
     },
     {
       article_id: "71176ad76c34bffe9510f00e7ee695f2",
-      rate: null,
       title: "Viettel sẽ phóng được vệ tinh và sản xuất chip bán dẫn vào năm 2030",
       link: "https://cafebiz.vn/viettel-se-phong-duoc-ve-tinh-va-san-xuat-chip-ban-dan-vao-nam-2030-176250120214837401.chn",
       keywords: null,
@@ -405,7 +398,6 @@ export const newsData = {
     },
     {
       article_id: "a3d2a09ac4fef96402d0529d0f8156e8",
-      rate: "1",
       title: "特朗普就職日 馬克龍提出自己的“軍事指導方針”",
       link: "https://www.rfi.fr/tw/%E5%B0%88%E6%AC%84%E6%AA%A2%E7%B4%A2/%E6%B3%95%E5%9C%8B%E7%94%9F%E6%B4%BB/20250120-%E7%89%B9%E6%9C%97%E6%99%AE%E5%B0%B1%E8%81%B7%E6%97%A5-%E9%A6%AC%E5%85%8B%E9%BE%8D%E6%8F%90%E5%87%BA%E8%87%AA%E5%B7%B1%E7%9A%84-%E8%BB%8D%E4%BA%8B%E6%8C%87%E5%B0%8E%E6%96%B9%E9%87%9D",
       keywords: [
@@ -441,7 +433,6 @@ export const newsData = {
     },
     {
       article_id: "4dd2b9d453107ad8b88d1d6f33077e28",
-      rate: "3",
       title: "Party chief chairs 1st meeting of steering committee for science, technology development",
       link: "https://en.vietnamplus.vn/party-chief-chairs-1st-meeting-of-steering-committee-for-science-technology-development-post308642.vnp",
       keywords: [
@@ -475,7 +466,6 @@ export const newsData = {
     },
     {
       article_id: "02b8a730329b15204cb271d84f017cb9",
-      rate: "5",
       title: "Bỏ tiền mua suất ăn, đồ uống nhưng không sử dụng mà 'treo lên': Bắt đầu nở rộ",
       link: "https://cafebiz.vn/bo-tien-mua-suat-an-do-uong-nhung-khong-su-dung-ma-treo-len-bat-dau-no-ro-176250120210921898.chn",
       keywords: null,

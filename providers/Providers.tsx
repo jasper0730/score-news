@@ -3,7 +3,7 @@ import { ThemeProvider } from "./ThemeProvider";
 import ToasterProvider from "./ToastProvider";
 import SessionProvider from "./SessionProvider";
 
-interface ProvidersProps {
+type  ProvidersProps = {
   children: ReactNode;
 }
 const Providers = ({ children }: ProvidersProps) => {

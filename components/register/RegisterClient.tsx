@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { toastBox } from "@/utils/toast";
 import Logo from "../ui/Logo";
-import Input from "../input/Input";
-import Button from "../button/Button";
+import Input from "../Input";
+import Button from "../Button";
 import { z } from 'zod'
 
-interface RegisterClientProps {
+type RegisterClientProps = {
   type: "login" | "signup";
   setOpenModal?: (type: "login" | "signup" | null) => void;
   className?: string;

@@ -1,8 +1,8 @@
 "use client"
 import RegisterClient from "./RegisterClient";
-import Modal from "../modal/Modal";
+import Modal from "../Modal";
 
-interface RegisterModalProps {
+type RegisterModalProps = {
   open: boolean;
   onClose: () => void;
   type: "login" | "signup";

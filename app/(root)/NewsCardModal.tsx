@@ -2,7 +2,7 @@ import { NewsDataType } from "@/types/news";
 import { IoIosCloseCircle } from "react-icons/io";
 
 
-interface NewsCardModalProps {
+type NewsCardModalProps = {
   data: NewsDataType
 }
 const NewsCardModal = ({ data }: NewsCardModalProps) => {

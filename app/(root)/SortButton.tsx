@@ -1,9 +1,9 @@
 "use client";
 import { useShallow } from "zustand/shallow";
 import { useNewsStore } from "@/store/newsStore";
-import Button from "../../components/button/Button";
+import Button from "../../components/Button";
 
-interface SortButtonProps {
+type SortButtonProps = {
   type: "rating" | "date";
 }
 

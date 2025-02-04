@@ -1,13 +1,13 @@
 
 import Link from "next/link";
 import Logo from "../../components/ui/Logo";
-import ThemeSwitcher from "../../components/themeSwitcher/ThemeSwitcher";
+import ThemeSwitcher from "../../components/ThemeSwitcher";
 import RegisterButton from "../../components/register/RegisterButton";
 import { SessionType } from "@/app/types/SessionType";
 import Avatars from "../../components/ui/Avatars";
 
 
-interface NavBarProps {
+type NavBarProps = {
   session: SessionType | null
 }
 const NavBar = ({ session }: NavBarProps) => {

@@ -1,5 +1,5 @@
 import { getUser } from "@/actions/getUser";
-import NewsCards from "@/app/(root)/NewsCards";
+import NewsCards from "@/app/(root)/NewsList";
 import axios from "axios";
 const API_URL = process.env.API_URL
 export default async function Home() {

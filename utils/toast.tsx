@@ -15,7 +15,6 @@ export const toastBox = (text: string, state: string) => {
     default:
       break;
   }
-  // 每次只出現最新的
   toast.dismiss();
   toast.custom((t: React.ComponentProps<typeof toast>) => (
     <div

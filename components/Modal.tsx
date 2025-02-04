@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react"
 
-interface ModalProps {
+type ModalProps = {
   open: boolean;
   onClose: () => void;
   children?: React.ReactNode;

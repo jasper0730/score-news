@@ -3,7 +3,7 @@
 import React from 'react'
 import Image from 'next/image'
 
-interface AvatarsProps {
+type  AvatarsProps = {
   src?: string | null
 }
 

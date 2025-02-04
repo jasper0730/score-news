@@ -1,4 +1,4 @@
-interface InputProps {
+type InputProps = {
   type?: string;
   disabled?: boolean;
   className?: string;

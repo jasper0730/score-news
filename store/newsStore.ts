@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-export interface StateProps {
+export type StateProps = {
   query: string;
   setNewsQuery: (query: string) => void;
   sortType: 'rating' | 'date';

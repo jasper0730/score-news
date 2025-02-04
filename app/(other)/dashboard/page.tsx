@@ -1,11 +1,11 @@
 import { getUser } from "@/actions/getUser";
-import DashboardNewsCards from "./DashboardNewsCards";
+import DashboardNewsList from "./DashboardNewsList";
 
 const DashboardPage = async () => {
   const currentUser = await getUser()
   return (
     <>
-      <DashboardNewsCards user={currentUser}/>
+      <DashboardNewsList user={currentUser} />
     </>
   );
 }

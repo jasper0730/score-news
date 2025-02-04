@@ -1,4 +1,4 @@
-export interface NewsDataType {
+export type NewsDataType = {
   article_id: string;
   title: string;
   description: string;
