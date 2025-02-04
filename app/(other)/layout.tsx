@@ -1,6 +1,6 @@
 
 import { getUser } from "@/actions/getUser";
-import NavBar from "@/app/dashboard/NavBar";
+import NavBar from "./NavBar";
 
 export default async function Layout({
   children,

@@ -3,9 +3,11 @@ import Card from '@/components/Card/Card';
 import { NewsDataType } from '@/types/news';
 import axios from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
+
 type DashboardNewsCardsProps = {
   user: { id: string } | null
 }
+
 const DashboardNewsCards = ({ user }: DashboardNewsCardsProps) => {
   const [newsData, setNewsData] = useState<NewsDataType[]>([])
   const fetchData = useCallback(async () => {
@@ -25,6 +27,7 @@ const DashboardNewsCards = ({ user }: DashboardNewsCardsProps) => {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
   const handleFavoriteClick = async (id: string) => {
     try {
       const res = await axios.post("/api/favorite", { id });
