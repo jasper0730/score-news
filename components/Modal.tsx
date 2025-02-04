@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -12,7 +12,12 @@ type ModalProps = {
 };
 
 const Modal = ({ children, open, className = "", onClose }: ModalProps) => {
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    setMounted(true);
+  }, []);
+  useEffect(() => {
+    if (!mounted) return;
     if (open) {
       document.body.style.overflow = "hidden";
     } else {
@@ -21,7 +26,8 @@ const Modal = ({ children, open, className = "", onClose }: ModalProps) => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open]);
+  }, [open, mounted]);
+  if (!mounted) return null
 
   return createPortal(
     <AnimatePresence>
