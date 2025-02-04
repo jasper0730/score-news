@@ -6,7 +6,6 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import clientPromise from "@/libs/mongodb";
 import bcrypt from "bcrypt";
 import { MongoDBAdapter } from "@auth/mongodb-adapter"
-import { ObjectId } from "mongodb";
 
 export const options: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
@@ -69,15 +68,28 @@ export const options: NextAuthOptions = {
       const client = await clientPromise;
       const db = client.db();
       const usersCollection = db.collection("users");
+      const accountsCollection = db.collection("accounts");
 
       const existingUser = await usersCollection.findOne({ email: user.email });
 
-      if (existingUser && existingUser.provider !== account?.provider) {
-        // 如果已有相同 Email 的帳號但不同 Provider，則更新它的 provider 資料
-        await usersCollection.updateOne(
-          { _id: new ObjectId(existingUser._id) },
-          { $set: { provider: account?.provider } }
-        );
+      if (existingUser) {
+        // 檢查該 Email 是否已經有該 OAuth 提供者
+        const existingAccount = await accountsCollection.findOne({
+          userId: existingUser._id,
+          provider: account?.provider,
+        });
+  
+        if (!existingAccount) {
+          await accountsCollection.insertOne({
+            provider: account?.provider,
+            type: account?.type,
+            providerAccountId: account?.providerAccountId,
+            userId: existingUser._id,
+            access_token: account?.access_token,
+            expires_at: account?.expires_at,
+            refresh_token: account?.refresh_token,
+          });
+        }
       }
 
       return true;
