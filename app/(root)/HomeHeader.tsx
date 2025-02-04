@@ -22,7 +22,8 @@ const HomeHeader = () => {
           <Link href="/" className="inline-block">
             <Logo />
           </Link>
-          <div className="max-w-[500px] w-full mt-5 h-[120px] overflow-auto">Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi rem soluta beatae alias. Ea maiores est corporis earum, non, temporibus quos facilis enim amet itaque adipisci a aperiam beatae alias natus cumque dolores corrupti? Incidunt praesentium nihil possimus aut aliquid. possimus aut aliquid possimus aut aliquid possimus aut aliquid</div>
+          <div className="max-w-[500px] w-full mt-5 h-[120px] overflow-auto">是一個提供新聞瀏覽體驗的網站，特色包括評分、收藏、評論，讓讀者能夠更有互動性地參與新聞內容。  
+          我們的目標是提升使用者的新聞閱讀體驗，使其更具個人化與社群互動性。</div>
         </div>
         <SearchBar />
         <div className="flex items-center gap-5 shrink-0">
