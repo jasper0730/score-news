@@ -39,6 +39,9 @@ const NewsList = ({ data }: NewsListProps) => {
 
     setFavorites(favoriteIds);
   }, [data.data]);
+  useEffect(() => {
+    console.log("sortType:", sortType);
+  }, [sortType]);
 
   const handleFavoriteClick = async (id: string) => {
     // 樂觀更新
@@ -53,10 +56,10 @@ const NewsList = ({ data }: NewsListProps) => {
       if (!res.data.success) {
         throw new Error("Failed to update favorite");
       }
-      if(res.data.message === "Favorite removed") {
+      if (res.data.message === "Favorite removed") {
         toastBox("移除收藏", "success")
       }
-      if(res.data.message === "Favorite added") {
+      if (res.data.message === "Favorite added") {
         toastBox("已收藏", "success")
       }
     } catch (error) {
@@ -83,9 +86,11 @@ const NewsList = ({ data }: NewsListProps) => {
     return filterData.sort((a, b) => {
       const aDate = new Date(a.pubDate).getTime();
       const bDate = new Date(b.pubDate).getTime();
+      const aRate = a.rate || 0
+      const bRate = b.rate || 0
       switch (sortType) {
         case "rating":
-          return b.rate - a.rate;
+          return bRate - aRate;
         case "date":
           return bDate - aDate;
         default:
