@@ -1,6 +1,8 @@
 "use client"
 import Card from '@/components/Card';
+import CardModal from '@/components/CardModal';
 import Loader from '@/components/Loader';
+import Modal from '@/components/Modal';
 import { NewsDataType } from '@/types/news';
 import { toastBox } from '@/utils/toast';
 import axios from 'axios';
@@ -14,6 +16,7 @@ type DashboardNewsListProps = {
 
 const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
   const router = useRouter()
+  const [selectedNews, setSelectedNews] = useState<NewsDataType | null>(null);
   const [newsData, setNewsData] = useState<NewsDataType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
@@ -63,18 +66,25 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
   )
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="grid grid-cols-4 gap-4">
-        {newsData.map((article: NewsDataType) => (
-          <Card
-            key={article.article_id}
-            article={article}
-            favorite={true}
-            onFavoriteClick={handleFavoriteClick}
-          />
-        ))}
+    <>
+
+      <div className="p-4">
+        <div className="grid grid-cols-4 gap-4">
+          {newsData.map((article: NewsDataType) => (
+            <Card
+              key={article.article_id}
+              article={article}
+              favorite={true}
+              onFavoriteClick={handleFavoriteClick}
+              onMoreClick={()=> setSelectedNews(article)}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+      <Modal className="max-w-[1000px] w-full" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
+        <CardModal data={selectedNews} onClose={() => setSelectedNews(null)} />
+      </Modal>
+    </>
   );
 };
 
