@@ -63,5 +63,24 @@ export const options: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  callbacks: {
+    async signIn({ user, account }) {
+      const client = await clientPromise;
+      const db = client.db();
+      const usersCollection = db.collection("users");
+
+      const existingUser = await usersCollection.findOne({ email: user.email });
+
+      if (existingUser && existingUser.provider !== account?.provider) {
+        // 如果已有相同 Email 的帳號但不同 Provider，則更新它的 provider 資料
+        await usersCollection.updateOne(
+          { _id: new Object(existingUser._id) },
+          { $set: { provider: account?.provider } }
+        );
+      }
+
+      return true;
+    }
+  },
   secret: process.env.NEXTAUTH_SECRET,
 }
