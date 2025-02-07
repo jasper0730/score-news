@@ -8,7 +8,7 @@ import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { toastBox } from "@/utils/toast";
 import axios from "axios";
-import CardModal from "@/components/CardModal";
+import NewsDetail from "@/components/NewsDetail";
 
 type NewsListProps = {
   data: {
@@ -124,7 +124,7 @@ const NewsList = ({ data }: NewsListProps) => {
         </p>
       )}
       <Modal className="max-w-[1000px] w-full" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
-        <CardModal data={selectedNews} onClose={() => setSelectedNews(null)} />
+        <NewsDetail data={selectedNews} onClose={() => setSelectedNews(null)} />
       </Modal>
 
     </div>

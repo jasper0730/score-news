@@ -1,6 +1,6 @@
 "use client"
 import Card from '@/components/Card';
-import CardModal from '@/components/CardModal';
+import NewsDetail from '@/components/NewsDetail';
 import Loader from '@/components/Loader';
 import Modal from '@/components/Modal';
 import { NewsDataType } from '@/types/news';
@@ -76,13 +76,13 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
               article={article}
               favorite={true}
               onFavoriteClick={handleFavoriteClick}
-              onMoreClick={()=> setSelectedNews(article)}
+              onMoreClick={() => setSelectedNews(article)}
             />
           ))}
         </div>
       </div>
       <Modal className="max-w-[1000px] w-full" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
-        <CardModal data={selectedNews} onClose={() => setSelectedNews(null)} />
+        <NewsDetail data={selectedNews} onClose={() => setSelectedNews(null)} />
       </Modal>
     </>
   );
