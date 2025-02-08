@@ -65,8 +65,8 @@ const RegisterClient = ({
         if (res?.error) {
           toastBox(res.error || "登入失敗", "error");
         } else {
-          await router.push("/dashboard");
-          toastBox("登入成功!", "success");
+          router.push("/dashboard");
+          toastBox("登入成功", "success");
           if (setOpenModal) setOpenModal(null);
         }
       }
@@ -104,7 +104,6 @@ const RegisterClient = ({
         callbackUrl: "/dashboard",
       })
       if (res?.ok) {
-
         toastBox("登入成功!", "success");
         if (setOpenModal) setOpenModal(null);
       }
@@ -115,6 +114,7 @@ const RegisterClient = ({
       setIsLoading(false);
     }
   }
+
   const buttonClass = `p-2 border-2 w-full rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition`
   const titleClass = `mt-2 text-grey-600 text-3xl font-semibold`
   const socialButtonClass = `border-none text-white hover:opacity-70`
