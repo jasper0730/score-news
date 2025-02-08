@@ -75,7 +75,6 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
       }
       setNewsData(prev => prev.filter(item => item.article_id !== id));
       toastBox("移除收藏", "success")
-      console.log('dash')
     } catch (error) {
       console.error("Failed to update favorite:", error);
     }

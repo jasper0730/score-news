@@ -45,7 +45,6 @@ const Card = ({
           </div>
         </div>
         <div className="mt-auto">
-          {JSON.stringify(article.rate)}
           {(article.rate && article.rate > 0) && (
             <div className="flex items-center mt-4">
               {Array.from({ length: article.rate }).map((item, index) => (

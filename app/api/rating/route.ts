@@ -9,10 +9,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
   }
   try {
-
     const { id: userId } = currentUser;
     const { id: postId, rate } = await request.json();
-    console.log(rate)
 
     if (!postId) {
       return NextResponse.json({ error: "Post ID is required" }, { status: 400 });

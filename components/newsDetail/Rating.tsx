@@ -21,7 +21,6 @@ export default function Rating({ postId, onRatingUpdate }: RatingProps) {
       const { data } = res;
       if (data.state === "success") {
         toastBox("評分已送出", "success");
-        console.log(data)
         onRatingUpdate(postId ?? '', data.rate)
       } else {
         throw new Error("Failed to update rating");
