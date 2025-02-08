@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/libs/mongodb";
 import { getUser } from "@/actions/getUser";
+import clientPromise from "@/libs/mongodb";
 
 export async function POST(request: Request) {
   try {

@@ -3,7 +3,6 @@ export const newsData = {
   totalResults: 116,
   results: [
     {
-      rate: 5,
       article_id: "bbf54f6fcf54decb5d81ed53095e834c",
       title: "德國看特朗普上任",
       link: "https://www.rfi.fr/tw/%E6%AD%90%E6%B4%B2/20250120-%E5%BE%B7%E5%9C%8B%E7%9C%8B%E7%89%B9%E6%9C%97%E6%99%AE%E4%B8%8A%E4%BB%BB",
@@ -85,7 +84,6 @@ export const newsData = {
       duplicate: false
     },
     {
-      rate: 3,
       article_id: "794cdcd5cdff07e947a7b435c66a315b",
       title: "6.4 magnitude earthquake jolts southern Taiwan",
       link: "https://www.indiatodayne.in/international/story/64-magnitude-earthquake-jolts-southern-taiwan-1157851-2025-01-20",
@@ -184,7 +182,6 @@ export const newsData = {
       duplicate: false
     },
     {
-      rate: 4,
       article_id: "62a3b776fe83c5af6058a7e764de07bf",
       title: "歐盟據報考慮撤銷一樁對華貿易訴訟 立陶宛總統促歐委會莫放棄",
       link: "https://www.rfi.fr/tw/%E6%AD%90%E6%B4%B2/20250120-%E6%AD%90%E7%9B%9F%E6%93%9A%E5%A0%B1%E8%80%83%E6%85%AE%E6%92%A4%E9%8A%B7%E4%B8%80%E6%A8%81%E5%B0%8D%E8%8F%AF%E8%B2%BF%E6%98%93%E8%A8%B4%E8%A8%9F-%E7%AB%8B%E9%99%B6%E5%AE%9B%E7%B8%BD%E7%B5%B1%E6%95%A6%E4%BF%83%E6%AD%90%E5%A7%94%E6%9C%83%E8%8E%AB%E6%94%BE%E6%A3%84",
@@ -266,7 +263,6 @@ export const newsData = {
       duplicate: false
     },
     {
-      rate: 2,
       article_id: "a25f22f78f640f66a12db6f3fbf87073",
       title: "法國總理警告:或將被美國特朗普新政策“擊垮”",
       link: "https://www.rfi.fr/tw/%E4%B8%AD%E5%9C%8B/20250120-%E6%B3%95%E5%9C%8B%E7%B8%BD%E7%90%86%E8%AD%A6%E5%91%8A-%E6%88%96%E5%B0%87%E8%A2%AB%E7%BE%8E%E5%9C%8B%E7%89%B9%E6%9C%97%E6%99%AE%E6%96%B0%E6%94%BF%E7%AD%96-%E6%93%8A%E5%9E%AE",

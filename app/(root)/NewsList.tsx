@@ -8,7 +8,7 @@ import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { toastBox } from "@/utils/toast";
 import axios from "axios";
-import NewsDetail from "@/components/NewsDetail";
+import NewsDetail from "@/components/newsDetail/NewsDetail";
 
 type NewsListProps = {
   data: {
@@ -21,7 +21,6 @@ const NewsList = ({ data }: NewsListProps) => {
   const [selectedNews, setSelectedNews] = useState<NewsDataType | null>(null);
   const [newsData, setNewsData] = useState<NewsDataType[]>(data.data || []);
   const [favorites, setFavorites] = useState<string[]>([]);
-
   const { query, sortType } = useNewsStore(
     useShallow((state) => ({
       query: state.query,
@@ -40,9 +39,31 @@ const NewsList = ({ data }: NewsListProps) => {
 
     setFavorites(favoriteIds);
   }, [data.data]);
-  useEffect(() => {
-    console.log("sortType:", sortType);
-  }, [sortType]);
+
+  const handleRatingUpdate = async (postId: string, newRating: number) => {
+    try {
+      const response = await axios.post("/api/rating", { id: postId, rate: newRating });
+      if (response.data.state === "success") {
+        const updatedRating = response.data.rate;
+
+        setNewsData((prevData) =>
+          prevData.map((news) =>
+            news.article_id === postId
+              ? { ...news, rate: updatedRating }
+              : news
+          )
+        );
+
+        if (selectedNews && selectedNews.article_id === postId) {
+          setSelectedNews((prev) =>
+            prev ? { ...prev, rate: updatedRating } : null
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update rating:", error);
+    }
+  };
 
   const handleFavoriteClick = async (id: string) => {
     // 樂觀更新
@@ -123,8 +144,8 @@ const NewsList = ({ data }: NewsListProps) => {
           無相符的資料，請重新搜尋
         </p>
       )}
-      <Modal className="max-w-[1000px] w-full" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
-        <NewsDetail data={selectedNews} onClose={() => setSelectedNews(null)} />
+      <Modal className="max-w-[1000px] w-full overflow-auto h-screen py-10 flex" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
+        <NewsDetail data={selectedNews} onClose={() => setSelectedNews(null)} onRatingUpdate={handleRatingUpdate} />
       </Modal>
 
     </div>

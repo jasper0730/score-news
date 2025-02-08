@@ -1,6 +1,6 @@
 "use client"
 import Card from '@/components/Card';
-import NewsDetail from '@/components/NewsDetail';
+import NewsDetail from '@/components/newsDetail/NewsDetail';
 import Loader from '@/components/Loader';
 import Modal from '@/components/Modal';
 import { NewsDataType } from '@/types/news';
@@ -43,7 +43,30 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+  const handleRatingUpdate = async (postId: string, newRating: number) => {
+    try {
+      const response = await axios.post("/api/rating", { id: postId, rate: newRating });
+      if (response.data.state === "success") {
+        const updatedRating = response.data.rate;
 
+        setNewsData((prevData) =>
+          prevData.map((news) =>
+            news.article_id === postId
+              ? { ...news, rate: updatedRating }
+              : news
+          )
+        );
+
+        if (selectedNews && selectedNews.article_id === postId) {
+          setSelectedNews((prev) =>
+            prev ? { ...prev, rate: updatedRating } : null
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update rating:", error);
+    }
+  };
   const handleFavoriteClick = async (id: string) => {
     try {
       const res = await axios.post("/api/favorite", { id });
@@ -82,7 +105,7 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
         </div>
       </div>
       <Modal className="max-w-[1000px] w-full" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
-        <NewsDetail data={selectedNews} onClose={() => setSelectedNews(null)} />
+        <NewsDetail data={selectedNews} onClose={() => setSelectedNews(null)} onRatingUpdate={handleRatingUpdate} />
       </Modal>
     </>
   );

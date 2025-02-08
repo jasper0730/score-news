@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { NewsDataType } from "@/types/news";
 
 type NewsCardProps = {
-  article:NewsDataType
+  article: NewsDataType
   favorite: boolean;
   onFavoriteClick: (articleId: string) => void;
   onMoreClick?: () => void;
@@ -23,7 +23,7 @@ const Card = ({
 
   return (
     <div className="p-4 border rounded-lg shadow-lg">
-      <div className="text-gray-600 dark:text-white flex flex-col justify-between h-full">
+      <div className="text-gray-600 dark:text-white flex flex-col h-full">
         <div>
           <h2 className="text-lg font-bold line-clamp-2">{article.title}</h2>
           <p className="mt-2 line-clamp-3">{article.description}</p>
@@ -44,24 +44,29 @@ const Card = ({
             </a>
           </div>
         </div>
-        <div className="flex items-center justify-between my-4">
-          <div className="flex items-center">
-            {Array.from({ length: article.rate ?? 0 }).map((_, index) => (
-              <div key={index} className="text-yellow-500 text-xl">
-                <FaStar />
-              </div>
-            ))}
-          </div>
-          {isAdmin && (
-            <button
-              onClick={() => onFavoriteClick(article.article_id)}
-              className="text-red-500 hover:opacity-70"
-            >
-              {favorite ? <FaHeart /> : <FaRegHeart />}
-            </button>
+        <div className="mt-auto">
+          {JSON.stringify(article.rate)}
+          {(article.rate && article.rate > 0) && (
+            <div className="flex items-center mt-4">
+              {Array.from({ length: article.rate }).map((item, index) => (
+                <div key={index} className="text-yellow-500 text-xl">
+                  <FaStar />
+                </div>
+              ))}
+            </div>
           )}
+          <div className="flex items-center justify-between mt-4">
+            <div className="mt-auto text-blue-500 cursor-pointer hover:opacity-70" onClick={onMoreClick}>More</div>
+            {isAdmin && (
+              <button
+                onClick={() => onFavoriteClick(article.article_id)}
+                className="text-red-500 hover:opacity-70"
+              >
+                {favorite ? <FaHeart /> : <FaRegHeart />}
+              </button>
+            )}
+          </div>
         </div>
-        <div className="mt-auto text-blue-500 cursor-pointer w-[60px] hover:opacity-70" onClick={onMoreClick}>More</div>
       </div>
     </div>
   );
