@@ -1,10 +1,10 @@
 "use client"
-import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image'
 import { NewsDataType } from "@/types/news";
 import { IoIosCloseCircle } from "react-icons/io";
 import Rating from './Rating';
+import DynamicImage from '../DynamicImage';
 
 type NewsDetailProps = {
   data: NewsDataType | null;
@@ -13,7 +13,6 @@ type NewsDetailProps = {
 }
 const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
   const currentUser = useSession()
-  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const isAdmin = currentUser.status === 'authenticated'
 
   const newsContent = data?.content && data?.content !== "ONLY AVAILABLE IN PAID PLANS"
@@ -21,21 +20,16 @@ const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
     : `我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，`
   return (
     <>
-      <div className="m-auto p-20 relative bg-white dark:bg-gray-900 rounded-lg">
+      <div className="m-auto px-5 py-20 md:px-10 relative bg-white dark:bg-gray-900 rounded-lg">
         <IoIosCloseCircle onClick={onClose} size={40} className="absolute top-[20px] left-[50%] cursor-pointer hover:rotate-90 duration-300" />
-        <div className="flex gap-8">
-          <div className='w-1/2 relative'>
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className='max-w-[400px] mx-auto md:w-1/2 md:max-w-none relative'>
             {data?.image_url
               ? (
-                <Image
+                <DynamicImage
                   src={data.image_url}
                   alt={data?.title || "新聞圖片"}
-                  width={imageSize.width}
-                  height={imageSize.height}
                   className="object-cover w-full h-auto rounded-lg"
-                  onLoadingComplete={(img) => {
-                    setImageSize({ width: img.naturalWidth, height: img.naturalHeight });
-                  }}
                 />
               ) : (
                 <Image
@@ -46,7 +40,7 @@ const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
               )
             }
           </div>
-          <div className='w-1/2'>
+          <div className='md:w-1/2'>
             <h2 className="text-xl font-bold">{data?.title}</h2>
             <p className="text-gray-600">{data?.description}</p>
           </div>

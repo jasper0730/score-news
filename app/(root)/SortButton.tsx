@@ -19,7 +19,7 @@ const SortButton = ({ type }: SortButtonProps) => {
     setSortType(type);
   };
 
-  const buttonClass = `flex justify-center items-center gap-1 w-[150px] bg-gray-100 py-2 px-3 text-sm hover:bg-slate-800 hover:text-white duration-300 dark:bg-slate-800 dark:hover:opacity-100  ${sortType === type ? "text-white bg-slate-800 dark:opacity-100" : "dark:opacity-70"}`;
+  const buttonClass = `flex justify-center items-center gap-1 w-full md:w-[150px] bg-gray-100 py-2 px-3 text-sm hover:bg-slate-800 hover:text-white duration-300 dark:bg-slate-800 dark:hover:opacity-100  ${sortType === type ? "text-white bg-slate-800 dark:opacity-100" : "dark:opacity-70"}`;
 
   return (
     <Button

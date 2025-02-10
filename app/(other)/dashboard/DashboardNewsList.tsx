@@ -1,14 +1,14 @@
 "use client"
-import Card from '@/components/Card';
-import NewsDetail from '@/components/newsDetail/NewsDetail';
-import Loader from '@/components/Loader';
-import Modal from '@/components/Modal';
-import { NewsDataType } from '@/types/news';
-import { toastBox } from '@/utils/toast';
-import axios from 'axios';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useState } from 'react';
+import { toastBox } from '@/utils/toast';
+import axios from 'axios';
+import { NewsDataType } from '@/types/news';
+import Loader from '@/components/Loader';
+import Card from '@/components/Card';
+import Modal from '@/components/Modal';
+import NewsDetail from '@/components/newsDetail/NewsDetail';
 
 type DashboardNewsListProps = {
   user: { id: string } | null;
@@ -89,9 +89,8 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
 
   return (
     <>
-
       <div className="p-4">
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {newsData.map((article: NewsDataType) => (
             <Card
               key={article.article_id}

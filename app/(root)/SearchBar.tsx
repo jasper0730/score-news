@@ -6,8 +6,7 @@ import { useShallow } from "zustand/shallow";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { IoSearch } from "react-icons/io5";
 
-
-const SearchBar = () => {
+const SearchBar = ({ className }: { className: string }) => {
   const [query, setQuery] = useState("");
   const { setNewsQuery } = useNewsStore(useShallow((state) => ({
     setNewsQuery: state.setNewsQuery,
@@ -29,13 +28,13 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="flex items-stretch gap-2 p-2 border-b-8 w-full max-w-[500px]">
+    <div className={`flex items-stretch gap-2 p-2 border-b-8 w-full  ${className}`}>
       <button
         type="button"
         onClick={handleSearch}
         className="px-3 py-2  duration-300 rounded-md hover:opacity-70"
       >
-        <IoSearch size={60} />
+        <IoSearch className="text-[60px]" />
       </button>
       <div className="relative w-full">
         <input

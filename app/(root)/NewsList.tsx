@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNewsStore } from "@/store/newsStore";
 import { useShallow } from "zustand/shallow";
+import { toastBox } from "@/utils/toast";
 import { NewsDataType } from "@/types/news";
+import axios from "axios";
 import Card from "@/components/Card";
 import Modal from "@/components/Modal";
-import { toastBox } from "@/utils/toast";
-import axios from "axios";
 import NewsDetail from "@/components/newsDetail/NewsDetail";
 
 type NewsListProps = {
@@ -128,7 +128,7 @@ const NewsList = ({ data }: NewsListProps) => {
   return (
     <div className="min-h-screen p-4">
       {sortedData.length ? (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {sortedData.map((article) => (
             <Card
               key={article.article_id}
@@ -144,7 +144,7 @@ const NewsList = ({ data }: NewsListProps) => {
           無相符的資料，請重新搜尋
         </p>
       )}
-      <Modal className="max-w-[1000px] w-full overflow-auto h-screen py-10 flex" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
+      <Modal className="max-w-[1000px] w-[full] overflow-auto h-screen flex md:p-10" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
         <NewsDetail data={selectedNews} onClose={() => setSelectedNews(null)} onRatingUpdate={handleRatingUpdate} />
       </Modal>
 
