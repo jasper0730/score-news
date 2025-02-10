@@ -27,6 +27,11 @@ const HomeHeader = () => {
         </div>
         <SearchBar className="md:flex hidden max-w-[500px]" />
         <div className="flex items-center gap-5 shrink-0">
+          {currentUser.status === "authenticated" && (
+            <Link href="/dashboard">
+              後台
+            </Link>
+          )}
           <RegisterButton type={currentUser.status === "authenticated" ? "logout" : "login"} />
           <ThemeSwitcher />
           {currentUser.status === "authenticated" && (

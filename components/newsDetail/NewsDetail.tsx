@@ -21,7 +21,7 @@ const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
   return (
     <>
       <div className="m-auto px-5 py-20 md:px-10 relative bg-white dark:bg-gray-900 rounded-lg">
-        <IoIosCloseCircle onClick={onClose} size={40} className="absolute top-[20px] left-[50%] cursor-pointer hover:rotate-90 duration-300" />
+        <IoIosCloseCircle onClick={onClose} size={40} className="absolute top-[20px] left-[50%] translate-x-[-50%] cursor-pointer hover:rotate-90 duration-300" />
         <div className="flex flex-col md:flex-row gap-8">
           <div className='max-w-[400px] mx-auto md:w-1/2 md:max-w-none relative'>
             {data?.image_url
