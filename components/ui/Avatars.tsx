@@ -11,7 +11,7 @@ const Avatar: React.FC<AvatarsProps> = ({ src }) => {
   return (
     <Image
       alt="avatars"
-      className="rounded-full object-cover hover:opacity-70 duration-300"
+      className="rounded-full object-cover"
       src={src ?? '/images/placeholder.jpg'}
       fill
       priority

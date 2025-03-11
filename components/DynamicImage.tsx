@@ -21,7 +21,6 @@ export default function DynamicImage({
       height={imageSize.height}
       className={className}
       onLoad={(img) => {
-        console.log('Image', img)
         setImageSize({ width: img.currentTarget.naturalWidth, height: img.currentTarget.naturalHeight });
       }}
     />

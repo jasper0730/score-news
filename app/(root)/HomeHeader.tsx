@@ -16,8 +16,8 @@ export type User = {
 const HomeHeader = () => {
   const currentUser = useSession()
   return (
-    <div className="md:fixed top-0 left-0 w-full bg-white dark:bg-black z-10">
-      <div className="px-5 py-5 flex justify-between items-start gap-5 fixed w-full z-10 dark:bg-black bg-white md:static md:pt-5 md:pb-0">
+    <div className="left-0 top-0 w-full bg-white z-10 dark:bg-black md:fixed md:shadow-md md:dark:border-b-2 md:dark:border-gray-500">
+      <div className="px-5 py-5 flex justify-between items-start gap-5 fixed w-full z-10 bg-white dark:bg-black md:static md:pt-5 md:pb-0 shadow-md md:shadow-none dark:border-b-2 dark:border-gray-500 md:dark:border-none">
         <div>
           <Link href="/" className="inline-block">
             <Logo />
@@ -25,23 +25,23 @@ const HomeHeader = () => {
           <div className="max-w-[500px] w-full mt-5 h-[120px] overflow-auto hidden md:block">是一個提供新聞瀏覽體驗的網站，特色包括評分、收藏、評論，讓讀者能夠更有互動性地參與新聞內容。
             我們的目標是提升使用者的新聞閱讀體驗，使其更具個人化與社群互動性。</div>
         </div>
-        <SearchBar className="md:flex hidden max-w-[500px]" />
-        <div className="flex items-center gap-5 shrink-0">
+        <SearchBar className="hidden max-w-[500px] md:flex" />
+        <div className="flex items-center gap-2 md:gap-5 shrink-0">
           {currentUser.status === "authenticated" && (
-            <Link href="/dashboard">
+            <Link className="hover:opacity-70 duration-300" href="/dashboard">
               後台
             </Link>
           )}
           <RegisterButton type={currentUser.status === "authenticated" ? "logout" : "login"} />
           <ThemeSwitcher />
           {currentUser.status === "authenticated" && (
-            <Link href="/dashboard" className="w-[35px] h-[35px] rounded-full relative">
+            <div className="w-[35px] h-[35px] rounded-full relative">
               <Avatars src={currentUser.data.user?.image} />
-            </Link>
+            </div>
           )}
         </div>
       </div>
-      <div className="md:mt-3 px-5 pt-[--navH] md:hidden md:pt-0">
+      <div className="px-5 pt-[--navH] md:hidden md:pt-0 md:mt-3">
         <SearchBar className="" />
       </div>
       <div className="mt-3 px-5 w-full md:hidden">是一個提供新聞瀏覽體驗的網站，特色包括評分、收藏、評論，讓讀者能夠更有互動性地參與新聞內容。

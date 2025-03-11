@@ -7,8 +7,7 @@ import { toastBox } from "@/utils/toast";
 import { NewsDataType } from "@/types/news";
 import axios from "axios";
 import Card from "@/components/Card";
-import Modal from "@/components/Modal";
-import NewsDetail from "@/components/newsDetail/NewsDetail";
+import NewsModal from "@/components/NewsModal";
 
 type NewsListProps = {
   data: {
@@ -79,10 +78,10 @@ const NewsList = ({ data }: NewsListProps) => {
         throw new Error("Failed to update favorite");
       }
       if (res.data.message === "Favorite removed") {
-        toastBox("移除收藏", "success")
+        toastBox("移除收藏", "success");
       }
       if (res.data.message === "Favorite added") {
-        toastBox("已收藏", "success")
+        toastBox("已收藏", "success");
       }
     } catch (error) {
       console.error("Failed to update favorite:", error);
@@ -108,8 +107,8 @@ const NewsList = ({ data }: NewsListProps) => {
     return filterData.sort((a, b) => {
       const aDate = new Date(a.pubDate).getTime();
       const bDate = new Date(b.pubDate).getTime();
-      const aRate = a.rate || 0
-      const bRate = b.rate || 0
+      const aRate = a.rate || 0;
+      const bRate = b.rate || 0;
       switch (sortType) {
         case "rating":
           return bRate - aRate;
@@ -126,9 +125,9 @@ const NewsList = ({ data }: NewsListProps) => {
   }
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen px-4 py-10">
       {sortedData.length ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {sortedData.map((article) => (
             <Card
               key={article.article_id}
@@ -144,9 +143,12 @@ const NewsList = ({ data }: NewsListProps) => {
           無相符的資料，請重新搜尋
         </p>
       )}
-      <Modal className="max-w-[1000px] w-[full] overflow-auto h-screen flex md:p-10" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
-        <NewsDetail data={selectedNews} onClose={() => setSelectedNews(null)} onRatingUpdate={handleRatingUpdate} />
-      </Modal>
+      <NewsModal
+        data={selectedNews}
+        onClose={() => setSelectedNews(null)}
+        onRatingUpdate={handleRatingUpdate}
+        open={selectedNews !== null}
+      />
 
     </div>
   );

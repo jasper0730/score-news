@@ -7,8 +7,7 @@ import axios from 'axios';
 import { NewsDataType } from '@/types/news';
 import Loader from '@/components/Loader';
 import Card from '@/components/Card';
-import Modal from '@/components/Modal';
-import NewsDetail from '@/components/newsDetail/NewsDetail';
+import NewsModal from '@/components/NewsModal';
 
 type DashboardNewsListProps = {
   user: { id: string } | null;
@@ -90,7 +89,7 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
   return (
     <>
       <div className="p-4">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ">
           {newsData.map((article: NewsDataType) => (
             <Card
               key={article.article_id}
@@ -102,9 +101,12 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
           ))}
         </div>
       </div>
-      <Modal className="max-w-[1000px] w-full" open={selectedNews !== null} onClose={() => setSelectedNews(null)}>
-        <NewsDetail data={selectedNews} onClose={() => setSelectedNews(null)} onRatingUpdate={handleRatingUpdate} />
-      </Modal>
+      <NewsModal
+        data={selectedNews}
+        onClose={() => setSelectedNews(null)}
+        onRatingUpdate={handleRatingUpdate}
+        open={selectedNews !== null}
+      />
     </>
   );
 };

@@ -14,7 +14,7 @@ const RegisterButton = ({ type }: { type: string }) => {
   const handleLoginClose = () => {
     setOpenModal(null);
   }
-  const classes = `flex gap-1 cursor-pointer  items-center hover:opacity-70 duration-300`
+  const classes = `flex md:gap-1 cursor-pointer  items-center hover:opacity-70 duration-300`
   return (
     <>
       {type === "logout" && (
