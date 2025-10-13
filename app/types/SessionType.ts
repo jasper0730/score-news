@@ -1,7 +1,7 @@
 export type SessionType = {
-  id: string;
-  email?: string;
-  password?: string;
-  emailVerified?: boolean | null;
-  image?: string;
+    id: string
+    email?: string
+    password?: string
+    emailVerified?: boolean | null
+    image?: string
 }

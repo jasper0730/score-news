@@ -1,20 +1,17 @@
-
-import { getUser } from "@/actions/getUser";
-import NavBar from "./NavBar";
+import { getUser } from '@/actions/getUser'
+import NavBar from './NavBar'
 
 export default async function Layout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode
 }>) {
-  const session = await getUser()
+    const session = await getUser()
 
-  return (
-    <>
-      <NavBar session={session} />
-      <section className="pt-[--navH]">
-        {children}
-      </section>
-    </>
-  );
+    return (
+        <>
+            <NavBar session={session} />
+            <section className="pt-[--navH]">{children}</section>
+        </>
+    )
 }

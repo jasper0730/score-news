@@ -5,6 +5,7 @@
 (建議使用Chrome or Safari 登入)
 
 **開發中**:
+
 - 收藏功能 完成
 - 註冊功能 完成
 - 登入功能(第三方登入) 完成
@@ -14,6 +15,7 @@
 - 元件優化整理
 
 ## 特色功能 (Features)
+
 - ⭐ **新聞評分**：讓讀者對新聞進行評分，衡量新聞的影響力。
 - 📌 **收藏新聞**：標記有趣的新聞，稍後閱讀或歸檔保存。
 - 🎨 **極簡 UI 設計**：直覺、清爽的界面，提升閱讀體驗。
@@ -21,7 +23,9 @@
 - 🔑 **安全登入**：使用 NextAuth.js 進行 OAuth 或密碼登入驗證。
 
 ## 技術棧 (Tech Stack)
+
 本專案使用以下技術：
+
 - **[Next.js](https://nextjs.org/)** - React 框架，提供伺服器端渲染 (SSR) 與靜態生成 (SSG)。
 - **[TypeScript](https://www.typescriptlang.org/)** - 增強 JavaScript 的型別安全性。
 - **[Tailwind CSS](https://tailwindcss.com/)** - 高效、易用的 CSS 框架，實現現代化 UI 設計。
@@ -32,5 +36,6 @@
 - **[MongoDB](https://www.mongodb.com/)** - NoSQL 資料庫，存儲用戶、新聞、評論等數據。
 
 ## 聯絡我們 (Contact Us)
+
 - Github Repository：[Score News](https://github.com/jasper0730/next-news-tw)
 - 提交問題 (Issues)：[GitHub Issues](https://github.com/jasper0730/next-news-tw/issues)

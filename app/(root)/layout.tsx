@@ -1,17 +1,14 @@
-import HomeHeader from "@/app/(root)/HomeHeader";
+import HomeHeader from '@/app/(root)/HomeHeader'
 
 export default async function Layout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode
 }>) {
-
-  return (
-    <>
-      <HomeHeader />
-      <section className="md:pt-[256px]">
-        {children}
-      </section>
-    </>
-  );
+    return (
+        <>
+            <HomeHeader />
+            <section className="md:pt-[256px]">{children}</section>
+        </>
+    )
 }
