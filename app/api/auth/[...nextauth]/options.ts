@@ -4,7 +4,7 @@ import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import clientPromise from '@/libs/mongodb'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
 
 export const options: NextAuthOptions = {
