@@ -1,10 +1,13 @@
 import { getUser } from '@/actions/getUser'
 import NewsCards from '@/app/(root)/NewsList'
 import axios from 'axios'
+
+export const dynamic = 'force-dynamic'
+
 const API_URL = process.env.API_URL
 export default async function Home() {
     const currentUser = await getUser()
-    let newsData = []
+    let newsData: { data: any[]; success: boolean } = { data: [], success: false }
     try {
         const res = await axios.get(`${API_URL}/api/news`, {
             params: {

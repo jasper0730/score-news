@@ -18,7 +18,7 @@ type NewsListProps = {
 
 const NewsList = ({ data }: NewsListProps) => {
     const [selectedNews, setSelectedNews] = useState<NewsDataType | null>(null)
-    const [newsData, setNewsData] = useState<NewsDataType[]>(data.data || [])
+    const [newsData, setNewsData] = useState<NewsDataType[]>(data?.data || [])
     const [favorites, setFavorites] = useState<string[]>([])
     const { query, sortType } = useNewsStore(
         useShallow((state) => ({
@@ -30,14 +30,15 @@ const NewsList = ({ data }: NewsListProps) => {
     const queryValue = query.trim().toLowerCase()
 
     useEffect(() => {
-        setNewsData(data.data || [])
+        const items = data?.data || []
+        setNewsData(items)
 
-        const favoriteIds = data.data
+        const favoriteIds = items
             .filter((item) => item.favorite === true)
             .map((item) => item.article_id)
 
         setFavorites(favoriteIds)
-    }, [data.data])
+    }, [data?.data])
 
     const handleRatingUpdate = async (postId: string, newRating: number) => {
         try {
@@ -116,7 +117,7 @@ const NewsList = ({ data }: NewsListProps) => {
         })
     }, [newsData, queryValue, sortType])
 
-    if (!data.success) {
+    if (!data?.success) {
         return <p>Failed to fetch</p>
     }
 

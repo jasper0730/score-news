@@ -1,4 +1,4 @@
-'use cliet'
+'use client'
 import Link from 'next/link'
 import Logo from '../../components/ui/Logo'
 import ThemeSwitcher from '../../components/ThemeSwitcher'
