@@ -22,7 +22,7 @@ const Card = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardProps
                 <div>
                     <h2 className="text-lg font-bold line-clamp-2">{article.title}</h2>
                     <p className="mt-2 line-clamp-3">{article.description}</p>
-                    <p className="mt-2 text-sm">日期：{article.pubDate}</p>
+                    <p className="mt-2 text-sm">日期111：{article.pubDate}</p>
                     <div className="flex items-center mt-4">
                         {article.source_icon && (
                             <div className="w-6 h-6 mr-2 relative">
