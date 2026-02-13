@@ -16,7 +16,7 @@ export const toastBox = (text: string, state: string) => {
             break
     }
     toast.dismiss()
-    toast.custom((t: React.ComponentProps<typeof toast>) => (
+    toast.custom((t) => (
         <div
             className={`${
                 t.visible ? 'animate-enter' : 'animate-leave'
