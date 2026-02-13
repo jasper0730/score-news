@@ -18,16 +18,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: pnpm
+          cache: npm
 
       - name: Install dependencies
-        run: pnpm ci
+        run: npm ci
 
       - name: Run lint
-        run: pnpm run lint
+        run: npm run lint
 
       - name: Run tests
-        run: pnpm run test --if-present
+        run: npm run test --if-present
 
       - name: Build
-        run: pnpm run build
+        run: npm run build
