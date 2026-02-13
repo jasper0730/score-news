@@ -1,32 +1,36 @@
 'use client'
-import { getUser } from '@/actions/getUser'
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react'
 
-export type User = {
+import { getUser } from '@/actions/getUser'
+import { createContext, type PropsWithChildren, useContext, useEffect, useState } from 'react'
+
+export interface User {
     id: string
     image?: string
 }
 
-const UserContext = createContext<
-    | {
-          user: User | null
-          setUser: (user: User) => void
-      }
-    | undefined
->(undefined)
+interface UserContextType {
+    user: User | null
+    setUser: (user: User) => void
+}
+
+const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export const UserProvider = ({ children }: PropsWithChildren) => {
     const [user, setUser] = useState<User | null>(null)
 
     useEffect(() => {
-        getUser().then((user: User | null) => {
-            if (user) {
-                setUser(user)
+        getUser().then((fetchedUser: User | null) => {
+            if (fetchedUser) {
+                setUser(fetchedUser)
             }
         })
-    })
+    }, [])
 
-    return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>
+    return (
+        <UserContext.Provider value={{ user, setUser }}>
+            {children}
+        </UserContext.Provider>
+    )
 }
 
 export const useUser = () => {

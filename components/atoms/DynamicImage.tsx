@@ -1,14 +1,17 @@
 'use client'
+
 import { useState } from 'react'
 import Image from 'next/image'
 
-type DynamicImage = {
+interface DynamicImageProps {
     src: string
     alt: string
-    className: string
+    className?: string
 }
-export default function DynamicImage({ src, alt, className }: DynamicImage) {
+
+const DynamicImage = ({ src, alt, className = '' }: DynamicImageProps) => {
     const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
+
     return (
         <Image
             src={src}
@@ -16,12 +19,15 @@ export default function DynamicImage({ src, alt, className }: DynamicImage) {
             width={imageSize.width}
             height={imageSize.height}
             className={className}
-            onLoad={(img) => {
+            onLoad={(event) => {
+                const target = event.currentTarget
                 setImageSize({
-                    width: img.currentTarget.naturalWidth,
-                    height: img.currentTarget.naturalHeight,
+                    width: target.naturalWidth,
+                    height: target.naturalHeight,
                 })
             }}
         />
     )
 }
+
+export default DynamicImage

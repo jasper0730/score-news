@@ -1,12 +1,16 @@
 'use client'
 
-import { useNewsStore } from '@/store/newsStore'
 import { useState } from 'react'
+import { useNewsStore } from '@/store/newsStore'
 import { useShallow } from 'zustand/shallow'
 import { IoIosCloseCircleOutline } from 'react-icons/io'
 import { IoSearch } from 'react-icons/io5'
 
-const SearchBar = ({ className }: { className: string }) => {
+interface SearchBarProps {
+    className?: string
+}
+
+const SearchBar = ({ className = '' }: SearchBarProps) => {
     const [query, setQuery] = useState('')
     const { setNewsQuery } = useNewsStore(
         useShallow((state) => ({
@@ -30,28 +34,28 @@ const SearchBar = ({ className }: { className: string }) => {
     }
 
     return (
-        <div className={`flex items-stretch gap-2 p-2 border-b-8 w-full  ${className}`}>
+        <div className={`search-bar ${className}`}>
             <button
                 type="button"
                 onClick={handleSearch}
-                className="px-3 py-2  duration-300 rounded-md hover:opacity-70"
+                className="search-bar__button"
             >
-                <IoSearch className="text-[60px]" />
+                <IoSearch className="search-bar__icon" />
             </button>
-            <div className="relative w-full">
+            <div className="search-bar__input-wrapper">
                 <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="搜尋內容..."
-                    className="w-full h-full flex-1 pl-3 py-2 pr-8 rounded-md focus:outline-none text-xl bg-transparent"
+                    className="search-bar__input"
                 />
                 {query && (
                     <button
                         type="button"
                         onClick={handleClear}
-                        className="absolute right-1 top-[50%] translate-y-[-50%] focus:outline-none"
+                        className="search-bar__clear"
                     >
                         <IoIosCloseCircleOutline size={20} />
                     </button>

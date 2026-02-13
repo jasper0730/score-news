@@ -1,26 +1,26 @@
 import { getUser } from '@/actions/getUser'
-import NewsCards from '@/app/(root)/NewsList'
+import NewsList from '@/app/(root)/NewsList'
 import axios from 'axios'
+import type { NewsApiResponse } from '@/types/news'
 
 export const dynamic = 'force-dynamic'
 
 const API_URL = process.env.API_URL
+
 export default async function Home() {
     const currentUser = await getUser()
-    let newsData: { data: any[]; success: boolean } = { data: [], success: false }
+    let newsData: NewsApiResponse = { data: [], success: false }
+
     try {
-        const res = await axios.get(`${API_URL}/api/news`, {
+        const res = await axios.get<NewsApiResponse>(`${API_URL}/api/news`, {
             params: {
-                userId: currentUser?.id || null,
+                userId: currentUser?.id ?? null,
             },
         })
         newsData = res.data
     } catch (error) {
         console.error(error instanceof Error ? error.message : error)
     }
-    return (
-        <>
-            <NewsCards data={newsData} />
-        </>
-    )
+
+    return <NewsList data={newsData} />
 }

@@ -1,4 +1,4 @@
-export type SessionType = {
+export interface SessionType {
     id: string
     email?: string
     password?: string

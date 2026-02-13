@@ -1,14 +1,16 @@
 import { create } from 'zustand'
-export type StateProps = {
+import type { SortType } from '@/types/news'
+
+interface NewsStoreState {
     query: string
     setNewsQuery: (query: string) => void
-    sortType: 'rating' | 'date'
-    setSortType: (type: 'rating' | 'date') => void
+    sortType: SortType
+    setSortType: (type: SortType) => void
 }
 
-export const useNewsStore = create<StateProps>((set) => ({
+export const useNewsStore = create<NewsStoreState>((set) => ({
     query: '',
     sortType: 'date',
     setNewsQuery: (query) => set({ query }),
-    setSortType: (type: 'rating' | 'date') => set({ sortType: type }),
+    setSortType: (type) => set({ sortType: type }),
 }))

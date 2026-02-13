@@ -1,34 +1,33 @@
-'use client' // Error components must be Client Components
+'use client'
 
 import Link from 'next/link'
 import { useEffect } from 'react'
+import Button from '@/components/atoms/Button'
 
-export default function Error({
-    error,
-    reset,
-}: {
+interface ErrorPageProps {
     error: Error & { digest?: string }
     reset: () => void
-}) {
+}
+
+export default function ErrorPage({ error, reset }: ErrorPageProps) {
     useEffect(() => {
-        // Log the error to an error reporting service
         console.error(error)
     }, [error])
 
-    const buttonClass = `px-6 py-2 rounded-md border border-gray-300 text-gray-400 hover:border-gray-700 hover:text-gray-700 duration-300`
-
     return (
-        <div className="m-auto px-5 flex flex-col justify-center items-center gap-8 text-center">
-            <div className="px-2 py-0.5 text-red-500  font-bold text-xl">ERROR 505</div>
-            <h2 className=" text-2xl font-bold">系統發生錯誤，請稍後再試</h2>
-            <p className=" text-xl text-gray-500">Something went wrong, so this page is broken.</p>
-            <div className="flex gap-4">
-                <Link href="/" className={buttonClass}>
-                    回到首頁
+        <div className="error-page">
+            <div className="error-page__code">ERROR 500</div>
+            <h2 className="error-page__title">系統發生錯誤，請稍後再試</h2>
+            <p className="error-page__message">
+                Something went wrong, so this page is broken.
+            </p>
+            <div className="error-page__actions">
+                <Link href="/">
+                    <Button variant="outline">回到首頁</Button>
                 </Link>
-                <button onClick={() => reset()} className={buttonClass}>
+                <Button variant="outline" onClick={() => reset()}>
                     重新整理
-                </button>
+                </Button>
             </div>
         </div>
     )

@@ -1,9 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================
+   CSS Custom Properties
+   ============================================ */
 :root {
     --navH: 80px;
 }
+
+/* ============================================
+   Base Styles
+   ============================================ */
 body {
     color: rgb(0, 0, 0);
     background: rgb(255, 255, 255);
@@ -19,6 +27,9 @@ body {
     display: none;
 }
 
+/* ============================================
+   Scrollbar
+   ============================================ */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -30,7 +41,6 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    border-radius: 0px;
     border-radius: 2em;
     background: rgba(100, 100, 100, 0.2);
 }
@@ -52,3 +62,454 @@ body {
     width: 0px;
     height: 0px;
 }
+
+/* ============================================
+   ATOMS
+   ============================================ */
+
+/* --- Button (btn) --- */
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+    }
+
+    .btn--primary {
+        @apply p-2 border-2 w-full rounded-xl hover:opacity-70;
+    }
+
+    .btn--outline {
+        @apply px-6 py-2 rounded-md border border-gray-300 text-gray-400 hover:border-gray-700 hover:text-gray-700 duration-300;
+    }
+
+    .btn--social {
+        @apply p-2 border-2 w-full rounded-xl border-none text-white hover:opacity-70;
+    }
+
+    .btn--social-facebook {
+        @apply bg-blue-500;
+    }
+
+    .btn--social-google {
+        @apply bg-red-500;
+    }
+
+    .btn--social-github {
+        @apply bg-gray-600;
+    }
+
+    /* --- Input (input) --- */
+    .input {
+        @apply relative;
+    }
+
+    .input__field {
+        @apply w-full font-light border-2 rounded-md outline-none transition p-2 disabled:opacity-70 disabled:cursor-not-allowed;
+    }
+
+    .input__field--error {
+        @apply border-red-500 focus:border-red-500;
+    }
+
+    .input__error {
+        @apply text-red-600 text-sm absolute top-full left-0 px-1;
+    }
+
+    /* --- Logo (logo) --- */
+    .logo {
+        @apply w-10 h-10 flex justify-center text-gray-500 rounded-full bg-black dark:border-solid dark:border-gray-500 dark:border-2;
+    }
+
+    .logo__text {
+        @apply flex items-center;
+    }
+
+    /* --- Avatar (avatar) --- */
+    .avatar {
+        @apply rounded-full relative overflow-hidden;
+    }
+
+    .avatar--sm {
+        @apply w-[25px] h-[25px];
+    }
+
+    .avatar--md {
+        @apply w-[35px] h-[35px];
+    }
+
+    .avatar--lg {
+        @apply w-[50px] h-[50px];
+    }
+
+    .avatar__image {
+        @apply rounded-full object-cover;
+    }
+
+    /* --- Loader (loader) --- */
+    .loader {
+        @apply flex items-center justify-center h-[80dvh];
+    }
+
+    /* --- Theme Switcher (theme-switcher) --- */
+    .theme-switcher {
+        @apply relative;
+    }
+
+    .theme-switcher--placeholder {
+        @apply w-4;
+    }
+
+    .theme-switcher__icon {
+        @apply hover:opacity-50 duration-300 cursor-pointer;
+    }
+
+    /* ============================================
+       MOLECULES
+       ============================================ */
+
+    /* --- Star Rating (star-rating) --- */
+    .star-rating {
+        @apply flex;
+    }
+
+    .star-rating__star {
+        @apply cursor-pointer text-2xl;
+    }
+
+    .star-rating__star--active {
+        @apply text-yellow-500;
+    }
+
+    .star-rating__star--inactive {
+        @apply text-gray-400;
+    }
+
+    /* --- Star Display (star-display) --- */
+    .star-display {
+        @apply flex items-center mt-4;
+    }
+
+    .star-display__star {
+        @apply text-yellow-500 text-xl;
+    }
+
+    /* --- Search Bar (search-bar) --- */
+    .search-bar {
+        @apply flex items-stretch gap-2 p-2 border-b-8 w-full;
+    }
+
+    .search-bar__button {
+        @apply px-3 py-2 duration-300 rounded-md hover:opacity-70;
+    }
+
+    .search-bar__icon {
+        @apply text-[60px];
+    }
+
+    .search-bar__input-wrapper {
+        @apply relative w-full;
+    }
+
+    .search-bar__input {
+        @apply w-full h-full flex-1 pl-3 py-2 pr-8 rounded-md focus:outline-none text-xl bg-transparent;
+    }
+
+    .search-bar__clear {
+        @apply absolute right-1 top-1/2 -translate-y-1/2 focus:outline-none;
+    }
+
+    /* --- Sort Button (sort-button) --- */
+    .sort-button {
+        @apply flex justify-center items-center gap-1 w-full bg-gray-100 py-2 px-3 text-sm hover:bg-slate-800 hover:text-white duration-300 dark:bg-slate-800 dark:hover:opacity-100 md:w-[150px] dark:opacity-70;
+    }
+
+    .sort-button--active {
+        @apply text-white bg-slate-800 dark:opacity-100;
+    }
+
+    /* --- Modal (modal) --- */
+    .modal__overlay {
+        @apply fixed inset-0 z-10 flex items-center justify-center bg-black/50 backdrop-blur-sm;
+    }
+
+    .modal__content {
+        @apply relative;
+    }
+
+    /* ============================================
+       ORGANISMS
+       ============================================ */
+
+    /* --- News Card (news-card) --- */
+    .news-card {
+        @apply p-4 border rounded-lg shadow-lg;
+    }
+
+    .news-card__body {
+        @apply text-gray-600 dark:text-white flex flex-col h-full;
+    }
+
+    .news-card__content {
+        @apply flex flex-col;
+    }
+
+    .news-card__title {
+        @apply text-lg font-bold line-clamp-2;
+    }
+
+    .news-card__description {
+        @apply mt-2 line-clamp-3;
+    }
+
+    .news-card__date {
+        @apply mt-2 text-sm;
+    }
+
+    .news-card__source {
+        @apply flex items-center mt-4;
+    }
+
+    .news-card__source-icon {
+        @apply w-6 h-6 mr-2 relative;
+    }
+
+    .news-card__source-link {
+        @apply text-sm text-blue-500 hover:underline;
+    }
+
+    .news-card__footer {
+        @apply mt-auto;
+    }
+
+    .news-card__actions {
+        @apply flex items-center justify-between mt-4;
+    }
+
+    .news-card__more {
+        @apply text-blue-500 cursor-pointer hover:opacity-70;
+    }
+
+    .news-card__favorite {
+        @apply text-red-500 hover:opacity-70 cursor-pointer;
+    }
+
+    /* --- News Detail (news-detail) --- */
+    .news-detail {
+        @apply m-auto px-5 py-20 relative bg-white rounded-lg dark:bg-gray-900 md:px-10;
+    }
+
+    .news-detail__close {
+        @apply absolute top-5 left-1/2 -translate-x-1/2 cursor-pointer hover:rotate-90 duration-300;
+    }
+
+    .news-detail__header {
+        @apply flex flex-col gap-8 md:flex-row;
+    }
+
+    .news-detail__image-wrapper {
+        @apply max-w-[400px] relative mx-auto md:w-1/2 md:max-w-none;
+    }
+
+    .news-detail__image {
+        @apply object-cover w-full h-auto rounded-lg;
+    }
+
+    .news-detail__meta {
+        @apply md:w-1/2;
+    }
+
+    .news-detail__title {
+        @apply text-xl font-bold;
+    }
+
+    .news-detail__description {
+        @apply text-gray-600;
+    }
+
+    .news-detail__body {
+        @apply mt-5;
+    }
+
+    .news-detail__rating {
+        @apply mt-8;
+    }
+
+    /* --- News Modal (news-modal) --- */
+    .news-modal {
+        @apply max-w-[1000px] w-full overflow-auto h-screen flex;
+    }
+
+    /* --- Rating Form (rating-form) --- */
+    .rating-form__title {
+        @apply text-lg font-semibold mb-2;
+    }
+
+    .rating-form__controls {
+        @apply flex items-center gap-5;
+    }
+
+    .rating-form__submit {
+        @apply px-2 py-1 border rounded-md w-[100px] cursor-pointer opacity-100 pointer-events-auto;
+    }
+
+    .rating-form__submit--disabled {
+        @apply opacity-30 pointer-events-none;
+    }
+
+    /* --- Register Button (register-button) --- */
+    .register-button {
+        @apply flex gap-1 cursor-pointer items-center hover:opacity-70 duration-300;
+    }
+
+    /* --- Register Modal (register-modal) --- */
+    .register-modal {
+        @apply w-full max-w-lg p-2 relative bg-white dark:bg-gray-900 rounded-lg shadow-lg;
+    }
+
+    .register-modal__form {
+        @apply px-12 pt-6 pb-10 z-10;
+    }
+
+    /* --- Auth Form (auth-form) --- */
+    .auth-form__header {
+        @apply flex flex-col items-center justify-center mb-5;
+    }
+
+    .auth-form__title {
+        @apply mt-2 text-gray-600 text-3xl font-semibold;
+    }
+
+    .auth-form__switch-text {
+        @apply text-sm text-center;
+    }
+
+    .auth-form__switch-link {
+        @apply text-red-600 cursor-pointer ml-1;
+    }
+
+    .auth-form__body {
+        @apply flex flex-col mt-3;
+    }
+
+    .auth-form__fields {
+        @apply flex flex-col gap-3;
+    }
+
+    .auth-form__submit {
+        @apply mt-8;
+    }
+
+    .auth-form__social {
+        @apply flex gap-2 mt-3;
+    }
+
+    /* ============================================
+       PAGE-SPECIFIC
+       ============================================ */
+
+    /* --- Home Header (home-header) --- */
+    .home-header {
+        @apply left-0 top-0 w-full bg-white z-10 dark:bg-black md:fixed md:shadow-md md:dark:border-b-2 md:dark:border-gray-500;
+    }
+
+    .home-header__top {
+        @apply px-5 py-5 flex justify-between items-start gap-5 fixed w-full z-10 bg-white dark:bg-black md:static md:pt-5 md:pb-0 shadow-md md:shadow-none dark:border-b-2 dark:border-gray-500 md:dark:border-none;
+    }
+
+    .home-header__brand-description {
+        @apply max-w-[500px] w-full mt-5 h-[120px] overflow-auto hidden md:block;
+    }
+
+    .home-header__actions {
+        @apply flex items-center gap-2 md:gap-5 shrink-0;
+    }
+
+    .home-header__dashboard-link {
+        @apply hover:opacity-70 duration-300;
+    }
+
+    .home-header__mobile-search {
+        @apply px-5 pt-[--navH] md:hidden md:pt-0 md:mt-3;
+    }
+
+    .home-header__mobile-description {
+        @apply mt-3 px-5 w-full md:hidden;
+    }
+
+    .home-header__sort-bar {
+        @apply flex mt-5 px-5 justify-center md:justify-end;
+    }
+
+    /* --- News List (news-list) --- */
+    .news-list {
+        @apply min-h-screen px-4 py-10;
+    }
+
+    .news-list__grid {
+        @apply grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+    }
+
+    .news-list__empty {
+        @apply p-5 pt-10 flex justify-center items-center text-xl;
+    }
+
+    /* --- Nav Bar (nav-bar) --- */
+    .nav-bar {
+        @apply flex justify-between items-center p-5 fixed top-0 left-0 w-full bg-white z-10 dark:bg-black;
+    }
+
+    .nav-bar__actions {
+        @apply flex items-center gap-5;
+    }
+
+    .nav-bar__link {
+        @apply hover:opacity-70 duration-300;
+    }
+
+    /* --- Dashboard (dashboard) --- */
+    .dashboard__empty {
+        @apply p-10;
+    }
+
+    .dashboard__empty-text {
+        @apply text-center text-xl p-10;
+    }
+
+    .dashboard__empty-link {
+        @apply text-red-500 hover:opacity-70;
+    }
+
+    /* --- Error Page (error-page) --- */
+    .error-page {
+        @apply m-auto px-5 flex flex-col justify-center items-center gap-8 text-center;
+    }
+
+    .error-page__code {
+        @apply px-2 py-0.5 text-red-500 font-bold text-xl;
+    }
+
+    .error-page__title {
+        @apply text-2xl font-bold;
+    }
+
+    .error-page__message {
+        @apply text-xl text-gray-500;
+    }
+
+    .error-page__actions {
+        @apply flex gap-4;
+    }
+
+    /* --- Auth Page (auth-page) --- */
+    .auth-page {
+        @apply flex flex-col items-center justify-center w-full px-10 pt-[100px] pb-[50px];
+    }
+
+    .auth-page__form {
+        @apply max-w-md w-full;
+    }
+
+    .auth-page__home-link {
+        @apply mt-5;
+    }
+}
+

@@ -1,9 +1,9 @@
-import RegisterClient from '@/components/register/RegisterClient'
+import RegisterForm from '@/components/organisms/RegisterForm'
 
 const SignUpPage = () => {
     return (
-        <div className="flex justify-center w-full px-10 pt-[100px] pb-[50px]">
-            <RegisterClient type={'signup'} className="max-w-md w-full" />
+        <div className="auth-page">
+            <RegisterForm type="signup" className="auth-page__form" />
         </div>
     )
 }

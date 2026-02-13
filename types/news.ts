@@ -1,4 +1,4 @@
-export type NewsDataType = {
+export interface NewsDataType {
     article_id: string
     title: string
     description: string
@@ -11,3 +11,14 @@ export type NewsDataType = {
     rate: number
     favorite: boolean
 }
+
+export interface NewsApiResponse {
+    data: NewsDataType[]
+    success: boolean
+}
+
+export type SortType = 'rating' | 'date'
+
+export type AuthFormType = 'login' | 'signup'
+
+export type ToastState = 'success' | 'error' | 'warning'

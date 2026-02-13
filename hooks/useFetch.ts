@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 
-async function sendHttpRequest(url: string, config: object) {
+async function sendHttpRequest<T>(url: string, config: RequestInit): Promise<T> {
     const res = await fetch(url, config)
-    const resData = await res.json()
+    const resData: T = await res.json()
+
     if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`)
     }
@@ -10,22 +11,22 @@ async function sendHttpRequest(url: string, config: object) {
     return resData
 }
 
-export default function useFetch(
+export default function useFetch<T>(
     url: string,
     config: RequestInit = { method: 'GET' },
-    initData = []
+    initData: T
 ) {
-    const [data, setData] = useState(initData)
+    const [data, setData] = useState<T>(initData)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string>()
 
     const sendRequest = useCallback(async () => {
         setIsLoading(true)
         try {
-            const resData = await sendHttpRequest(url, config)
+            const resData = await sendHttpRequest<T>(url, config)
             setData(resData)
-        } catch (error) {
-            console.error('error:', error)
+        } catch (err) {
+            console.error('error:', err)
             setError('something went wrong')
         }
         setIsLoading(false)
