@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { newsData } from '@/libs/datas/newsData'
 import clientPromise from '@/libs/mongodb'
 
 export async function GET(request: Request) {
@@ -9,10 +8,12 @@ export async function GET(request: Request) {
     try {
         const client = await clientPromise
         const db = client.db()
+        const newsCollection = db.collection('news')
         const favoritesCollection = db.collection('favorites')
         const ratingsCollection = db.collection('ratings')
 
-        const allData = newsData.results
+        // 從 MongoDB 取得所有新聞
+        const allData = await newsCollection.find({}).toArray()
 
         let favoriteSet = new Set()
         if (userId) {

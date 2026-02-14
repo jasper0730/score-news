@@ -3,9 +3,9 @@ import Link from 'next/link'
 
 const LoginPage = () => {
     return (
-        <div className="auth-page">
-            <RegisterForm type="login" className="auth-page__form" />
-            <Link href="/" className="auth-page__home-link">
+        <div className="flex flex-col items-center justify-center w-full px-10 pt-[100px] pb-[50px]">
+            <RegisterForm type="login" className="max-w-md w-full" />
+            <Link href="/" className="mt-5">
                 回首頁
             </Link>
         </div>

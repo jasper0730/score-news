@@ -10,9 +10,9 @@ const StarDisplay = ({ rating }: StarDisplayProps) => {
     if (!rating || rating <= 0) return null
 
     return (
-        <div className="star-display">
+        <div className="flex items-center mt-4">
             {Array.from({ length: Math.round(rating) }, (_, index) => (
-                <FaStar key={index} className="star-display__star" />
+                <FaStar key={index} className="text-yellow-500 text-xl" />
             ))}
         </div>
     )

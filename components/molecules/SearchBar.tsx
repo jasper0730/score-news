@@ -34,28 +34,28 @@ const SearchBar = ({ className = '' }: SearchBarProps) => {
     }
 
     return (
-        <div className={`search-bar ${className}`}>
+        <div className={`flex items-stretch gap-2 p-2 border-b-8 w-full ${className}`}>
             <button
                 type="button"
                 onClick={handleSearch}
-                className="search-bar__button"
+                className="px-3 py-2 duration-300 rounded-md hover:opacity-70"
             >
-                <IoSearch className="search-bar__icon" />
+                <IoSearch className="text-[60px]" />
             </button>
-            <div className="search-bar__input-wrapper">
+            <div className="relative w-full">
                 <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="搜尋內容..."
-                    className="search-bar__input"
+                    className="w-full h-full flex-1 pl-3 py-2 pr-8 rounded-md focus:outline-none text-xl bg-transparent"
                 />
                 {query && (
                     <button
                         type="button"
                         onClick={handleClear}
-                        className="search-bar__clear"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 focus:outline-none"
                     >
                         <IoIosCloseCircleOutline size={20} />
                     </button>

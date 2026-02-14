@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { toastBox } from '@/utils/toast'
 import axios from 'axios'
 import type { NewsDataType, NewsApiResponse } from '@/types/news'
@@ -25,17 +24,10 @@ interface FavoriteApiResponse {
 }
 
 const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
-    const router = useRouter()
     const [selectedNews, setSelectedNews] = useState<NewsDataType | null>(null)
     const [newsData, setNewsData] = useState<NewsDataType[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [hasFetched, setHasFetched] = useState(false)
-
-    useEffect(() => {
-        if (!user) {
-            router.push('/login')
-        }
-    }, [user, router])
 
     const fetchData = useCallback(async () => {
         if (!user) return
@@ -108,10 +100,10 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
 
     if (!isLoading && newsData.length === 0) {
         return (
-            <div className="dashboard__empty">
-                <p className="dashboard__empty-text">
+            <div className="p-10">
+                <p className="text-center text-xl p-10">
                     目前沒有收藏的新聞，請回
-                    <Link href="/" className="dashboard__empty-link">
+                    <Link href="/" className="text-red-500 hover:opacity-70">
                         首頁
                     </Link>
                     加入收藏文章
@@ -122,8 +114,8 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
 
     return (
         <>
-            <div className="news-list">
-                <div className="news-list__grid">
+            <div className="min-h-screen px-4 py-10">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {newsData.map((article) => (
                         <NewsCard
                             key={article.article_id}

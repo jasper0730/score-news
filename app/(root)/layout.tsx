@@ -8,7 +8,7 @@ export default async function Layout({
     return (
         <>
             <HomeHeader />
-            <section className="md:pt-[256px]">{children}</section>
+            <section className="md:pt-[189px]">{children}</section>
         </>
     )
 }

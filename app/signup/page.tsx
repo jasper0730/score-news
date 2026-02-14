@@ -2,8 +2,8 @@ import RegisterForm from '@/components/organisms/RegisterForm'
 
 const SignUpPage = () => {
     return (
-        <div className="auth-page">
-            <RegisterForm type="signup" className="auth-page__form" />
+        <div className="flex flex-col items-center justify-center w-full px-10 pt-[100px] pb-[50px]">
+            <RegisterForm type="signup" className="max-w-md w-full" />
         </div>
     )
 }

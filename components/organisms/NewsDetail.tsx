@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { NewsDataType } from '@/types/news'
 import { IoIosCloseCircle } from 'react-icons/io'
 import RatingForm from '@/components/organisms/RatingForm'
+import CommentSection from '@/components/organisms/CommentSection'
 import DynamicImage from '@/components/atoms/DynamicImage'
 
 const DEFAULT_CONTENT =
@@ -26,22 +27,22 @@ const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
             : DEFAULT_CONTENT
 
     return (
-        <article className="news-detail">
+        <article className="m-auto px-5 py-20 relative bg-white rounded-lg dark:bg-gray-900 md:px-10">
             <button
                 onClick={onClose}
-                className="news-detail__close"
+                className="absolute top-5 left-1/2 -translate-x-1/2 cursor-pointer hover:rotate-90 duration-300"
                 aria-label="關閉新聞詳情"
             >
                 <IoIosCloseCircle size={40} />
             </button>
 
-            <div className="news-detail__header">
-                <div className="news-detail__image-wrapper">
+            <div className="flex flex-col gap-8 md:flex-row">
+                <div className="max-w-[400px] relative mx-auto md:w-1/2 md:max-w-none">
                     {data?.image_url ? (
                         <DynamicImage
                             src={data.image_url}
                             alt={data.title ?? '新聞圖片'}
-                            className="news-detail__image"
+                            className="object-cover w-full h-auto rounded-lg"
                         />
                     ) : (
                         <Image
@@ -51,23 +52,30 @@ const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
                         />
                     )}
                 </div>
-                <div className="news-detail__meta">
-                    <h2 className="news-detail__title">{data?.title}</h2>
-                    <p className="news-detail__description">{data?.description}</p>
+                <div className="md:w-1/2">
+                    <h2 className="text-xl font-bold">{data?.title}</h2>
+                    <p className="text-gray-600">{data?.description}</p>
                 </div>
             </div>
 
-            <div className="news-detail__body">
+            <div className="mt-5">
                 <p>{newsContent}</p>
             </div>
 
             {isAuthenticated && (
-                <div className="news-detail__rating">
+                <div className="mt-8">
                     <RatingForm
                         postId={data?.article_id}
                         onRatingUpdate={onRatingUpdate}
                     />
                 </div>
+            )}
+
+            {data?.article_id && (
+                <CommentSection
+                    postId={data.article_id}
+                    postTitle={data.title}
+                />
             )}
         </article>
     )

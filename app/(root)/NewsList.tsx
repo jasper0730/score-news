@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNewsStore } from '@/store/newsStore'
 import { useShallow } from 'zustand/shallow'
 import { toastBox } from '@/utils/toast'
@@ -8,6 +8,8 @@ import type { NewsDataType, NewsApiResponse } from '@/types/news'
 import axios from 'axios'
 import NewsCard from '@/components/organisms/NewsCard'
 import NewsModal from '@/components/organisms/NewsModal'
+
+const PAGE_SIZE = 8
 
 interface NewsListProps {
     data: NewsApiResponse
@@ -27,6 +29,9 @@ const NewsList = ({ data }: NewsListProps) => {
     const [selectedNews, setSelectedNews] = useState<NewsDataType | null>(null)
     const [newsData, setNewsData] = useState<NewsDataType[]>(data?.data ?? [])
     const [favorites, setFavorites] = useState<string[]>([])
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+    const [isLoadingMore, setIsLoadingMore] = useState(false)
+    const sentinelRef = useRef<HTMLDivElement>(null)
 
     const { query, sortType } = useNewsStore(
         useShallow((state) => ({
@@ -47,6 +52,67 @@ const NewsList = ({ data }: NewsListProps) => {
 
         setFavorites(favoriteIds)
     }, [data?.data])
+
+    const sortedData = useMemo(() => {
+        const filtered = newsData.filter(
+            (item) =>
+                item.title?.toLowerCase().includes(queryValue) ||
+                item.description?.toLowerCase().includes(queryValue)
+        )
+
+        return [...filtered].sort((a, b) => {
+            switch (sortType) {
+                case 'rating':
+                    return (b.rate || 0) - (a.rate || 0)
+                case 'date':
+                    return (
+                        new Date(b.pubDate).getTime() -
+                        new Date(a.pubDate).getTime()
+                    )
+                default:
+                    return 0
+            }
+        })
+    }, [newsData, queryValue, sortType])
+
+    // Reset visible count when filter/sort changes
+    useEffect(() => {
+        setVisibleCount(PAGE_SIZE)
+    }, [queryValue, sortType])
+
+    const hasMore = visibleCount < sortedData.length
+    const visibleData = useMemo(
+        () => sortedData.slice(0, visibleCount),
+        [sortedData, visibleCount]
+    )
+
+    // Infinite scroll via IntersectionObserver
+    const loadMore = useCallback(() => {
+        if (!hasMore || isLoadingMore) return
+        setIsLoadingMore(true)
+        // Simulate a short delay for smoother UX
+        setTimeout(() => {
+            setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, sortedData.length))
+            setIsLoadingMore(false)
+        }, 300)
+    }, [hasMore, isLoadingMore, sortedData.length])
+
+    useEffect(() => {
+        const sentinel = sentinelRef.current
+        if (!sentinel) return
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    loadMore()
+                }
+            },
+            { rootMargin: '200px' }
+        )
+
+        observer.observe(sentinel)
+        return () => observer.disconnect()
+    }, [loadMore])
 
     const handleRatingUpdate = async (postId: string, newRating: number) => {
         try {
@@ -103,48 +169,42 @@ const NewsList = ({ data }: NewsListProps) => {
         }
     }
 
-    const sortedData = useMemo(() => {
-        const filtered = newsData.filter(
-            (item) =>
-                item.title?.toLowerCase().includes(queryValue) ||
-                item.description?.toLowerCase().includes(queryValue)
-        )
-
-        return [...filtered].sort((a, b) => {
-            switch (sortType) {
-                case 'rating':
-                    return (b.rate || 0) - (a.rate || 0)
-                case 'date':
-                    return (
-                        new Date(b.pubDate).getTime() -
-                        new Date(a.pubDate).getTime()
-                    )
-                default:
-                    return 0
-            }
-        })
-    }, [newsData, queryValue, sortType])
-
     if (!data?.success) {
         return <p>Failed to fetch</p>
     }
 
     return (
-        <div className="news-list">
+        <div className="min-h-screen px-4 py-10">
             {sortedData.length > 0 ? (
-                <div className="news-list__grid">
-                    {sortedData.map((article) => (
-                        <NewsCard
-                            key={article.article_id}
-                            article={article}
-                            favorite={favorites.includes(article.article_id)}
-                            onFavoriteClick={handleFavoriteClick}
-                            onMoreClick={() => setSelectedNews(article)}
-                        />
-                    ))}
-                </div>
+                <>
+                    <div className="masonry">
+                        {visibleData.map((article) => (
+                            <div key={article.article_id} className="masonry-item">
+                                <NewsCard
+                                    article={article}
+                                    favorite={favorites.includes(article.article_id)}
+                                    onFavoriteClick={handleFavoriteClick}
+                                    onMoreClick={() => setSelectedNews(article)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Infinite scroll sentinel */}
+                    <div ref={sentinelRef} className="py-6 flex justify-center">
+                        {isLoadingMore && (
+                            <div className="flex items-center gap-2 text-gray-400">
+                                <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                                <span>載入更多...</span>
+                            </div>
+                        )}
+                        {!hasMore && sortedData.length > PAGE_SIZE && (
+                            <p className="text-sm text-gray-400">已載入全部文章</p>
+                        )}
+                    </div>
+                </>
             ) : (
-                <p className="news-list__empty">
+                <p className="p-5 pt-10 flex justify-center items-center text-xl">
                     無相符的資料，請重新搜尋
                 </p>
             )}

@@ -8,18 +8,18 @@ interface AvatarProps {
 }
 
 const SIZE_CLASSES: Record<NonNullable<AvatarProps['size']>, string> = {
-    sm: 'avatar--sm',
-    md: 'avatar--md',
-    lg: 'avatar--lg',
+    sm: 'w-[25px] h-[25px]',
+    md: 'w-[35px] h-[35px]',
+    lg: 'w-[50px] h-[50px]',
 }
 
 const Avatar = ({ src, size = 'md' }: AvatarProps) => {
     return (
-        <div className={`avatar ${SIZE_CLASSES[size]}`}>
+        <div className={`rounded-full relative overflow-hidden ${SIZE_CLASSES[size]}`}>
             <Image
                 alt="使用者頭像"
-                className="avatar__image"
-                src={src ?? '/images/placeholder.jpg'}
+                className="rounded-full object-cover"
+                src={src || '/images/placeholder.jpg'}
                 fill
                 priority
             />

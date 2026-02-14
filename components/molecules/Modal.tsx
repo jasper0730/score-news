@@ -37,11 +37,11 @@ const Modal = ({ children, open, className = '', onClose }: ModalProps) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="modal__overlay"
+                    className="fixed inset-0 z-10 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={onClose}
                 >
                     <motion.div
-                        className={`modal__content ${className}`}
+                        className={`relative ${className}`}
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}

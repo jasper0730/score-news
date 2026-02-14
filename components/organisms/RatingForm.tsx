@@ -40,12 +40,12 @@ const RatingForm = ({ postId, onRatingUpdate }: RatingFormProps) => {
     const isDisabled = isLoading || rating === 0
 
     return (
-        <div className="rating-form">
-            <h3 className="rating-form__title">你覺得這則新聞？</h3>
-            <div className="rating-form__controls">
+        <div>
+            <h3 className="text-lg font-semibold mb-2">你覺得這則新聞？</h3>
+            <div className="flex items-center gap-5">
                 <StarRating value={rating} onChange={setRating} />
                 <Button
-                    className={`rating-form__submit ${isDisabled ? 'rating-form__submit--disabled' : ''}`}
+                    className={`px-2 py-1 border rounded-md w-[100px] cursor-pointer ${isDisabled ? 'opacity-30 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}
                     disabled={isDisabled}
                     onClick={handleSubmit}
                 >

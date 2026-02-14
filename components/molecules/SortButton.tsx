@@ -23,11 +23,12 @@ const SortButton = ({ type }: SortButtonProps) => {
     )
 
     const isActive = sortType === type
-    const activeClass = isActive ? 'sort-button--active' : ''
 
     return (
         <Button
-            className={`sort-button ${activeClass}`}
+            className={`flex justify-center items-center gap-1 w-full bg-gray-100 py-2 px-3 text-sm hover:bg-slate-800 hover:text-white duration-300 dark:bg-slate-800 dark:hover:opacity-100 md:w-[150px] dark:opacity-70 ${
+                isActive ? 'text-white bg-slate-800 dark:opacity-100' : ''
+            }`}
             onClick={() => setSortType(type)}
         >
             {SORT_LABELS[type]}

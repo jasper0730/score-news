@@ -14,7 +14,7 @@ const ThemeSwitcher = () => {
 
     if (!mounted) {
         return (
-            <div className="theme-switcher theme-switcher--placeholder">
+            <div className="relative w-4">
                 <Image
                     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAC/ghZPgAAAAAASUVORK5CYII="
                     alt="主題佔位圖"
@@ -26,7 +26,7 @@ const ThemeSwitcher = () => {
         )
     }
 
-    const iconClass = 'theme-switcher__icon'
+    const iconClass = 'hover:opacity-50 duration-300 cursor-pointer'
 
     if (resolvedTheme === 'dark') {
         return <MdSunny className={iconClass} onClick={() => setTheme('light')} />

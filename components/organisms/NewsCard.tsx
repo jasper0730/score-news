@@ -18,16 +18,16 @@ const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardP
     const isAuthenticated = status === 'authenticated'
 
     return (
-        <article className="news-card">
-            <div className="news-card__body">
-                <div className="news-card__content">
-                    <h2 className="news-card__title">{article.title}</h2>
-                    <p className="news-card__description">{article.description}</p>
-                    <time className="news-card__date">日期：{article.pubDate}</time>
+        <article className="p-4 border rounded-lg shadow-lg">
+            <div className="text-gray-600 dark:text-white flex flex-col h-full">
+                <div className="flex flex-col">
+                    <h2 className="text-lg font-bold line-clamp-2">{article.title}</h2>
+                    <p className="mt-2">{article.description}</p>
+                    <time className="mt-2 text-sm">日期：{article.pubDate}</time>
 
-                    <div className="news-card__source">
+                    <div className="flex items-center mt-4">
                         {article.source_icon && (
-                            <div className="news-card__source-icon">
+                            <div className="w-6 h-6 mr-2 relative">
                                 <Image
                                     src={article.source_icon}
                                     alt={`${article.source_name} icon`}
@@ -39,19 +39,19 @@ const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardP
                             href={article.source_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="news-card__source-link"
+                            className="text-sm text-blue-500 hover:underline"
                         >
                             {article.source_name}
                         </a>
                     </div>
                 </div>
 
-                <div className="news-card__footer">
+                <div className="mt-auto">
                     <StarDisplay rating={article.rate} />
 
-                    <div className="news-card__actions">
+                    <div className="flex items-center justify-between mt-4">
                         <button
-                            className="news-card__more"
+                            className="text-blue-500 cursor-pointer hover:opacity-70"
                             onClick={onMoreClick}
                             type="button"
                         >
@@ -60,7 +60,7 @@ const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardP
                         {isAuthenticated && (
                             <button
                                 onClick={() => onFavoriteClick(article.article_id)}
-                                className="news-card__favorite"
+                                className="text-red-500 hover:opacity-70 cursor-pointer"
                                 type="button"
                                 aria-label={favorite ? '取消收藏' : '加入收藏'}
                             >

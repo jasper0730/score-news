@@ -19,21 +19,21 @@ const Input = ({
     wrapperClassName = '',
     ...props
 }: InputProps) => {
-    const errorClass = error ? 'input__field--error' : ''
+    const errorClass = error ? 'border-red-500 focus:border-red-500' : ''
 
     return (
-        <div className={`input ${wrapperClassName}`}>
+        <div className={`relative ${wrapperClassName}`}>
             <input
                 name={name}
                 ref={inputRef}
                 type={type}
                 disabled={disabled}
-                className={`input__field ${errorClass}`}
+                className={`w-full font-light border-2 rounded-md outline-none transition p-2 disabled:opacity-70 disabled:cursor-not-allowed ${errorClass}`}
                 placeholder={placeholder}
                 defaultValue={defaultValue}
                 {...props}
             />
-            {error && <span className="input__error">{error}</span>}
+            {error && <span className="text-red-600 text-sm absolute top-full left-0 px-1">{error}</span>}
         </div>
     )
 }

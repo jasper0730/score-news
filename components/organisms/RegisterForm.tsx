@@ -127,20 +127,20 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
     }
 
     return (
-        <div className={`auth-form ${className}`}>
-            <div className="auth-form__header">
+        <div className={className}>
+            <div className="flex flex-col items-center justify-center mb-5">
                 <Logo />
-                <h2 className="auth-form__title">
+                <h2 className="mt-2 text-gray-600 text-3xl font-semibold">
                     {type === 'login' ? '登入 ScoreNews' : '創建一個帳戶'}
                 </h2>
             </div>
 
             {type === 'login' && (
-                <p className="auth-form__switch-text">
+                <p className="text-sm text-center">
                     還沒加入 ScoreNews 嗎？
                     <button
                         type="button"
-                        className="auth-form__switch-link"
+                        className="text-red-600 cursor-pointer ml-1"
                         onClick={() => handleSwitchType('signup')}
                     >
                         註冊
@@ -149,11 +149,11 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
             )}
 
             {type === 'signup' && (
-                <p className="auth-form__switch-text">
+                <p className="text-sm text-center">
                     已經加入 ScoreNews 嗎？
                     <button
                         type="button"
-                        className="auth-form__switch-link"
+                        className="text-red-600 cursor-pointer ml-1"
                         onClick={() => handleSwitchType('login')}
                     >
                         登入
@@ -161,8 +161,8 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
                 </p>
             )}
 
-            <form ref={formRef} className="auth-form__body" onSubmit={handleSubmit}>
-                <div className="auth-form__fields">
+            <form ref={formRef} className="flex flex-col mt-3" onSubmit={handleSubmit}>
+                <div className="flex flex-col gap-3">
                     <Input
                         name="email"
                         type="text"
@@ -182,7 +182,7 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
                 <Button
                     type="submit"
                     variant="primary"
-                    className="auth-form__submit"
+                    className="mt-8"
                     disabled={isLoading}
                 >
                     {type === 'login' ? '登入' : '註冊'}
@@ -190,7 +190,7 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
             </form>
 
             {type === 'login' && (
-                <div className="auth-form__social">
+                <div className="flex gap-2 mt-3">
                     {SOCIAL_PROVIDERS.map(({ id, label, variant }) => (
                         <Button
                             key={id}

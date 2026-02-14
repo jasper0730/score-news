@@ -2,11 +2,21 @@ import { options } from '@/app/api/auth/[...nextauth]/options'
 import { getServerSession } from 'next-auth'
 import clientPromise from '@/libs/mongodb'
 
+export interface UserType {
+    id: string
+    name?: string
+    email?: string
+    image?: string
+    nickname?: string
+    bio?: string
+    [key: string]: unknown
+}
+
 export const getSession = async () => {
     return await getServerSession(options)
 }
 
-export const getUser = async () => {
+export const getUser = async (): Promise<UserType | null> => {
     try {
         const session = await getSession()
         if (!session?.user?.email) return null

@@ -16,12 +16,12 @@ const RegisterModal = ({ open, onClose, type, setOpenModal }: RegisterModalProps
         <Modal
             open={open}
             onClose={onClose}
-            className="register-modal"
+            className="w-full max-w-lg p-2 relative bg-white dark:bg-gray-900 rounded-lg shadow-lg"
         >
             <RegisterForm
                 type={type}
                 setOpenModal={setOpenModal}
-                className="register-modal__form"
+                className="px-12 pt-6 pb-10 z-10"
             />
         </Modal>
     )

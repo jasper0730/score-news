@@ -13,7 +13,7 @@ const StarRating = ({ value, onChange, maxStars = 5 }: StarRatingProps) => {
     const [hoverValue, setHoverValue] = useState(0)
 
     return (
-        <div className="star-rating">
+        <div className="flex">
             {Array.from({ length: maxStars }, (_, index) => {
                 const starValue = index + 1
                 const isActive = (hoverValue || value) >= starValue
@@ -21,7 +21,7 @@ const StarRating = ({ value, onChange, maxStars = 5 }: StarRatingProps) => {
                 return (
                     <FaStar
                         key={starValue}
-                        className={`star-rating__star ${isActive ? 'star-rating__star--active' : 'star-rating__star--inactive'}`}
+                        className={`cursor-pointer text-2xl ${isActive ? 'text-yellow-500' : 'text-gray-400'}`}
                         onMouseEnter={() => setHoverValue(starValue)}
                         onMouseLeave={() => setHoverValue(0)}
                         onClick={() => onChange(value === starValue ? 0 : starValue)}

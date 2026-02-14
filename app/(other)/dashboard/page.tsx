@@ -1,13 +1,9 @@
 import { getUser } from '@/actions/getUser'
-import DashboardNewsList from './DashboardNewsList'
+import DashboardContent from './DashboardContent'
 
 const DashboardPage = async () => {
     const currentUser = await getUser()
-    return (
-        <>
-            <DashboardNewsList user={currentUser} />
-        </>
-    )
+    return <DashboardContent user={currentUser} />
 }
 
 export default DashboardPage

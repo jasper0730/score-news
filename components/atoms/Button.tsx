@@ -9,11 +9,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANT_CLASSES: Record<NonNullable<ButtonProps['variant']>, string> = {
-    primary: 'btn btn--primary',
-    outline: 'btn btn--outline',
-    'social-facebook': 'btn btn--social btn--social-facebook',
-    'social-google': 'btn btn--social btn--social-google',
-    'social-github': 'btn btn--social btn--social-github',
+    primary: 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed p-2 border-2 w-full rounded-xl hover:opacity-70',
+    outline: 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-2 rounded-md border border-gray-300 text-gray-400 hover:border-gray-700 hover:text-gray-700',
+    'social-facebook': 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed p-2 border-2 w-full rounded-xl border-none text-white hover:opacity-70 bg-blue-500',
+    'social-google': 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed p-2 border-2 w-full rounded-xl border-none text-white hover:opacity-70 bg-red-500',
+    'social-github': 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed p-2 border-2 w-full rounded-xl border-none text-white hover:opacity-70 bg-gray-600',
 }
 
 const Button = ({

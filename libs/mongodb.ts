@@ -1,4 +1,8 @@
 import { MongoClient, ServerApiVersion } from 'mongodb'
+import dns from 'dns'
+
+// 使用 Google DNS 解析 MongoDB Atlas SRV 記錄（解決本地路由器 DNS 不支援 SRV 查詢的問題）
+dns.setServers(['8.8.8.8', '8.8.4.4'])
 
 if (!process.env.MONGODB_URI) {
     throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')

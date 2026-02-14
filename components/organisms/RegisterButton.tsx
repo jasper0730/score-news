@@ -25,7 +25,7 @@ const RegisterButton = ({ type }: RegisterButtonProps) => {
     if (type === 'logout') {
         return (
             <button
-                className="register-button"
+                className="flex gap-1 cursor-pointer items-center hover:opacity-70 duration-300"
                 onClick={() => signOut({ callbackUrl: '/' })}
                 type="button"
             >
@@ -38,7 +38,7 @@ const RegisterButton = ({ type }: RegisterButtonProps) => {
     return (
         <>
             <button
-                className="register-button"
+                className="flex gap-1 cursor-pointer items-center hover:opacity-70 duration-300"
                 onClick={handleLoginOpen}
                 type="button"
             >
