@@ -9,7 +9,6 @@ export interface UserType {
     image?: string
     nickname?: string
     bio?: string
-    [key: string]: unknown
 }
 
 export const getSession = async () => {
@@ -19,6 +18,7 @@ export const getSession = async () => {
 export const getUser = async (): Promise<UserType | null> => {
     try {
         const session = await getSession()
+        console.log('[getUser] session:', session ? `email=${session.user?.email}` : 'NULL')
         if (!session?.user?.email) return null
 
         // 連接到 database

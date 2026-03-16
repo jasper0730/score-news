@@ -1,16 +1,14 @@
-import { NextResponse } from 'next/server'
+'use server'
+
 import { ObjectId } from 'mongodb'
 import { requireAuth } from '@/libs/auth'
 import { getCollection, UserDocument } from '@/libs/db'
 
-export async function GET() {
+export async function getProfileAction() {
     try {
         const auth = await requireAuth()
         if (!auth.authenticated) {
-            return NextResponse.json(
-                { success: false, message: auth.error },
-                { status: 401 }
-            )
+            return { success: false as const, error: auth.error }
         }
 
         const currentUser = auth.user
@@ -21,14 +19,11 @@ export async function GET() {
         })
 
         if (!user) {
-            return NextResponse.json(
-                { success: false, message: 'User not found' },
-                { status: 404 }
-            )
+            return { success: false as const, error: 'User not found' }
         }
 
-        return NextResponse.json({
-            success: true,
+        return {
+            success: true as const,
             profile: {
                 nickname: user.nickname ?? '',
                 bio: user.bio ?? '',
@@ -36,41 +31,28 @@ export async function GET() {
                 name: user.name ?? '',
                 email: user.email ?? '',
             },
-        })
+        }
     } catch (error) {
-        console.error('Profile GET error:', error)
-        return NextResponse.json(
-            { success: false, message: 'Internal server error' },
-            { status: 500 }
-        )
+        console.error('Error in getProfileAction:', error)
+        return { success: false as const, error: 'Internal server error' }
     }
 }
 
-export async function PUT(request: Request) {
+export async function updateProfileAction(nickname: string, bio: string) {
     try {
         const auth = await requireAuth()
         if (!auth.authenticated) {
-            return NextResponse.json(
-                { success: false, message: auth.error },
-                { status: 401 }
-            )
+            return { success: false as const, error: auth.error }
         }
 
         const currentUser = auth.user
-        const { nickname, bio } = await request.json()
 
         if (nickname !== undefined && nickname.length > 20) {
-            return NextResponse.json(
-                { success: false, message: '暱稱不能超過 20 個字' },
-                { status: 400 }
-            )
+            return { success: false as const, error: '暱稱不能超過 20 個字' }
         }
 
         if (bio !== undefined && bio.length > 200) {
-            return NextResponse.json(
-                { success: false, message: '自我介紹不能超過 200 個字' },
-                { status: 400 }
-            )
+            return { success: false as const, error: '自我介紹不能超過 200 個字' }
         }
 
         const usersCollection = await getCollection<UserDocument>('users')
@@ -84,16 +66,9 @@ export async function PUT(request: Request) {
             { $set: updateFields }
         )
 
-        return NextResponse.json({
-            success: true,
-            message: '個人資料已更新',
-            profile: updateFields,
-        })
+        return { success: true as const, message: '個人資料已更新', profile: updateFields }
     } catch (error) {
-        console.error('Profile PUT error:', error)
-        return NextResponse.json(
-            { success: false, message: 'Internal server error' },
-            { status: 500 }
-        )
+        console.error('Error in updateProfileAction:', error)
+        return { success: false as const, error: 'Internal server error' }
     }
 }

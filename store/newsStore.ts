@@ -10,7 +10,7 @@ interface NewsStoreState {
 
 export const useNewsStore = create<NewsStoreState>((set) => ({
     query: '',
-    sortType: 'date',
+    sortType: 'date_desc',
     setNewsQuery: (query) => set({ query }),
     setSortType: (type) => set({ sortType: type }),
 }))

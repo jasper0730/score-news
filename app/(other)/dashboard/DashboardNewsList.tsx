@@ -3,24 +3,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { toastBox } from '@/utils/toast'
-import axios from 'axios'
-import type { NewsDataType, NewsApiResponse } from '@/types/news'
+import { getNewsActions } from '@/actions/newsActions'
+import { toggleFavoriteAction } from '@/actions/favoriteActions'
+import { rateNewsAction } from '@/actions/rateNewsAction'
+import type { NewsDataType } from '@/types/news'
 import Loader from '@/components/atoms/Loader'
 import NewsCard from '@/components/organisms/NewsCard'
 import NewsModal from '@/components/organisms/NewsModal'
 
 interface DashboardNewsListProps {
     user: { id: string } | null
-}
-
-interface RatingApiResponse {
-    state: string
-    rate: number
-}
-
-interface FavoriteApiResponse {
-    success: boolean
-    message: string
 }
 
 const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
@@ -34,11 +26,8 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
 
         setIsLoading(true)
         try {
-            const res = await axios.get<NewsApiResponse>('/api/news', {
-                params: { userId: user.id },
-            })
-
-            const fetchedNews = res.data.data ?? []
+            const result = await getNewsActions({ userId: user.id, limit: 1000 })
+            const fetchedNews = result.data ?? []
             setNewsData(fetchedNews.filter((item) => item.favorite))
             setHasFetched(true)
         } catch (error) {
@@ -54,13 +43,10 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
 
     const handleRatingUpdate = async (postId: string, newRating: number) => {
         try {
-            const response = await axios.post<RatingApiResponse>('/api/rating', {
-                id: postId,
-                rate: newRating,
-            })
+            const result = await rateNewsAction(postId, newRating)
 
-            if (response.data.state === 'success') {
-                const updatedRating = response.data.rate
+            if (result.success) {
+                const updatedRating = result.rate
 
                 setNewsData((prevData) =>
                     prevData.map((news) =>
@@ -83,9 +69,9 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
 
     const handleFavoriteClick = async (id: string) => {
         try {
-            const res = await axios.post<FavoriteApiResponse>('/api/favorite', { id })
+            const result = await toggleFavoriteAction(id)
 
-            if (!res.data.success) {
+            if (!result.success) {
                 throw new Error('Failed to update favorite')
             }
 

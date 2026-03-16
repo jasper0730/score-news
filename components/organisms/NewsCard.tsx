@@ -22,7 +22,7 @@ const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardP
             <div className="text-gray-600 dark:text-white flex flex-col h-full">
                 <div className="flex flex-col">
                     <h2 className="text-lg font-bold line-clamp-2">{article.title}</h2>
-                    <p className="mt-2">{article.description}</p>
+                    <p className="mt-2 line-clamp-2">{article.description}</p>
                     <time className="mt-2 text-sm">日期：{article.pubDate}</time>
 
                     <div className="flex items-center mt-4">

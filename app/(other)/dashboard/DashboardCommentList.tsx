@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { toastBox } from '@/utils/toast'
-import axios from 'axios'
-import type { CommentType, CommentApiResponse, NewsDataType, NewsApiResponse } from '@/types/news'
+import { getCommentsByUserId, deleteCommentAction } from '@/actions/commentActions'
+import { getNewsByIds } from '@/actions/newsActions'
+import type { CommentType, NewsDataType } from '@/types/news'
 import Loader from '@/components/atoms/Loader'
 import NewsModal from '@/components/organisms/NewsModal'
+import { rateNewsAction } from '@/actions/rateNewsAction'
 import { FiEye } from 'react-icons/fi'
 
 interface DashboardCommentListProps {
@@ -21,12 +23,9 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
     const fetchComments = useCallback(async () => {
         setIsLoading(true)
         try {
-            const res = await axios.get<CommentApiResponse>('/api/comment', {
-                params: { userId },
-            })
-
-            if (res.data.success) {
-                setComments(res.data.comments)
+            const result = await getCommentsByUserId(userId)
+            if (result.success) {
+                setComments(result.comments)
             }
         } catch (error) {
             console.error('Failed to fetch comments:', error)
@@ -35,24 +34,28 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
         }
     }, [userId])
 
-    const fetchNews = useCallback(async () => {
+    const fetchNews = useCallback(async (commentList: CommentType[]) => {
         try {
-            const res = await axios.get<NewsApiResponse>('/api/news', {
-                params: { userId },
-            })
-
-            if (res.data.success) {
-                setAllNews(res.data.data)
+            const articleIds = [...new Set(commentList.map((c) => c.postId))]
+            if (articleIds.length === 0) return
+            const result = await getNewsByIds(articleIds)
+            if (result.success) {
+                setAllNews(result.data)
             }
         } catch (error) {
             console.error('Failed to fetch news:', error)
         }
-    }, [userId])
+    }, [])
 
     useEffect(() => {
-        fetchComments()
-        fetchNews()
-    }, [fetchComments, fetchNews])
+        fetchComments().then(() => {})
+    }, [fetchComments])
+
+    useEffect(() => {
+        if (comments.length > 0) {
+            fetchNews(comments)
+        }
+    }, [comments, fetchNews])
 
     const handleViewArticle = (postId: string) => {
         const article = allNews.find((n) => n.article_id === postId)
@@ -65,13 +68,10 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
 
     const handleRatingUpdate = async (postId: string, newRating: number) => {
         try {
-            const response = await axios.post<{ state: string; rate: number }>('/api/rating', {
-                id: postId,
-                rate: newRating,
-            })
+            const result = await rateNewsAction(postId, newRating)
 
-            if (response.data.state === 'success') {
-                const updatedRating = response.data.rate
+            if (result.success) {
+                const updatedRating = result.rate
 
                 setAllNews((prev) =>
                     prev.map((n) =>
@@ -92,11 +92,9 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
 
     const handleDelete = async (commentId: string) => {
         try {
-            const res = await axios.delete<{ success: boolean }>('/api/comment', {
-                data: { commentId },
-            })
+            const result = await deleteCommentAction(commentId)
 
-            if (res.data.success) {
+            if (result.success) {
                 setComments((prev) => prev.filter((c) => c._id !== commentId))
                 toastBox('評論已刪除', 'success')
             }

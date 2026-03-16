@@ -1,31 +1,32 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { toastBox } from '@/utils/toast'
-import axios from 'axios'
+import { getCommentsByPostId, createCommentAction, deleteCommentAction } from '@/actions/commentActions'
 import CommentForm from '@/components/molecules/CommentForm'
 import CommentList from '@/components/organisms/CommentList'
-import type { CommentType, CommentApiResponse } from '@/types/news'
+import type { CommentType } from '@/types/news'
 
 interface CommentSectionProps {
     postId: string
     postTitle: string
+    initialRating?: number
+    onRatingUpdate?: (postId: string, newRating: number) => void
 }
 
-const CommentSection = ({ postId, postTitle }: CommentSectionProps) => {
-    const { status } = useSession()
+const CommentSection = ({ postId, postTitle, initialRating = 0, onRatingUpdate }: CommentSectionProps) => {
+    const { data: session, status } = useSession()
     const isAuthenticated = status === 'authenticated'
+    const currentUserId = (session?.user as { id?: string })?.id
     const [comments, setComments] = useState<CommentType[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
     const fetchComments = useCallback(async () => {
         try {
-            const res = await axios.get<CommentApiResponse>('/api/comment', {
-                params: { postId },
-            })
-            if (res.data.success) {
-                setComments(res.data.comments)
+            const result = await getCommentsByPostId(postId)
+            if (result.success) {
+                setComments(result.comments)
             }
         } catch (error) {
             console.error('Failed to fetch comments:', error)
@@ -40,16 +41,34 @@ const CommentSection = ({ postId, postTitle }: CommentSectionProps) => {
         }
     }, [postId, fetchComments])
 
-    const handleSubmit = async (content: string) => {
-        try {
-            const res = await axios.post<{ success: boolean; comment: CommentType }>(
-                '/api/comment',
-                { postId, postTitle, content }
-            )
+    const userComment = useMemo(
+        () => comments.find((c) => c.userId === currentUserId) ?? null,
+        [comments, currentUserId]
+    )
 
-            if (res.data.success) {
-                setComments((prev) => [res.data.comment, ...prev])
-                toastBox('評論已送出', 'success')
+    const handleSubmit = async (content: string, rating: number) => {
+        try {
+            if (rating > 0) {
+                onRatingUpdate?.(postId, rating)
+            }
+
+            const result = await createCommentAction(postId, postTitle, content, rating > 0 ? rating : undefined)
+
+            if (result.success) {
+                setComments((prev) => {
+                    const idx = prev.findIndex(
+                        (c) => c.userId === result.comment.userId || c._id === result.comment._id
+                    )
+                    if (idx >= 0) {
+                        const updated = [...prev]
+                        updated[idx] = result.comment
+                        return updated
+                    }
+                    return [result.comment, ...prev]
+                })
+                toastBox(userComment ? '評論已更新' : '評論已送出', 'success')
+            } else {
+                toastBox('評論失敗，請稍後再試', 'error')
             }
         } catch (error) {
             console.error('Failed to submit comment:', error)
@@ -59,11 +78,9 @@ const CommentSection = ({ postId, postTitle }: CommentSectionProps) => {
 
     const handleDelete = async (commentId: string) => {
         try {
-            const res = await axios.delete<{ success: boolean }>('/api/comment', {
-                data: { commentId },
-            })
+            const result = await deleteCommentAction(commentId)
 
-            if (res.data.success) {
+            if (result.success) {
                 setComments((prev) => prev.filter((c) => c._id !== commentId))
                 toastBox('評論已刪除', 'success')
             }
@@ -80,7 +97,12 @@ const CommentSection = ({ postId, postTitle }: CommentSectionProps) => {
             </h3>
 
             {isAuthenticated && (
-                <CommentForm onSubmit={handleSubmit} />
+                <CommentForm
+                    key={userComment ? 'edit' : 'new'}
+                    initialRating={userComment?.rating ?? initialRating}
+                    initialContent={userComment?.content ?? ''}
+                    onSubmit={handleSubmit}
+                />
             )}
 
             {isLoading ? (

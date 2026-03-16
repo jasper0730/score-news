@@ -5,7 +5,7 @@ import SearchBar from '@/components/molecules/SearchBar'
 import Logo from '@/components/atoms/Logo'
 import RegisterButton from '@/components/organisms/RegisterButton'
 import ThemeSwitcher from '@/components/atoms/ThemeSwitcher'
-import SortButton from '@/components/molecules/SortButton'
+import SortDropdown from '@/components/molecules/SortDropdown'
 import Avatar from '@/components/atoms/Avatar'
 import { useSession } from 'next-auth/react'
 import { MdDashboard } from 'react-icons/md'
@@ -46,9 +46,8 @@ const HomeHeader = () => {
             <div className="px-5 pt-[--navH] md:hidden md:pt-0 md:mt-3">
                 <SearchBar />
             </div>
-            <div className="flex mt-3 px-5 pb-2 justify-center md:justify-end gap-1">
-                <SortButton type="rating" />
-                <SortButton type="date" />
+            <div className="flex mt-3 px-5 pb-2 justify-center md:justify-end">
+                <SortDropdown />
             </div>
         </header>
     )

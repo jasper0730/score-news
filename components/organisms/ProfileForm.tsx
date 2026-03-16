@@ -2,20 +2,21 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { toastBox } from '@/utils/toast'
-import axios from 'axios'
+import { getProfileAction, updateProfileAction } from '@/actions/profileActions'
 import Avatar from '@/components/atoms/Avatar'
 import Button from '@/components/atoms/Button'
 import Loader from '@/components/atoms/Loader'
-import type { ProfileType } from '@/types/news'
 
-interface ProfileApiResponse {
-    success: boolean
-    profile: ProfileType & { name: string; email: string }
-    message?: string
+interface Profile {
+    nickname: string
+    bio: string
+    avatar: string
+    name: string
+    email: string
 }
 
 const ProfileForm = () => {
-    const [profile, setProfile] = useState<ProfileApiResponse['profile'] | null>(null)
+    const [profile, setProfile] = useState<Profile | null>(null)
     const [nickname, setNickname] = useState('')
     const [bio, setBio] = useState('')
     const [isLoading, setIsLoading] = useState(true)
@@ -23,11 +24,11 @@ const ProfileForm = () => {
 
     const fetchProfile = useCallback(async () => {
         try {
-            const res = await axios.get<ProfileApiResponse>('/api/profile')
-            if (res.data.success) {
-                setProfile(res.data.profile)
-                setNickname(res.data.profile.nickname)
-                setBio(res.data.profile.bio)
+            const result = await getProfileAction()
+            if (result.success) {
+                setProfile(result.profile)
+                setNickname(result.profile.nickname)
+                setBio(result.profile.bio)
             }
         } catch (error) {
             console.error('Failed to fetch profile:', error)
@@ -45,13 +46,12 @@ const ProfileForm = () => {
 
         setIsSaving(true)
         try {
-            const res = await axios.put<ProfileApiResponse>('/api/profile', {
-                nickname,
-                bio,
-            })
+            const result = await updateProfileAction(nickname, bio)
 
-            if (res.data.success) {
+            if (result.success) {
                 toastBox('個人資料已更新', 'success')
+            } else {
+                toastBox(result.error ?? '更新失敗', 'error')
             }
         } catch (error) {
             console.error('Failed to update profile:', error)

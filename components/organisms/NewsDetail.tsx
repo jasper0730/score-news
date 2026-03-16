@@ -1,15 +1,11 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { NewsDataType } from '@/types/news'
 import { IoIosCloseCircle } from 'react-icons/io'
-import RatingForm from '@/components/organisms/RatingForm'
 import CommentSection from '@/components/organisms/CommentSection'
 import DynamicImage from '@/components/atoms/DynamicImage'
 
-const DEFAULT_CONTENT =
-    '我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容，我是預設內容'
 
 interface NewsDetailProps {
     data: NewsDataType | null
@@ -18,13 +14,12 @@ interface NewsDetailProps {
 }
 
 const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
-    const { status } = useSession()
-    const isAuthenticated = status === 'authenticated'
+    const hasFullContent =
+        data?.content &&
+        data.content !== 'ONLY AVAILABLE IN PAID PLANS' &&
+        data.content.trim() !== ''
 
-    const newsContent =
-        data?.content && data.content !== 'ONLY AVAILABLE IN PAID PLANS'
-            ? data.content
-            : DEFAULT_CONTENT
+    const newsContent = hasFullContent ? data!.content : (data?.description ?? '')
 
     return (
         <article className="m-auto px-5 py-20 relative bg-white rounded-lg dark:bg-gray-900 md:px-10">
@@ -54,27 +49,29 @@ const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
                 </div>
                 <div className="md:w-1/2">
                     <h2 className="text-xl font-bold">{data?.title}</h2>
-                    <p className="text-gray-600">{data?.description}</p>
                 </div>
             </div>
 
             <div className="mt-5">
-                <p>{newsContent}</p>
+                <p className="leading-relaxed text-gray-700 dark:text-gray-300 line-clamp-2">{newsContent}</p>
+                {!hasFullContent && data?.link && (
+                    <a
+                        href={data.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 mt-4 text-sm text-blue-500 hover:text-blue-700 underline duration-200"
+                    >
+                        閱讀完整原文 →
+                    </a>
+                )}
             </div>
-
-            {isAuthenticated && (
-                <div className="mt-8">
-                    <RatingForm
-                        postId={data?.article_id}
-                        onRatingUpdate={onRatingUpdate}
-                    />
-                </div>
-            )}
 
             {data?.article_id && (
                 <CommentSection
                     postId={data.article_id}
                     postTitle={data.title}
+                    initialRating={data.userRate ?? 0}
+                    onRatingUpdate={onRatingUpdate}
                 />
             )}
         </article>

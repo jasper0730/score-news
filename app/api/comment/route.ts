@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { ObjectId } from 'mongodb'
-import { getUser } from '@/actions/getUser'
-import clientPromise from '@/libs/mongodb'
+import { requireAuth } from '@/libs/auth'
+import { getCollection, CommentDocument, UserDocument } from '@/libs/db'
 
 export async function GET(request: Request) {
     try {
@@ -9,9 +9,7 @@ export async function GET(request: Request) {
         const postId = searchParams.get('postId')
         const userId = searchParams.get('userId')
 
-        const client = await clientPromise
-        const db = client.db()
-        const commentsCollection = db.collection('comments')
+        const commentsCollection = await getCollection<CommentDocument>('comments')
 
         if (postId) {
             const comments = await commentsCollection
@@ -21,7 +19,7 @@ export async function GET(request: Request) {
 
             const serialized = comments.map((c) => ({
                 ...c,
-                _id: c._id.toString(),
+                _id: c._id!.toString(),
             }))
 
             return NextResponse.json({ success: true, comments: serialized })
@@ -35,7 +33,7 @@ export async function GET(request: Request) {
 
             const serialized = comments.map((c) => ({
                 ...c,
-                _id: c._id.toString(),
+                _id: c._id!.toString(),
             }))
 
             return NextResponse.json({ success: true, comments: serialized })
@@ -56,14 +54,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const currentUser = await getUser()
-        if (!currentUser) {
+        const auth = await requireAuth()
+        if (!auth.authenticated) {
             return NextResponse.json(
-                { success: false, message: 'User not authenticated' },
+                { success: false, message: auth.error },
                 { status: 401 }
             )
         }
 
+        const currentUser = auth.user
         const { postId, postTitle, content } = await request.json()
 
         if (!postId || !content?.trim()) {
@@ -73,13 +72,11 @@ export async function POST(request: Request) {
             )
         }
 
-        const client = await clientPromise
-        const db = client.db()
-        const commentsCollection = db.collection('comments')
-        const usersCollection = db.collection('users')
+        const commentsCollection = await getCollection<CommentDocument>('comments')
+        const usersCollection = await getCollection<UserDocument>('users')
 
         const userDoc = await usersCollection.findOne({
-            _id: new ObjectId(currentUser.id),
+            _id: new ObjectId(currentUser.id) as unknown as UserDocument['_id'],
         })
         const displayName =
             userDoc?.nickname || currentUser.name || currentUser.email || '匿名用戶'
@@ -94,7 +91,7 @@ export async function POST(request: Request) {
             createdAt: new Date().toISOString(),
         }
 
-        const result = await commentsCollection.insertOne(newComment)
+        const result = await commentsCollection.insertOne(newComment as CommentDocument)
 
         return NextResponse.json({
             success: true,
@@ -114,14 +111,15 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
     try {
-        const currentUser = await getUser()
-        if (!currentUser) {
+        const auth = await requireAuth()
+        if (!auth.authenticated) {
             return NextResponse.json(
-                { success: false, message: 'User not authenticated' },
+                { success: false, message: auth.error },
                 { status: 401 }
             )
         }
 
+        const currentUser = auth.user
         const { commentId } = await request.json()
 
         if (!commentId) {
@@ -131,12 +129,10 @@ export async function DELETE(request: Request) {
             )
         }
 
-        const client = await clientPromise
-        const db = client.db()
-        const commentsCollection = db.collection('comments')
+        const commentsCollection = await getCollection<CommentDocument>('comments')
 
         const result = await commentsCollection.deleteOne({
-            _id: new ObjectId(commentId),
+            _id: new ObjectId(commentId) as unknown as CommentDocument['_id'],
             userId: currentUser.id,
         })
 
