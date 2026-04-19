@@ -5,7 +5,16 @@
       "Bash(ls:*)",
       "Bash(cd:*)",
       "Bash(code:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(timeout 15 npm run dev)",
+      "Bash(tasklist:*)",
+      "Bash(netstat -ano)",
+      "Bash(cmd /c \"netstat -ano | findstr :3000\")",
+      "Bash(cmd /c \"netstat -ano | findstr LISTENING | findstr 3000\")",
+      "Bash(echo \"exit:$?\")",
+      "Bash(timeout 20 npm run dev)",
+      "Bash(node:*)",
+      "Bash(timeout 25 npm run dev)"
     ]
   }
 }
