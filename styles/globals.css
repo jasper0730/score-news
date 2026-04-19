@@ -53,34 +53,4 @@ body {
     background: rgba(100, 100, 100, 0.8);
 }
 
-/* ============================================
-   Masonry Layout (cannot be done inline)
-   ============================================ */
-.masonry {
-    columns: 1;
-    column-gap: 1rem;
-}
-
-@media (min-width: 768px) {
-    .masonry {
-        columns: 2;
-    }
-}
-
-@media (min-width: 1024px) {
-    .masonry {
-        columns: 3;
-    }
-}
-
-@media (min-width: 1280px) {
-    .masonry {
-        columns: 4;
-    }
-}
-
-.masonry-item {
-    break-inside: avoid;
-    margin-bottom: 1rem;
-}
 

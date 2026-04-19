@@ -10,8 +10,11 @@ interface SortButtonProps {
 }
 
 const SORT_LABELS: Record<SortType, string> = {
-    rating: '評分最高',
-    date: '最新',
+    rating_desc: '評分最高',
+    rating_asc: '評分最低',
+    date_desc: '最新',
+    date_asc: '最舊',
+    views: '最多瀏覽',
 }
 
 const SortButton = ({ type }: SortButtonProps) => {

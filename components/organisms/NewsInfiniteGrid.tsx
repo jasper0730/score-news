@@ -34,16 +34,15 @@ const NewsInfiniteGrid = ({
 
     return (
         <>
-            <div className="masonry">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {visibleData.map((article) => (
-                    <div key={article.article_id} className="masonry-item">
-                        <NewsCard
-                            article={article}
-                            favorite={favorites.includes(article.article_id)}
-                            onFavoriteClick={onFavoriteClick}
-                            onMoreClick={() => onMoreClick(article)}
-                        />
-                    </div>
+                    <NewsCard
+                        key={article.article_id}
+                        article={article}
+                        favorite={favorites.includes(article.article_id)}
+                        onFavoriteClick={onFavoriteClick}
+                        onMoreClick={() => onMoreClick(article)}
+                    />
                 ))}
             </div>
 
