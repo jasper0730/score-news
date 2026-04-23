@@ -9,12 +9,6 @@ resolver.setServers(['1.1.1.1', '8.8.8.8', '8.8.4.4'])
 const resolveSrv = promisify(resolver.resolveSrv.bind(resolver))
 const resolveTxt = promisify(resolver.resolveTxt.bind(resolver))
 
-if (!process.env.MONGODB_URI) {
-    throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
-}
-
-const uri = process.env.MONGODB_URI
-
 const options = {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -29,6 +23,10 @@ const globalWithMongo = global as typeof globalThis & {
 }
 
 async function createClient(): Promise<MongoClient> {
+    if (!process.env.MONGODB_URI) {
+        throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
+    }
+    const uri = process.env.MONGODB_URI
     let connectionUri = uri
 
     // 若使用 mongodb+srv:// 則手動解析 SRV，避免 Next.js 環境 DNS 問題
