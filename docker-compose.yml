@@ -1,0 +1,42 @@
+services:
+  app:
+    # 使用當前目錄的 Dockerfile 進行建置
+    build:
+      context: .          # build context 為專案根目錄
+      dockerfile: Dockerfile
+
+    # 指定容器名稱，方便用 docker ps 識別
+    container_name: score-news
+
+    # 容器異常退出時自動重啟，但手動 docker stop 不會重啟
+    restart: unless-stopped
+
+    # 將主機的 80 port 對應到容器內的 3000 port
+    # 外部訪問 http://<server-ip> 即會導向 Next.js
+    ports:
+      - "80:3000"
+
+    # 從 .env.production 檔案載入環境變數（不會打包進 image，僅在 runtime 注入）
+    # 部署到 AWS 前需修改此檔案中的 IP / domain
+    env_file:
+      - .env.production
+
+    # 額外補充環境變數（會覆蓋 env_file 中的同名變數）
+    environment:
+      - NODE_ENV=production
+
+    # 健康檢查：定期確認服務是否正常回應
+    healthcheck:
+      # 對 /api/health 發送請求，失敗則回傳 exit 1
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health", "||", "exit", "1"]
+      interval: 30s       # 每 30 秒檢查一次
+      timeout: 10s        # 單次檢查超過 10 秒視為失敗
+      retries: 3          # 連續失敗 3 次才標記為 unhealthy
+      start_period: 40s   # 容器啟動後等待 40 秒再開始健康檢查（給 Next.js 足夠啟動時間）
+
+    # Log 設定：避免 log 無限增長佔滿磁碟
+    logging:
+      driver: "json-file"   # 使用 Docker 預設的 JSON 格式記錄 log
+      options:
+        max-size: "10m"     # 單個 log 檔案最大 10MB
+        max-file: "3"       # 最多保留 3 個輪替檔案（共最多 30MB）

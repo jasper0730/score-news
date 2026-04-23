@@ -1,0 +1,15 @@
+.git
+.gitignore
+node_modules
+.next
+.env*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+README.md
+*.jpg
+*.png
+.vscode
+.idea
+Dockerfile
+docker-compose.yml
