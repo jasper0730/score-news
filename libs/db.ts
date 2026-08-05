@@ -6,6 +6,8 @@ export interface NewsDocument {
     title: string
     description: string
     content: string
+    /** 原文連結。content 只有摘要時，前端會用它導向原始新聞 */
+    link?: string
     image_url: string
     pubDate: string
     source_icon: string

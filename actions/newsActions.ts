@@ -1,8 +1,39 @@
 'use server'
 
-import { Sort } from 'mongodb'
-import { getCollection, NewsDocument, FavoriteDocument, RatingDocument } from '@/libs/db'
-import { NewsDataType } from '@/types/news'
+import type { Sort, WithId } from 'mongodb'
+import {
+    getCollection,
+    type NewsDocument,
+    type FavoriteDocument,
+    type RatingDocument,
+} from '@/libs/db'
+import type { NewsDataType } from '@/types/news'
+
+/** 依評分排序時走 aggregate，結果會多帶一個算出來的 avgRating 欄位 */
+type NewsQueryDocument = WithId<NewsDocument> & { avgRating?: number }
+
+/**
+ * 把資料庫 document 轉成前端型別。
+ * 刻意逐欄列出而非展開 document：欄位對不上時會在這裡編譯失敗，
+ * 而不是等到畫面上少一塊才發現，也順帶擋住 _id 之類的內部欄位外流。
+ */
+const toNewsData = (
+    doc: NewsQueryDocument,
+    extra: { rate: number; favorite: boolean; userRate?: number }
+): NewsDataType => ({
+    article_id: doc.article_id,
+    title: doc.title,
+    description: doc.description,
+    content: doc.content,
+    link: doc.link,
+    image_url: doc.image_url,
+    pubDate: doc.pubDate,
+    source_icon: doc.source_icon,
+    source_name: doc.source_name,
+    source_url: doc.source_url,
+    views: doc.views ?? 0,
+    ...extra,
+})
 
 export interface GetNewsParams {
     userId?: string | null
@@ -50,7 +81,7 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
         // Pagination setup
         const skip = (page - 1) * limit
 
-        let allData: Record<string, unknown>[] = []
+        let allData: NewsQueryDocument[] = []
         let total = 0
 
         if (sortType === 'rating') {
@@ -79,16 +110,20 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
                 },
             ]
             const aggResult = await newsCollection.aggregate(pipeline).toArray()
-            allData = (aggResult[0].data as Record<string, unknown>[]) || []
-            total = (aggResult[0].metadata as { total: number }[])[0]?.total || 0
+            // $facet 的結果是單一 document，但型別上仍是陣列，因此用 optional 存取
+            const facet = aggResult[0] as
+                | { data?: NewsQueryDocument[]; metadata?: { total: number }[] }
+                | undefined
+            allData = facet?.data ?? []
+            total = facet?.metadata?.[0]?.total ?? 0
         } else {
             total = await newsCollection.countDocuments(filter)
-            allData = (await newsCollection
+            allData = await newsCollection
                 .find(filter)
                 .sort(sortOption)
                 .skip(skip)
                 .limit(limit)
-                .toArray()) as Record<string, unknown>[]
+                .toArray()
         }
 
         // Enrich with favorites
@@ -103,7 +138,7 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
         // Enrich with ratings (avg + user's own rating)
         let ratingMap = new Map<string, number>()
         let userRatingMap = new Map<string, number>()
-        const postIds = allData.map((item) => item.article_id as string)
+        const postIds = allData.map((item) => item.article_id)
 
         if (postIds.length > 0) {
             if (sortType !== 'rating') {
@@ -126,21 +161,14 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
             }
         }
 
-        const enrichedData = allData.map((item) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { _id, ...rest } = item
-            const rate =
-                sortType === 'rating'
-                    ? (item.avgRating as number)
-                    : ratingMap.get(item.article_id as string)
-            return {
-                ...rest,
-                favorite: favoriteSet.has(item.article_id as string),
-                rate: rate || 0,
-                userRate: userRatingMap.get(item.article_id as string),
-                views: (item.views as number) ?? 0,
-            }
-        }) as NewsDataType[]
+        const enrichedData: NewsDataType[] = allData.map((item) =>
+            toNewsData(item, {
+                rate:
+                    (sortType === 'rating' ? item.avgRating : ratingMap.get(item.article_id)) ?? 0,
+                favorite: favoriteSet.has(item.article_id),
+                userRate: userRatingMap.get(item.article_id),
+            })
+        )
 
         return {
             success: true,
@@ -169,9 +197,7 @@ export async function getNewsByIds(
         const newsCollection = await getCollection<NewsDocument>('news')
         const ratingsCollection = await getCollection<RatingDocument>('ratings')
 
-        const docs = (await newsCollection
-            .find({ article_id: { $in: articleIds } })
-            .toArray()) as Record<string, unknown>[]
+        const docs = await newsCollection.find({ article_id: { $in: articleIds } }).toArray()
 
         const ratings = await ratingsCollection
             .aggregate([
@@ -182,15 +208,9 @@ export async function getNewsByIds(
 
         const ratingMap = new Map(ratings.map((r) => [r._id as string, r.avgRating as number]))
 
-        const data = docs.map((item) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { _id, ...rest } = item
-            return {
-                ...rest,
-                favorite: false,
-                rate: ratingMap.get(item.article_id as string) || 0,
-            }
-        }) as NewsDataType[]
+        const data: NewsDataType[] = docs.map((item) =>
+            toNewsData(item, { rate: ratingMap.get(item.article_id) ?? 0, favorite: false })
+        )
 
         return { success: true, data }
     } catch (error) {

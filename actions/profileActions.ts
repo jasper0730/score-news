@@ -15,7 +15,7 @@ export async function getProfileAction() {
         const usersCollection = await getCollection<UserDocument>('users')
 
         const user = await usersCollection.findOne({
-            _id: new ObjectId(currentUser.id) as unknown as UserDocument['_id'],
+            _id: new ObjectId(currentUser.id),
         })
 
         if (!user) {
@@ -62,7 +62,7 @@ export async function updateProfileAction(nickname: string, bio: string) {
         if (bio !== undefined) updateFields.bio = bio.trim()
 
         await usersCollection.updateOne(
-            { _id: new ObjectId(currentUser.id) as unknown as UserDocument['_id'] },
+            { _id: new ObjectId(currentUser.id) },
             { $set: updateFields }
         )
 

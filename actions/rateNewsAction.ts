@@ -37,7 +37,7 @@ export async function rateNewsAction(postId: string, rate: number) {
             ])
             .toArray()
 
-        const avgRating = ratings.length > 0 ? ratings[0].avgRating : rate
+        const avgRating = ratings[0]?.avgRating ?? rate
 
         return {
             success: true as const,

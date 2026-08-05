@@ -33,7 +33,8 @@ async function createClient(): Promise<MongoClient> {
     if (uri.startsWith('mongodb+srv://')) {
         try {
             const match = uri.match(/mongodb\+srv:\/\/([^@]+)@([^/]+)\/(.*)/)
-            if (match) {
+            // 三個 capture group 都要確定有值才往下走，任何一個缺了就退回原始 URI
+            if (match?.[1] && match[2] && match[3] !== undefined) {
                 const credentials = match[1]
                 const host = match[2]
                 const rest = match[3]

@@ -65,7 +65,7 @@ export async function createCommentAction(
         const usersCollection = await getCollection<UserDocument>('users')
 
         const userDoc = await usersCollection.findOne({
-            _id: new ObjectId(currentUser.id) as unknown as UserDocument['_id'],
+            _id: new ObjectId(currentUser.id),
         })
         const displayName = userDoc?.nickname || currentUser.name || currentUser.email || '匿名用戶'
 
@@ -116,7 +116,7 @@ export async function deleteCommentAction(commentId: string) {
         const commentsCollection = await getCollection<CommentDocument>('comments')
 
         const result = await commentsCollection.deleteOne({
-            _id: new ObjectId(commentId) as unknown as CommentDocument['_id'],
+            _id: new ObjectId(commentId),
             userId: currentUser.id,
         })
 

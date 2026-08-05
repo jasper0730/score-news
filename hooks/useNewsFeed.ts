@@ -78,7 +78,9 @@ export function useNewsFeed(data: NewsApiResponse) {
         const sentinel = sentinelRef.current
         if (!sentinel) return
         const observer = new IntersectionObserver(
-            (entries) => { if (entries[0].isIntersecting) loadMore() },
+            (entries) => {
+                if (entries[0]?.isIntersecting) loadMore()
+            },
             { rootMargin: '200px' }
         )
         observer.observe(sentinel)
@@ -108,10 +110,10 @@ export function useNewsFeed(data: NewsApiResponse) {
             const result = await rateNewsAction(postId, newRating)
             if (result.success) {
                 setNewsData((prev) =>
-                    prev.map((n) => n.article_id === postId ? { ...n, rate: result.rate } : n)
+                    prev.map((n) => (n.article_id === postId ? { ...n, rate: result.rate } : n))
                 )
                 if (selectedNews?.article_id === postId) {
-                    setSelectedNews((prev) => prev ? { ...prev, rate: result.rate } : null)
+                    setSelectedNews((prev) => (prev ? { ...prev, rate: result.rate } : null))
                 }
             }
         } catch (error) {
@@ -120,9 +122,7 @@ export function useNewsFeed(data: NewsApiResponse) {
     }
 
     const toggleFavorites = (id: string): string[] =>
-        favorites.includes(id)
-            ? favorites.filter((favId) => favId !== id)
-            : [...favorites, id]
+        favorites.includes(id) ? favorites.filter((favId) => favId !== id) : [...favorites, id]
 
     const handleFavoriteClick = async (id: string) => {
         const previousFavorites = [...favorites]
