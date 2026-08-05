@@ -1,14 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import SearchBar from '@/components/molecules/SearchBar'
 import BrandLink from '@/components/molecules/BrandLink'
+import UserMenu from '@/components/molecules/UserMenu'
 import RegisterButton from '@/components/organisms/RegisterButton'
 import ThemeSwitcher from '@/components/atoms/ThemeSwitcher'
 import SortDropdown from '@/components/molecules/SortDropdown'
-import Avatar from '@/components/atoms/Avatar'
 import { useSession } from 'next-auth/react'
-import { MdDashboard } from 'react-icons/md'
 
 const HomeHeader = () => {
     const { status, data: session } = useSession()
@@ -25,26 +23,12 @@ const HomeHeader = () => {
                 </div>
                 <SearchBar className="hidden max-w-[500px] md:flex" />
                 <div className="flex shrink-0 items-center gap-3 md:gap-4">
-                    {isAuthenticated && (
-                        <Link
-                            className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition duration-300 hover:opacity-70"
-                            href="/dashboard"
-                            title="後台管理"
-                        >
-                            <MdDashboard size={20} />
-                            <span className="hidden sm:inline">後台</span>
-                        </Link>
-                    )}
-                    <RegisterButton type={isAuthenticated ? 'logout' : 'login'} />
                     <ThemeSwitcher />
-                    {isAuthenticated && (
-                        <Link
-                            href="/dashboard"
-                            className="transition duration-300 hover:opacity-80"
-                            aria-label="前往後台"
-                        >
-                            <Avatar src={session?.user?.image} size="md" />
-                        </Link>
+                    {/* 登入後「前往後台」與「登出」都收進頭像下拉，未登入時只留登入鈕 */}
+                    {isAuthenticated ? (
+                        <UserMenu image={session?.user?.image} />
+                    ) : (
+                        <RegisterButton type="login" />
                     )}
                 </div>
             </div>

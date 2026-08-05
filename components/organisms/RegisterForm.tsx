@@ -40,6 +40,22 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
     const [isLoading, setIsLoading] = useState(false)
     const [errors, setErrors] = useState<FormErrors>({})
 
+    // 有 setOpenModal 代表是彈窗開起來的，沒有則是 /login、/signup 這兩個獨立頁面
+    const isModal = Boolean(setOpenModal)
+
+    /**
+     * 登入成功後不再強制跳去後台（後台已收在頭像選單裡）。
+     * 彈窗登入就留在原頁面，只用 router.refresh() 重新取一次伺服器資料，
+     * 讓收藏狀態這類由 server component 帶下來的內容跟著更新。
+     */
+    const handlePostLogin = () => {
+        if (isModal) {
+            router.refresh()
+        } else {
+            router.replace('/')
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
@@ -71,9 +87,9 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
                 if (res?.error) {
                     toastBox(res.error || '登入失敗', 'error')
                 } else {
-                    router.push('/dashboard')
                     toastBox('登入成功', 'success')
                     setOpenModal?.(null)
+                    handlePostLogin()
                 }
             }
 
@@ -104,11 +120,13 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
         try {
             const res = await signIn(providerId, {
                 redirect: false,
-                callbackUrl: '/dashboard',
+                // 從彈窗登入就回到當下這頁，從 /login 頁登入則回首頁
+                callbackUrl: isModal ? window.location.pathname : '/',
             })
             if (res?.ok) {
                 toastBox('登入成功！', 'success')
                 setOpenModal?.(null)
+                handlePostLogin()
             }
         } catch (error) {
             console.error('Social login error:', error)
