@@ -11,11 +11,7 @@ interface NewsModalProps {
 
 const NewsModal = ({ data, open, onClose, onRatingUpdate }: NewsModalProps) => {
     return (
-        <Modal
-            className="flex h-screen w-full max-w-[1000px] overflow-auto"
-            open={open}
-            onClose={onClose}
-        >
+        <Modal className="h-full max-h-[900px] w-full max-w-[1000px]" open={open} onClose={onClose}>
             <NewsDetail data={data} onClose={onClose} onRatingUpdate={onRatingUpdate} />
         </Modal>
     )
