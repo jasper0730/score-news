@@ -33,7 +33,7 @@ const StarBadge = ({ rating }: { rating: number }) => (
 
 const CommentList = ({ comments, onDelete }: CommentListProps) => {
     const { data: session } = useSession()
-    const currentUserId = (session?.user as { id?: string })?.id
+    const currentUserId = session?.user?.id
     const [filterRating, setFilterRating] = useState<number | null>(null)
 
     const filtered = filterRating ? comments.filter((c) => c.rating === filterRating) : comments

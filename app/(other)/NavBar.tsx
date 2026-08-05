@@ -5,11 +5,11 @@ import BrandLink from '@/components/molecules/BrandLink'
 import ThemeSwitcher from '@/components/atoms/ThemeSwitcher'
 import RegisterButton from '@/components/organisms/RegisterButton'
 import Avatar from '@/components/atoms/Avatar'
-import type { SessionType } from '@/app/types/SessionType'
+import type { UserType } from '@/types/user'
 import { IoArrowBack } from 'react-icons/io5'
 
 interface NavBarProps {
-    session: SessionType | null
+    session: UserType | null
 }
 
 const NavBar = ({ session }: NavBarProps) => {

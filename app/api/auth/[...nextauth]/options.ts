@@ -67,6 +67,17 @@ export const options: NextAuthOptions = {
         strategy: 'jwt',
     },
     callbacks: {
+        /**
+         * JWT 策略下 next-auth 組出來的 session.user 只有 name / email / image，
+         * 使用者 id 只存在於 token.sub（登入時由 user.id 寫入）。
+         * 少了這個 callback，client 端的 session.user.id 會永遠是 undefined。
+         */
+        async session({ session, token }) {
+            if (session.user && token.sub) {
+                session.user.id = token.sub
+            }
+            return session
+        },
         async signIn({ user, account }) {
             const client = await getMongoClient()
             const db = client.db()

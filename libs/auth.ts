@@ -1,4 +1,5 @@
-import { getUser, UserType } from '@/actions/getUser'
+import { getUser } from '@/actions/getUser'
+import type { UserType } from '@/types/user'
 
 type AuthResult = { authenticated: true; user: UserType } | { authenticated: false; error: string }
 

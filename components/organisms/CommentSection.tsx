@@ -27,7 +27,7 @@ const CommentSection = ({
 }: CommentSectionProps) => {
     const { data: session, status } = useSession()
     const isAuthenticated = status === 'authenticated'
-    const currentUserId = (session?.user as { id?: string })?.id
+    const currentUserId = session?.user?.id
     const [comments, setComments] = useState<CommentType[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
