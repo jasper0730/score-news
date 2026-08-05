@@ -67,15 +67,16 @@ async function createClient(): Promise<MongoClient> {
     return client
 }
 
-let clientPromise: Promise<MongoClient>
-
-if (process.env.NODE_ENV === 'development') {
+// 連線失敗時必須清掉快取，否則第一次失敗（例如當時 .env 的帳密還是錯的）
+// 會把 rejected promise 永久留在 globalThis 上，之後即使修好 .env 也一定要重啟才會恢復
+export function getMongoClient(): Promise<MongoClient> {
     if (!globalWithMongo._mongoClientPromise) {
-        globalWithMongo._mongoClientPromise = createClient()
+        globalWithMongo._mongoClientPromise = createClient().catch((err) => {
+            globalWithMongo._mongoClientPromise = undefined
+            throw err
+        })
     }
-    clientPromise = globalWithMongo._mongoClientPromise
-} else {
-    clientPromise = createClient()
+    return globalWithMongo._mongoClientPromise
 }
 
-export default clientPromise
+export default getMongoClient

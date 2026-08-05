@@ -1,5 +1,5 @@
 import { Collection, Db, ObjectId } from 'mongodb'
-import clientPromise from '@/libs/mongodb'
+import getMongoClient from '@/libs/mongodb'
 
 export interface NewsDocument {
     article_id: string
@@ -48,7 +48,7 @@ export interface UserDocument {
 }
 
 export async function getDb(): Promise<Db> {
-    const client = await clientPromise
+    const client = await getMongoClient()
     return client.db()
 }
 

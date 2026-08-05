@@ -3,12 +3,12 @@ import GitHubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import clientPromise from '@/libs/mongodb'
+import getMongoClient from '@/libs/mongodb'
 import bcrypt from 'bcryptjs'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
 
 export const options: NextAuthOptions = {
-    adapter: MongoDBAdapter(clientPromise),
+    adapter: MongoDBAdapter(getMongoClient()),
     pages: {
         signIn: '/login',
     },
@@ -41,7 +41,7 @@ export const options: NextAuthOptions = {
                 }
 
                 // 連接到 database
-                const client = await clientPromise
+                const client = await getMongoClient()
                 const db = client.db()
                 const usersCollection = db.collection('users')
 
@@ -68,7 +68,7 @@ export const options: NextAuthOptions = {
     },
     callbacks: {
         async signIn({ user, account }) {
-            const client = await clientPromise
+            const client = await getMongoClient()
             const db = client.db()
             const usersCollection = db.collection('users')
             const accountsCollection = db.collection('accounts')

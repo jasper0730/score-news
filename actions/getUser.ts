@@ -1,6 +1,6 @@
 import { options } from '@/app/api/auth/[...nextauth]/options'
 import { getServerSession } from 'next-auth'
-import clientPromise from '@/libs/mongodb'
+import getMongoClient from '@/libs/mongodb'
 
 export interface UserType {
     id: string
@@ -22,7 +22,7 @@ export const getUser = async (): Promise<UserType | null> => {
         if (!session?.user?.email) return null
 
         // 連接到 database
-        const client = await clientPromise
+        const client = await getMongoClient()
         const db = client.db()
         const usersCollection = db.collection('users')
 

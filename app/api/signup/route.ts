@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import clientPromise from '@/libs/mongodb'
+import getMongoClient from '@/libs/mongodb'
 
 const validate = z.object({
     email: z
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         }
 
         // 連接database
-        const client = await clientPromise
+        const client = await getMongoClient()
         const db = client.db()
         const usersCollection = db.collection('users')
 

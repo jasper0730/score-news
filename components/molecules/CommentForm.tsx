@@ -7,6 +7,7 @@ import StarRating from '@/components/molecules/StarRating'
 interface CommentFormProps {
     initialRating?: number
     initialContent?: string
+    
     onSubmit: (content: string, rating: number) => Promise<void>
 }
 
