@@ -9,10 +9,7 @@ export async function GET() {
     try {
         const auth = await requireAuth()
         if (!auth.authenticated) {
-            return NextResponse.json(
-                { success: false, message: auth.error },
-                { status: 401 }
-            )
+            return NextResponse.json({ success: false, message: auth.error }, { status: 401 })
         }
 
         const currentUser = auth.user
@@ -23,10 +20,7 @@ export async function GET() {
         })
 
         if (!user) {
-            return NextResponse.json(
-                { success: false, message: 'User not found' },
-                { status: 404 }
-            )
+            return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
         }
 
         return NextResponse.json({
@@ -52,10 +46,7 @@ export async function PUT(request: Request) {
     try {
         const auth = await requireAuth()
         if (!auth.authenticated) {
-            return NextResponse.json(
-                { success: false, message: auth.error },
-                { status: 401 }
-            )
+            return NextResponse.json({ success: false, message: auth.error }, { status: 401 })
         }
 
         const currentUser = auth.user

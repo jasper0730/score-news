@@ -54,7 +54,7 @@ const CommentForm = ({ initialRating = 0, initialContent = '', onSubmit }: Comme
                 aria-label="評論內容"
             />
             <div className="flex items-center justify-between">
-                <span className="text-sm text-subtle">
+                <span className="text-sm tabular-nums text-subtle">
                     {content.length}/{MAX_LENGTH}
                 </span>
                 <Button variant="ghost" size="sm" disabled={isDisabled} onClick={handleSubmit}>

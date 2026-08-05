@@ -42,7 +42,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
                 className="rounded-md px-3 py-2 transition duration-300 hover:opacity-70"
                 aria-label="搜尋"
             >
-                <IoSearch className="text-6xl" />
+                <IoSearch className="text-4xl" />
             </button>
             <div className="relative w-full">
                 <input

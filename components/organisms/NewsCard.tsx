@@ -20,11 +20,13 @@ const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardP
     const isAuthenticated = status === 'authenticated'
 
     return (
-        <article className={cn(CARD_CLASSES, 'flex flex-col shadow-lg')}>
+        <article className={cn(CARD_CLASSES, 'flex flex-col shadow-sm')}>
             <div className="flex flex-col">
-                <h2 className="line-clamp-2 text-lg font-bold">{article.title}</h2>
-                <p className="mt-2 line-clamp-2 text-muted-foreground">{article.description}</p>
-                <time className="mt-2 text-sm text-muted-foreground">日期：{article.pubDate}</time>
+                <h2 className="line-clamp-2 text-xl font-semibold leading-snug">{article.title}</h2>
+                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                    {article.description}
+                </p>
+                <time className="mt-2 text-sm text-subtle">日期：{article.pubDate}</time>
 
                 <div className="mt-4 flex items-center">
                     {article.source_icon && (

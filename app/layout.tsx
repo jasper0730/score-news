@@ -1,17 +1,15 @@
 import type { Metadata } from 'next'
-import { Oswald, Inter } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import '../styles/globals.css'
 import Providers from '@/providers/Providers'
 
+// 不指定 weight 會載入 variable font，一份檔案涵蓋 100–900。
+// 過去固定成 weight: '100'，導致拉丁字母與數字全部是 Thin，
+// 而且 font-bold 只能由瀏覽器合成假粗體。
 const inter = Inter({
     subsets: ['latin'],
     variable: '--font-inter',
-    weight: '100',
-})
-const oswald = Oswald({
-    subsets: ['latin'],
-    variable: '--font-oswald',
-    weight: '400',
+    display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -29,7 +27,7 @@ export default async function RootLayout({
 }>) {
     return (
         <html lang="zh-TW" suppressHydrationWarning>
-            <body className={`${inter.variable} ${oswald.variable} font-sans`}>
+            <body className={`${inter.variable} font-sans`}>
                 <Providers>
                     <main className="flex min-h-dvh flex-col">{children}</main>
                 </Providers>

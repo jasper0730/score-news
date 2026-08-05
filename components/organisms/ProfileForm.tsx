@@ -91,7 +91,7 @@ const ProfileForm = () => {
                         placeholder="設定你的暱稱..."
                         maxLength={MAX_NICKNAME_LENGTH}
                     />
-                    <span className="text-right text-xs text-subtle">
+                    <span className="text-right text-xs tabular-nums text-subtle">
                         {nickname.length}/{MAX_NICKNAME_LENGTH}
                     </span>
                 </div>
@@ -108,7 +108,7 @@ const ProfileForm = () => {
                         rows={4}
                         maxLength={MAX_BIO_LENGTH}
                     />
-                    <span className="text-right text-xs text-subtle">
+                    <span className="text-right text-xs tabular-nums text-subtle">
                         {bio.length}/{MAX_BIO_LENGTH}
                     </span>
                 </div>

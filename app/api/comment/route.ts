@@ -58,10 +58,7 @@ export async function POST(request: Request) {
     try {
         const auth = await requireAuth()
         if (!auth.authenticated) {
-            return NextResponse.json(
-                { success: false, message: auth.error },
-                { status: 401 }
-            )
+            return NextResponse.json({ success: false, message: auth.error }, { status: 401 })
         }
 
         const currentUser = auth.user
@@ -80,8 +77,7 @@ export async function POST(request: Request) {
         const userDoc = await usersCollection.findOne({
             _id: new ObjectId(currentUser.id) as unknown as UserDocument['_id'],
         })
-        const displayName =
-            userDoc?.nickname || currentUser.name || currentUser.email || '匿名用戶'
+        const displayName = userDoc?.nickname || currentUser.name || currentUser.email || '匿名用戶'
 
         const newComment = {
             userId: currentUser.id,
@@ -115,10 +111,7 @@ export async function DELETE(request: Request) {
     try {
         const auth = await requireAuth()
         if (!auth.authenticated) {
-            return NextResponse.json(
-                { success: false, message: auth.error },
-                { status: 401 }
-            )
+            return NextResponse.json({ success: false, message: auth.error }, { status: 401 })
         }
 
         const currentUser = auth.user

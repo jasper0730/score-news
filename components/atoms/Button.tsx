@@ -30,10 +30,11 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     outline:
         'border border-input text-muted-foreground hover:border-foreground hover:text-foreground',
     ghost: 'border border-input hover:bg-muted',
-    brand: 'rounded-lg bg-gradient-to-r from-brand-from to-brand-to font-medium text-white hover:opacity-90',
-    'social-facebook': 'rounded-xl bg-blue-500 text-white hover:opacity-70',
-    'social-google': 'rounded-xl bg-red-500 text-white hover:opacity-70',
-    'social-github': 'rounded-xl bg-gray-600 text-white hover:opacity-70',
+    // 漸層在夜間是亮的、日間是暗的，所以字色跟著 background 反轉才讀得清楚
+    brand: 'rounded-lg bg-gradient-to-r from-brand-from to-brand-to font-medium text-background hover:opacity-90',
+    'social-facebook': 'rounded-xl bg-social-facebook text-white hover:opacity-70',
+    'social-google': 'rounded-xl bg-social-google text-white hover:opacity-70',
+    'social-github': 'rounded-xl bg-social-github text-white hover:opacity-70',
 }
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
