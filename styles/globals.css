@@ -7,51 +7,64 @@
        Design tokens
        顏色只寫 RGB 數值，讓 Tailwind 的 <alpha-value> 能組出 rgb(r g b / a)
        ============================================ */
+    /* 日間：和紙。以生成り（未漂白的紙白）打底，避免純白的刺眼與廉價感，
+       重點色取自日本傳統色，統一壓低彩度，讓畫面安靜下來。 */
     :root {
         --nav-height: 80px;
         --home-nav-height: 189px;
 
-        --color-background: 255 255 255;
-        --color-foreground: 0 0 0;
-        --color-surface: 255 255 255;
-        --color-card: 249 250 251;
-        --color-muted: 243 244 246;
-        --color-muted-foreground: 107 114 128;
-        --color-subtle: 156 163 175;
-        --color-border: 229 231 235;
-        --color-input: 209 213 219;
-        --color-ring: 96 165 250;
-        --color-primary: 37 99 235;
-        --color-primary-foreground: 255 255 255;
-        --color-danger: 239 68 68;
-        --color-success: 34 197 94;
-        --color-star: 234 179 8;
-        --color-brand-from: 37 99 235;
-        --color-brand-to: 147 51 234;
+        --color-background: 247 245 241; /* #F7F5F1 生成り */
+        --color-foreground: 35 33 32; /* #232120 墨 */
+        --color-surface: 253 252 250; /* #FDFCFA 浮起的面板略亮於底 */
+        --color-card: 241 238 232; /* #F1EEE8 */
+        --color-muted: 232 228 220; /* #E8E4DC */
+        --color-muted-foreground: 107 102 96; /* #6B6660 */
+        --color-subtle: 139 132 122; /* #8B847A */
+        --color-border: 223 218 209; /* #DFDAD1 */
+        --color-input: 207 200 188; /* #CFC8BC */
+        --color-ring: 93 122 140; /* #5D7A8C 藍鼠 */
+        --color-primary: 61 90 108; /* #3D5A6C 藍墨 */
+        --color-primary-foreground: 253 252 250;
+        --color-danger: 161 84 81; /* #A15451 蘇芳 */
+        --color-success: 95 127 85; /* #5F7F55 苔色 */
+        --color-star: 191 155 48; /* #BF9B30 山吹 */
+        --color-star-foreground: 35 33 32; /* 山吹偏亮，配深色字才讀得清楚 */
+        --color-scrim: 26 24 21; /* #1A1815 遮罩底色，兩個模式都是暗的 */
+        --color-brand-from: 74 107 124; /* #4A6B7C 藍鼠 */
+        --color-brand-to: 122 110 143; /* #7A6E8F 藤 */
     }
 
+    /* 夜間：墨。同樣避開純黑，用帶一點暖的炭色，
+       文字用白練而非純白，降低夜間的對比疲勞。 */
     .dark {
-        --color-background: 0 0 0;
-        --color-foreground: 255 255 255;
-        --color-surface: 17 24 39;
-        --color-card: 31 41 55;
-        --color-muted: 30 41 59;
-        --color-muted-foreground: 156 163 175;
-        --color-subtle: 107 114 128;
-        --color-border: 55 65 81;
-        --color-input: 55 65 81;
-        --color-ring: 96 165 250;
-        --color-primary: 59 130 246;
-        --color-primary-foreground: 255 255 255;
-        --color-danger: 248 113 113;
-        --color-success: 74 222 128;
-        --color-star: 250 204 21;
-        --color-brand-from: 96 165 250;
-        --color-brand-to: 192 132 252;
+        --color-background: 22 21 19; /* #161513 */
+        --color-foreground: 237 234 227; /* #EDEAE3 白練 */
+        --color-surface: 30 29 26; /* #1E1D1A */
+        --color-card: 34 32 29; /* #22201D */
+        --color-muted: 42 40 37; /* #2A2825 */
+        --color-muted-foreground: 158 151 140; /* #9E978C */
+        --color-subtle: 115 109 100; /* #736D64 */
+        --color-border: 51 48 43; /* #33302B */
+        --color-input: 64 60 54; /* #403C36 */
+        --color-ring: 127 160 174; /* #7FA0AE */
+        --color-primary: 143 175 191; /* #8FAFBF 夜間把藍墨提亮才有足夠對比 */
+        --color-primary-foreground: 22 21 19; /* 主色變亮，其上的字就得轉深 */
+        --color-danger: 201 127 123; /* #C97F7B */
+        --color-success: 143 174 126; /* #8FAE7E */
+        --color-star: 217 180 90; /* #D9B45A */
+        --color-star-foreground: 22 21 19;
+        --color-scrim: 8 8 7; /* #080807 */
+        --color-brand-from: 143 175 191; /* #8FAFBF */
+        --color-brand-to: 167 155 192; /* #A79BC0 藤 */
     }
 
     body {
         @apply bg-background text-foreground;
+    }
+
+    /* 時間戳的數字寬度固定，否則同一欄的日期會因為 1 比 0 窄而參差不齊 */
+    time {
+        font-variant-numeric: tabular-nums;
     }
 
     /* 全站統一的鍵盤焦點樣式；元件內若要停用滑鼠點擊的外框，

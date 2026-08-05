@@ -70,7 +70,7 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
                             FILTER_CHIP_CLASSES,
                             'gap-1',
                             filterRating === star
-                                ? 'border-star bg-star text-white'
+                                ? 'border-star bg-star text-star-foreground'
                                 : 'hover:border-star'
                         )}
                         aria-pressed={filterRating === star}

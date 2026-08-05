@@ -15,7 +15,7 @@ export const toastBox = (text: string, state: ToastState) => {
     toast.custom((t) => (
         <div
             className={cn(
-                'pointer-events-auto flex max-w-60 items-center justify-center gap-2 rounded-lg bg-surface px-4 py-2 shadow-lg ring-1 ring-black/5',
+                'pointer-events-auto flex max-w-60 items-center justify-center gap-2 rounded-lg bg-surface px-4 py-2 shadow-lg ring-1 ring-border',
                 t.visible ? 'animate-enter' : 'animate-leave'
             )}
         >
