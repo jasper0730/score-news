@@ -4,7 +4,6 @@ import Image from 'next/image'
 import { NewsDataType } from '@/types/news'
 import { IoIosCloseCircle } from 'react-icons/io'
 import CommentSection from '@/components/organisms/CommentSection'
-import DynamicImage from '@/components/atoms/DynamicImage'
 
 interface NewsDetailProps {
     data: NewsDataType | null
@@ -36,21 +35,16 @@ const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
             {/* 內容超出固定高度時只在這一層捲動；overscroll-contain 避免捲到底時帶動背景頁面 */}
             <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-6 md:px-10">
                 <div className="flex flex-col gap-8 md:flex-row">
-                    <div className="relative mx-auto max-w-[400px] md:w-1/2 md:max-w-none">
-                        {data?.image_url ? (
-                            <DynamicImage
-                                src={data.image_url}
-                                alt={data.title ?? '新聞圖片'}
-                                className="h-auto w-full rounded-lg object-cover"
-                            />
-                        ) : (
-                            <Image
-                                src="/images/no-image.jpg"
-                                alt={data?.title ?? '無圖片'}
-                                sizes="(min-width: 768px) 50vw, 400px"
-                                fill
-                            />
-                        )}
+                    {/* 用固定長寬比預留空間，尺寸由 CSS 決定而非等圖片載入後回填，
+                        圖片載入完成時不會推動下方內容 */}
+                    <div className="relative mx-auto aspect-video w-full max-w-[400px] overflow-hidden rounded-lg md:w-1/2 md:max-w-none">
+                        <Image
+                            src={data?.image_url || '/images/no-image.jpg'}
+                            alt={data?.title ?? '新聞圖片'}
+                            sizes="(min-width: 768px) 50vw, 400px"
+                            className="object-cover"
+                            fill
+                        />
                     </div>
                     <div className="md:w-1/2">
                         <h2 className="text-2xl font-semibold leading-snug">{data?.title}</h2>

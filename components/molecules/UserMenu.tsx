@@ -59,7 +59,7 @@ const UserMenu = ({ image }: UserMenuProps) => {
                 aria-label="開啟使用者選單"
                 className="block rounded-full transition duration-300 hover:opacity-80"
             >
-                <Avatar src={image} size="md" />
+                <Avatar src={image} size="md" priority />
             </button>
 
             <AnimatePresence>

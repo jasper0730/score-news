@@ -69,10 +69,10 @@ async function seed() {
 
             if (!nextPage) break
             // 避免 rate limit
-            await new Promise(r => setTimeout(r, 500))
+            await new Promise((r) => setTimeout(r, 500))
         }
 
-        const docs = allItems.slice(0, TARGET).map(item => ({
+        const docs = allItems.slice(0, TARGET).map((item) => ({
             ...item,
             _importedAt: new Date(),
         }))

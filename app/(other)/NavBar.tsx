@@ -31,7 +31,7 @@ const NavBar = ({ session }: NavBarProps) => {
                 <div className="h-5 w-px bg-border" />
                 <RegisterButton type={session ? 'logout' : 'login'} />
                 <ThemeSwitcher />
-                {session && <Avatar src={session.image} size="md" />}
+                {session && <Avatar src={session.image} size="md" priority />}
             </div>
         </nav>
     )
