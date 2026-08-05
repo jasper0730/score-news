@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { toastBox } from '@/utils/toast'
-import { getNewsActions } from '@/actions/newsActions'
+import { getFavoriteNewsAction } from '@/actions/newsActions'
 import { toggleFavoriteAction } from '@/actions/favoriteActions'
 import { rateNewsAction } from '@/actions/rateNewsAction'
 import type { NewsDataType } from '@/types/news'
@@ -27,9 +27,9 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
 
         setIsLoading(true)
         try {
-            const result = await getNewsActions({ userId: user.id, limit: 1000 })
+            const result = await getFavoriteNewsAction()
             const fetchedNews = result.data ?? []
-            setNewsData(fetchedNews.filter((item) => item.favorite))
+            setNewsData(fetchedNews)
             setHasFetched(true)
         } catch (error) {
             console.error(error instanceof Error ? error.message : error)

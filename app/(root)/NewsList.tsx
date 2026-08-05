@@ -1,21 +1,21 @@
 'use client'
 
 import { useNewsFeed } from '@/hooks/useNewsFeed'
-import type { NewsApiResponse } from '@/types/news'
+import type { NewsResponse } from '@/actions/newsActions'
 import NewsInfiniteGrid from '@/components/organisms/NewsInfiniteGrid'
 import NewsModal from '@/components/organisms/NewsModal'
 
 interface NewsListProps {
-    data: NewsApiResponse
+    data: NewsResponse
 }
 
 const NewsList = ({ data }: NewsListProps) => {
     const {
-        visibleData,
-        sortedData,
+        items,
+        total,
         favorites,
         hasMore,
-        isLoadingMore,
+        isLoading,
         sentinelRef,
         selectedNews,
         setSelectedNews,
@@ -24,18 +24,18 @@ const NewsList = ({ data }: NewsListProps) => {
         handleRatingUpdate,
     } = useNewsFeed(data)
 
-    if (!data?.success) {
-        return <p>Failed to fetch</p>
+    if (!data.success) {
+        return <p className="p-10 text-center text-xl text-muted-foreground">新聞載入失敗</p>
     }
 
     return (
         <div className="min-h-screen px-4 py-10">
             <NewsInfiniteGrid
-                visibleData={visibleData}
-                sortedDataLength={sortedData.length}
+                items={items}
+                total={total}
                 favorites={favorites}
                 hasMore={hasMore}
-                isLoadingMore={isLoadingMore}
+                isLoading={isLoading}
                 sentinelRef={sentinelRef}
                 onFavoriteClick={handleFavoriteClick}
                 onMoreClick={handleSelectNews}

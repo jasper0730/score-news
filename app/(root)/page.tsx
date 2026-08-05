@@ -1,19 +1,20 @@
-import { getUser } from '@/actions/getUser'
 import { getNewsActions } from '@/actions/newsActions'
 import NewsList from '@/app/(root)/NewsList'
-import type { NewsApiResponse } from '@/types/news'
+import { NEWS_PAGE_SIZE } from '@/constants/common'
+import type { NewsResponse } from '@/actions/newsActions'
 
 export default async function Home() {
-    const currentUser = await getUser()
-    let newsData: NewsApiResponse = { data: [], success: false }
+    // 只取第一頁，其餘由 client 捲動時再向伺服器要。
+    // 使用者身分由 getNewsActions 內部自 session 解析，這裡不需要先查一次。
+    let newsData: NewsResponse = {
+        data: [],
+        success: false,
+        hasMore: false,
+        total: 0,
+    }
 
     try {
-        const result = await getNewsActions({
-            userId: currentUser?.id ?? null,
-            page: 1,
-            limit: 1000,
-        })
-        newsData = { data: result.data, success: result.success }
+        newsData = await getNewsActions({ page: 1, limit: NEWS_PAGE_SIZE })
     } catch (error) {
         console.error(error instanceof Error ? error.message : error)
     }

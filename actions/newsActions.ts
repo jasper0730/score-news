@@ -7,7 +7,8 @@ import {
     type FavoriteDocument,
     type RatingDocument,
 } from '@/libs/db'
-import type { NewsDataType } from '@/types/news'
+import type { NewsDataType, SortType } from '@/types/news'
+import { getSession } from '@/actions/getUser'
 
 /** 依評分排序時走 aggregate，結果會多帶一個算出來的 avgRating 欄位 */
 type NewsQueryDocument = WithId<NewsDocument> & { avgRating?: number }
@@ -36,11 +37,19 @@ const toNewsData = (
 })
 
 export interface GetNewsParams {
-    userId?: string | null
     query?: string
-    sortType?: 'rating' | 'date'
+    sortType?: SortType
     page?: number
     limit?: number
+}
+
+/** 依評分排序必須走 aggregate，因為 avgRating 是算出來的欄位，無法用一般索引排序 */
+const usesRatingSort = (sortType: SortType) => sortType.startsWith('rating')
+
+const SORT_OPTIONS: Record<Exclude<SortType, 'rating_desc' | 'rating_asc'>, Sort> = {
+    date_desc: { pubDate: -1 },
+    date_asc: { pubDate: 1 },
+    views: { views: -1 },
 }
 
 export type NewsResponse = {
@@ -51,10 +60,16 @@ export type NewsResponse = {
     total: number
 }
 
-export async function getNewsActions(params: GetNewsParams): Promise<NewsResponse> {
-    const { userId, query = '', sortType = 'date', page = 1, limit = 8 } = params
+export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsResponse> {
+    const { query = '', sortType = 'date_desc', page = 1, limit = 12 } = params
 
     try {
+        // userId 一律由 server 端的 session 取得，不接受呼叫端傳入。
+        // 這是 client 可直接呼叫的 server action，若信任參數，
+        // 任何人都能帶別人的 id 讀取他人的收藏與個人評分。
+        const session = await getSession()
+        const userId = session?.user?.id ?? null
+
         const newsCollection = await getCollection<NewsDocument>('news')
         const favoritesCollection = await getCollection<FavoriteDocument>('favorites')
         const ratingsCollection = await getCollection<RatingDocument>('ratings')
@@ -68,23 +83,13 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
             ]
         }
 
-        // Output sorting
-        let sortOption: Sort = {}
-        if (sortType === 'date') {
-            sortOption = { pubDate: -1 } // newest first
-        } else if (sortType === 'rating') {
-            // Because rating is dynamically calculated, doing this purely in Mongo with aggregation is best,
-            // but for a simple find, we can't sort by virtual fields easily unless we do an aggregation pipeline.
-            // For now, if rating sort is requested, we will handle it via aggregation below.
-        }
-
-        // Pagination setup
         const skip = (page - 1) * limit
+        const byRating = usesRatingSort(sortType)
 
         let allData: NewsQueryDocument[] = []
         let total = 0
 
-        if (sortType === 'rating') {
+        if (byRating) {
             // Aggregation pipeline to sort by average rating
             const pipeline = [
                 { $match: filter },
@@ -101,7 +106,7 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
                         avgRating: { $avg: '$ratingsData.rate' },
                     },
                 },
-                { $sort: { avgRating: -1, pubDate: -1 } },
+                { $sort: { avgRating: sortType === 'rating_asc' ? 1 : -1, pubDate: -1 } },
                 {
                     $facet: {
                         metadata: [{ $count: 'total' }],
@@ -120,7 +125,9 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
             total = await newsCollection.countDocuments(filter)
             allData = await newsCollection
                 .find(filter)
-                .sort(sortOption)
+                // byRating 為 false 已排除兩個 rating 選項，但 TS 無法從布林值收窄
+                // sortType，因此在這裡明確斷言剩餘的聯集
+                .sort(SORT_OPTIONS[sortType as keyof typeof SORT_OPTIONS])
                 .skip(skip)
                 .limit(limit)
                 .toArray()
@@ -141,7 +148,7 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
         const postIds = allData.map((item) => item.article_id)
 
         if (postIds.length > 0) {
-            if (sortType !== 'rating') {
+            if (!byRating) {
                 const avgRatings = await ratingsCollection
                     .aggregate([
                         { $match: { postId: { $in: postIds } } },
@@ -163,8 +170,7 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
 
         const enrichedData: NewsDataType[] = allData.map((item) =>
             toNewsData(item, {
-                rate:
-                    (sortType === 'rating' ? item.avgRating : ratingMap.get(item.article_id)) ?? 0,
+                rate: (byRating ? item.avgRating : ratingMap.get(item.article_id)) ?? 0,
                 favorite: favoriteSet.has(item.article_id),
                 userRate: userRatingMap.get(item.article_id),
             })
@@ -215,6 +221,39 @@ export async function getNewsByIds(
         return { success: true, data }
     } catch (error) {
         console.error('Failed to get news by ids:', error)
+        return { success: false, data: [] }
+    }
+}
+
+/**
+ * 取得目前使用者收藏的新聞。
+ *
+ * 先前後台是呼叫 getNewsActions({ limit: 1000 }) 再於 client 端 filter
+ * item.favorite，等於為了幾筆收藏把整個資料庫搬到瀏覽器。
+ * 這裡改為先查收藏清單拿到 id，再只取那幾筆。
+ */
+export async function getFavoriteNewsAction(): Promise<{
+    success: boolean
+    data: NewsDataType[]
+}> {
+    try {
+        const session = await getSession()
+        const userId = session?.user?.id
+        if (!userId) return { success: false, data: [] }
+
+        const favoritesCollection = await getCollection<FavoriteDocument>('favorites')
+        const favorites = await favoritesCollection.findOne({ userId })
+        const postIds = favorites?.postIds ?? []
+        if (postIds.length === 0) return { success: true, data: [] }
+
+        const result = await getNewsByIds(postIds)
+        return {
+            success: result.success,
+            // 這個清單本來就全是收藏，getNewsByIds 一律回 false，這裡補正
+            data: result.data.map((item) => ({ ...item, favorite: true })),
+        }
+    } catch (error) {
+        console.error('Failed to get favorite news:', error)
         return { success: false, data: [] }
     }
 }
