@@ -8,6 +8,7 @@ import type { CommentType, NewsDataType } from '@/types/news'
 import Loader from '@/components/atoms/Loader'
 import NewsModal from '@/components/organisms/NewsModal'
 import { rateNewsAction } from '@/actions/rateNewsAction'
+import { CARD_CLASSES } from '@/libs/styles'
 import { FiEye } from 'react-icons/fi'
 
 interface DashboardCommentListProps {
@@ -74,15 +75,11 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
                 const updatedRating = result.rate
 
                 setAllNews((prev) =>
-                    prev.map((n) =>
-                        n.article_id === postId ? { ...n, rate: updatedRating } : n
-                    )
+                    prev.map((n) => (n.article_id === postId ? { ...n, rate: updatedRating } : n))
                 )
 
                 if (selectedNews?.article_id === postId) {
-                    setSelectedNews((prev) =>
-                        prev ? { ...prev, rate: updatedRating } : null
-                    )
+                    setSelectedNews((prev) => (prev ? { ...prev, rate: updatedRating } : null))
                 }
             }
         } catch (error) {
@@ -109,7 +106,7 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
     if (comments.length === 0) {
         return (
             <div className="p-10">
-                <p className="text-center text-xl p-10">目前沒有任何評論紀錄</p>
+                <p className="p-10 text-center text-xl">目前沒有任何評論紀錄</p>
             </div>
         )
     }
@@ -117,15 +114,15 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
     return (
         <div className="flex flex-col gap-4 py-6">
             {comments.map((comment) => (
-                <div key={comment._id} className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                    <div className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2">
+                <div key={comment._id} className={CARD_CLASSES}>
+                    <div className="mb-2 text-sm font-semibold text-primary">
                         📰 {comment.postTitle || '未知文章'}
                     </div>
-                    <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
                         {comment.content}
                     </div>
-                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
-                        <time className="text-xs text-gray-400">
+                    <div className="mt-3 flex items-center justify-between border-t pt-2">
+                        <time className="text-xs text-subtle">
                             {new Date(comment.createdAt).toLocaleDateString('zh-TW', {
                                 year: 'numeric',
                                 month: '2-digit',
@@ -136,15 +133,14 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
                         </time>
                         <div className="flex items-center gap-3">
                             <button
-                                className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 cursor-pointer duration-300"
+                                className="flex cursor-pointer items-center gap-1 text-xs text-primary transition duration-300 hover:opacity-70"
                                 onClick={() => handleViewArticle(comment.postId)}
-                                aria-label="查看文章"
                             >
                                 <FiEye />
                                 <span>查看文章</span>
                             </button>
                             <button
-                                className="text-xs text-red-400 hover:text-red-600 cursor-pointer duration-300"
+                                className="cursor-pointer text-xs text-danger transition duration-300 hover:opacity-70"
                                 onClick={() => handleDelete(comment._id)}
                                 aria-label="刪除評論"
                             >

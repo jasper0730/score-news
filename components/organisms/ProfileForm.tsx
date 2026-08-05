@@ -5,7 +5,12 @@ import { toastBox } from '@/utils/toast'
 import { getProfileAction, updateProfileAction } from '@/actions/profileActions'
 import Avatar from '@/components/atoms/Avatar'
 import Button from '@/components/atoms/Button'
+import Input from '@/components/atoms/Input'
+import Textarea from '@/components/atoms/Textarea'
 import Loader from '@/components/atoms/Loader'
+
+const MAX_NICKNAME_LENGTH = 20
+const MAX_BIO_LENGTH = 200
 
 interface Profile {
     nickname: string
@@ -64,51 +69,56 @@ const ProfileForm = () => {
     if (isLoading) return <Loader />
 
     return (
-        <div className="max-w-lg mx-auto py-8 px-4">
-            <div className="flex items-center gap-4 mb-8 pb-6 border-b dark:border-gray-700">
+        <div className="mx-auto max-w-lg px-4 py-8">
+            <div className="mb-8 flex items-center gap-4 border-b pb-6">
                 <Avatar src={profile?.avatar} size="lg" />
                 <div className="flex flex-col">
                     <h3 className="text-lg font-semibold">{profile?.name || '未設定姓名'}</h3>
-                    <p className="text-sm text-gray-400">{profile?.email}</p>
+                    <p className="text-sm text-subtle">{profile?.email}</p>
                 </div>
             </div>
 
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300" htmlFor="nickname">
+                    <label className="text-sm font-medium text-muted-foreground" htmlFor="nickname">
                         暱稱（顯示於評論區）
                     </label>
-                    <input
+                    <Input
                         id="nickname"
                         type="text"
-                        className="w-full p-3 border-2 rounded-lg focus:outline-none focus:border-blue-400 bg-transparent transition duration-300"
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
                         placeholder="設定你的暱稱..."
-                        maxLength={20}
+                        maxLength={MAX_NICKNAME_LENGTH}
                     />
-                    <span className="text-xs text-gray-400 text-right">{nickname.length}/20</span>
+                    <span className="text-right text-xs text-subtle">
+                        {nickname.length}/{MAX_NICKNAME_LENGTH}
+                    </span>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300" htmlFor="bio">
+                    <label className="text-sm font-medium text-muted-foreground" htmlFor="bio">
                         自我介紹
                     </label>
-                    <textarea
+                    <Textarea
                         id="bio"
-                        className="w-full p-3 border-2 rounded-lg resize-none focus:outline-none focus:border-blue-400 bg-transparent transition duration-300"
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
                         placeholder="介紹一下你自己..."
                         rows={4}
-                        maxLength={200}
+                        maxLength={MAX_BIO_LENGTH}
                     />
-                    <span className="text-xs text-gray-400 text-right">{bio.length}/200</span>
+                    <span className="text-right text-xs text-subtle">
+                        {bio.length}/{MAX_BIO_LENGTH}
+                    </span>
                 </div>
             </div>
 
             <Button
-                className={`mt-6 w-full py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium hover:opacity-90 duration-300 cursor-pointer ${isSaving ? 'opacity-60 pointer-events-none' : ''}`}
+                variant="brand"
+                size="lg"
+                fullWidth
+                className="mt-6"
                 onClick={handleSubmit}
                 disabled={isSaving}
             >

@@ -10,6 +10,7 @@ import type { NewsDataType } from '@/types/news'
 import Loader from '@/components/atoms/Loader'
 import NewsCard from '@/components/organisms/NewsCard'
 import NewsModal from '@/components/organisms/NewsModal'
+import { NEWS_GRID_CLASSES } from '@/libs/styles'
 
 interface DashboardNewsListProps {
     user: { id: string } | null
@@ -50,16 +51,12 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
 
                 setNewsData((prevData) =>
                     prevData.map((news) =>
-                        news.article_id === postId
-                            ? { ...news, rate: updatedRating }
-                            : news
+                        news.article_id === postId ? { ...news, rate: updatedRating } : news
                     )
                 )
 
                 if (selectedNews?.article_id === postId) {
-                    setSelectedNews((prev) =>
-                        prev ? { ...prev, rate: updatedRating } : null
-                    )
+                    setSelectedNews((prev) => (prev ? { ...prev, rate: updatedRating } : null))
                 }
             }
         } catch (error) {
@@ -87,9 +84,9 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
     if (!isLoading && newsData.length === 0) {
         return (
             <div className="p-10">
-                <p className="text-center text-xl p-10">
+                <p className="p-10 text-center text-xl">
                     目前沒有收藏的新聞，請回
-                    <Link href="/" className="text-red-500 hover:opacity-70">
+                    <Link href="/" className="text-danger hover:opacity-70">
                         首頁
                     </Link>
                     加入收藏文章
@@ -101,7 +98,7 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
     return (
         <>
             <div className="min-h-screen px-4 py-10">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className={NEWS_GRID_CLASSES}>
                     {newsData.map((article) => (
                         <NewsCard
                             key={article.article_id}

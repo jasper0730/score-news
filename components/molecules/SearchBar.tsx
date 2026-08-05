@@ -5,12 +5,13 @@ import { useNewsStore } from '@/store/newsStore'
 import { useShallow } from 'zustand/shallow'
 import { IoIosCloseCircleOutline } from 'react-icons/io'
 import { IoSearch } from 'react-icons/io5'
+import { cn } from '@/libs/cn'
 
 interface SearchBarProps {
     className?: string
 }
 
-const SearchBar = ({ className = '' }: SearchBarProps) => {
+const SearchBar = ({ className }: SearchBarProps) => {
     const [query, setQuery] = useState('')
     const { setNewsQuery } = useNewsStore(
         useShallow((state) => ({
@@ -34,13 +35,14 @@ const SearchBar = ({ className = '' }: SearchBarProps) => {
     }
 
     return (
-        <div className={`flex items-stretch gap-2 p-2 border-b-8 w-full ${className}`}>
+        <div className={cn('flex w-full items-stretch gap-2 border-b-8 p-2', className)}>
             <button
                 type="button"
                 onClick={handleSearch}
-                className="px-3 py-2 duration-300 rounded-md hover:opacity-70"
+                className="rounded-md px-3 py-2 transition duration-300 hover:opacity-70"
+                aria-label="搜尋"
             >
-                <IoSearch className="text-[60px]" />
+                <IoSearch className="text-6xl" />
             </button>
             <div className="relative w-full">
                 <input
@@ -49,13 +51,15 @@ const SearchBar = ({ className = '' }: SearchBarProps) => {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="搜尋內容..."
-                    className="w-full h-full flex-1 pl-3 py-2 pr-8 rounded-md focus:outline-none text-xl bg-transparent"
+                    aria-label="搜尋新聞"
+                    className="h-full w-full flex-1 rounded-md bg-transparent py-2 pl-3 pr-8 text-xl"
                 />
                 {query && (
                     <button
                         type="button"
                         onClick={handleClear}
-                        className="absolute right-1 top-1/2 -translate-y-1/2 focus:outline-none"
+                        className="absolute right-1 top-1/2 -translate-y-1/2"
+                        aria-label="清除搜尋"
                     >
                         <IoIosCloseCircleOutline size={20} />
                     </button>

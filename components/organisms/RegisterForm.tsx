@@ -128,19 +128,19 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
 
     return (
         <div className={className}>
-            <div className="flex flex-col items-center justify-center mb-5">
+            <div className="mb-5 flex flex-col items-center justify-center">
                 <Logo />
-                <h2 className="mt-2 text-gray-600 text-3xl font-semibold">
+                <h2 className="mt-2 text-3xl font-semibold">
                     {type === 'login' ? '登入 ScoreNews' : '創建一個帳戶'}
                 </h2>
             </div>
 
             {type === 'login' && (
-                <p className="text-sm text-center">
+                <p className="text-center text-sm">
                     還沒加入 ScoreNews 嗎？
                     <button
                         type="button"
-                        className="text-red-600 cursor-pointer ml-1"
+                        className="ml-1 cursor-pointer text-danger hover:underline"
                         onClick={() => handleSwitchType('signup')}
                     >
                         註冊
@@ -149,11 +149,11 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
             )}
 
             {type === 'signup' && (
-                <p className="text-sm text-center">
+                <p className="text-center text-sm">
                     已經加入 ScoreNews 嗎？
                     <button
                         type="button"
-                        className="text-red-600 cursor-pointer ml-1"
+                        className="ml-1 cursor-pointer text-danger hover:underline"
                         onClick={() => handleSwitchType('login')}
                     >
                         登入
@@ -161,7 +161,7 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
                 </p>
             )}
 
-            <form ref={formRef} className="flex flex-col mt-3" onSubmit={handleSubmit}>
+            <form ref={formRef} className="mt-3 flex flex-col" onSubmit={handleSubmit}>
                 <div className="flex flex-col gap-3">
                     <Input
                         name="email"
@@ -182,6 +182,7 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
                 <Button
                     type="submit"
                     variant="primary"
+                    fullWidth
                     className="mt-8"
                     disabled={isLoading}
                 >
@@ -190,11 +191,13 @@ const RegisterForm = ({ type, setOpenModal, className = '' }: RegisterFormProps)
             </form>
 
             {type === 'login' && (
-                <div className="flex gap-2 mt-3">
+                <div className="mt-3 flex gap-2">
                     {SOCIAL_PROVIDERS.map(({ id, label, variant }) => (
                         <Button
                             key={id}
                             variant={variant}
+                            size="sm"
+                            fullWidth
                             type="button"
                             onClick={() => handleSocialLogin(id)}
                             disabled={isLoading}

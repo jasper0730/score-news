@@ -8,7 +8,11 @@ export default async function Home() {
     let newsData: NewsApiResponse = { data: [], success: false }
 
     try {
-        const result = await getNewsActions({ userId: currentUser?.id ?? null, page: 1, limit: 1000 })
+        const result = await getNewsActions({
+            userId: currentUser?.id ?? null,
+            page: 1,
+            limit: 1000,
+        })
         newsData = { data: result.data, success: result.success }
     } catch (error) {
         console.error(error instanceof Error ? error.message : error)

@@ -6,7 +6,6 @@ import { IoIosCloseCircle } from 'react-icons/io'
 import CommentSection from '@/components/organisms/CommentSection'
 import DynamicImage from '@/components/atoms/DynamicImage'
 
-
 interface NewsDetailProps {
     data: NewsDataType | null
     onClose: () => void
@@ -22,27 +21,28 @@ const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
     const newsContent = hasFullContent ? data!.content : (data?.description ?? '')
 
     return (
-        <article className="m-auto px-5 py-20 relative bg-white rounded-lg dark:bg-gray-900 md:px-10">
+        <article className="relative m-auto rounded-lg bg-surface px-5 py-20 md:px-10">
             <button
                 onClick={onClose}
-                className="absolute top-5 left-1/2 -translate-x-1/2 cursor-pointer hover:rotate-90 duration-300"
+                className="absolute left-1/2 top-5 -translate-x-1/2 cursor-pointer transition duration-300 hover:rotate-90"
                 aria-label="關閉新聞詳情"
             >
                 <IoIosCloseCircle size={40} />
             </button>
 
             <div className="flex flex-col gap-8 md:flex-row">
-                <div className="max-w-[400px] relative mx-auto md:w-1/2 md:max-w-none">
+                <div className="relative mx-auto max-w-[400px] md:w-1/2 md:max-w-none">
                     {data?.image_url ? (
                         <DynamicImage
                             src={data.image_url}
                             alt={data.title ?? '新聞圖片'}
-                            className="object-cover w-full h-auto rounded-lg"
+                            className="h-auto w-full rounded-lg object-cover"
                         />
                     ) : (
                         <Image
                             src="/images/no-image.jpg"
                             alt={data?.title ?? '無圖片'}
+                            sizes="(min-width: 768px) 50vw, 400px"
                             fill
                         />
                     )}
@@ -53,13 +53,13 @@ const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {
             </div>
 
             <div className="mt-5">
-                <p className="leading-relaxed text-gray-700 dark:text-gray-300 line-clamp-2">{newsContent}</p>
+                <p className="line-clamp-2 leading-relaxed text-muted-foreground">{newsContent}</p>
                 {!hasFullContent && data?.link && (
                     <a
                         href={data.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 mt-4 text-sm text-blue-500 hover:text-blue-700 underline duration-200"
+                        className="mt-4 inline-flex items-center gap-1 text-sm text-primary underline transition duration-200 hover:opacity-70"
                     >
                         閱讀完整原文 →
                     </a>

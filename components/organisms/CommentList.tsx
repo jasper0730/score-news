@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react'
 import { FaStar, FaRegStar } from 'react-icons/fa'
 import { MdDeleteOutline } from 'react-icons/md'
 import Avatar from '@/components/atoms/Avatar'
+import { cn } from '@/libs/cn'
+import { CARD_CLASSES } from '@/libs/styles'
 import type { CommentType } from '@/types/news'
 
 interface CommentListProps {
@@ -14,12 +16,17 @@ interface CommentListProps {
 
 const STAR_FILTERS = [1, 2, 3, 4, 5]
 
+const FILTER_CHIP_CLASSES =
+    'flex cursor-pointer items-center rounded-full border border-input px-3 py-1 text-sm transition-colors'
+
 const StarBadge = ({ rating }: { rating: number }) => (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0.5" role="img" aria-label={`評分 ${rating} 顆星`}>
         {Array.from({ length: 5 }, (_, i) =>
-            i < rating
-                ? <FaStar key={i} className="text-yellow-400 text-sm" />
-                : <FaRegStar key={i} className="text-gray-300 text-sm" />
+            i < rating ? (
+                <FaStar key={i} className="text-sm text-star" />
+            ) : (
+                <FaRegStar key={i} className="text-sm text-subtle" />
+            )
         )}
     </div>
 )
@@ -29,22 +36,29 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
     const currentUserId = (session?.user as { id?: string })?.id
     const [filterRating, setFilterRating] = useState<number | null>(null)
 
-    const filtered = filterRating
-        ? comments.filter((c) => c.rating === filterRating)
-        : comments
+    const filtered = filterRating ? comments.filter((c) => c.rating === filterRating) : comments
 
     const formatDate = (dateStr: string) =>
         new Date(dateStr).toLocaleDateString('zh-TW', {
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
         })
 
     return (
         <div className="mt-4">
             {/* 星星篩選器 */}
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <div className="mb-4 flex flex-wrap items-center gap-2">
                 <button
-                    className={`px-3 py-1 text-sm rounded-full border transition-colors cursor-pointer ${filterRating === null ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-300 hover:border-blue-400'}`}
+                    className={cn(
+                        FILTER_CHIP_CLASSES,
+                        filterRating === null
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'hover:border-ring'
+                    )}
+                    aria-pressed={filterRating === null}
                     onClick={() => setFilterRating(null)}
                 >
                     全部
@@ -52,7 +66,14 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
                 {STAR_FILTERS.map((star) => (
                     <button
                         key={star}
-                        className={`flex items-center gap-1 px-3 py-1 text-sm rounded-full border transition-colors cursor-pointer ${filterRating === star ? 'bg-yellow-400 text-white border-yellow-400' : 'border-gray-300 hover:border-yellow-400'}`}
+                        className={cn(
+                            FILTER_CHIP_CLASSES,
+                            'gap-1',
+                            filterRating === star
+                                ? 'border-star bg-star text-white'
+                                : 'hover:border-star'
+                        )}
+                        aria-pressed={filterRating === star}
                         onClick={() => setFilterRating(filterRating === star ? null : star)}
                     >
                         {star} <FaStar className="text-xs" />
@@ -61,23 +82,27 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
             </div>
 
             {filtered.length === 0 ? (
-                <p className="text-gray-400 text-center py-6">
-                    {filterRating ? `目前沒有 ${filterRating} 顆星的評論` : '目前還沒有評論，成為第一個留言的人吧！'}
+                <p className="py-6 text-center text-subtle">
+                    {filterRating
+                        ? `目前沒有 ${filterRating} 顆星的評論`
+                        : '目前還沒有評論，成為第一個留言的人吧！'}
                 </p>
             ) : (
                 <div className="flex flex-col gap-4">
                     {filtered.map((comment) => (
-                        <div key={comment._id} className="p-4 rounded-lg border bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                            <div className="flex items-center justify-between mb-2">
+                        <div key={comment._id} className={CARD_CLASSES}>
+                            <div className="mb-2 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Avatar src={comment.userImage} size="sm" />
                                     <span className="text-sm font-medium">{comment.userName}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <time className="text-xs text-gray-400">{formatDate(comment.createdAt)}</time>
+                                    <time className="text-xs text-subtle">
+                                        {formatDate(comment.createdAt)}
+                                    </time>
                                     {currentUserId === comment.userId && onDelete && (
                                         <button
-                                            className="text-red-400 hover:text-red-600 cursor-pointer duration-300"
+                                            className="cursor-pointer text-danger transition duration-300 hover:opacity-70"
                                             onClick={() => onDelete(comment._id)}
                                             aria-label="刪除評論"
                                         >
@@ -92,7 +117,9 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
                                 </div>
                             )}
                             {comment.content && (
-                                <p className="text-sm leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+                                <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                                    {comment.content}
+                                </p>
                             )}
                         </div>
                     ))}

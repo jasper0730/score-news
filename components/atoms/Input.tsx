@@ -1,6 +1,8 @@
 'use client'
 
-import { type InputHTMLAttributes, type RefObject } from 'react'
+import { useId, type InputHTMLAttributes, type RefObject } from 'react'
+import { cn } from '@/libs/cn'
+import { FIELD_CLASSES } from '@/libs/styles'
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'className'> {
     error?: string
@@ -8,32 +10,31 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'classN
     wrapperClassName?: string
 }
 
-const Input = ({
-    type = 'text',
-    disabled,
-    placeholder,
-    inputRef,
-    name,
-    error,
-    defaultValue,
-    wrapperClassName = '',
-    ...props
-}: InputProps) => {
-    const errorClass = error ? 'border-red-500 focus:border-red-500' : ''
+const Input = ({ type = 'text', inputRef, error, wrapperClassName, id, ...props }: InputProps) => {
+    const generatedId = useId()
+    const inputId = id ?? generatedId
+    const errorId = `${inputId}-error`
 
     return (
-        <div className={`relative ${wrapperClassName}`}>
+        <div className={cn('relative', wrapperClassName)}>
             <input
-                name={name}
+                id={inputId}
                 ref={inputRef}
                 type={type}
-                disabled={disabled}
-                className={`w-full font-light border-2 rounded-md outline-none transition p-2 disabled:opacity-70 disabled:cursor-not-allowed ${errorClass}`}
-                placeholder={placeholder}
-                defaultValue={defaultValue}
+                className={cn(FIELD_CLASSES, error && 'border-danger focus:border-danger')}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? errorId : undefined}
                 {...props}
             />
-            {error && <span className="text-red-600 text-sm absolute top-full left-0 px-1">{error}</span>}
+            {error && (
+                <span
+                    id={errorId}
+                    role="alert"
+                    className="absolute left-0 top-full px-1 text-sm text-danger"
+                >
+                    {error}
+                </span>
+            )}
         </div>
     )
 }

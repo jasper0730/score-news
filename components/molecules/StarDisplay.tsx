@@ -10,9 +10,13 @@ const StarDisplay = ({ rating }: StarDisplayProps) => {
     if (!rating || rating <= 0) return null
 
     return (
-        <div className="flex items-center mt-4">
+        <div
+            className="mt-4 flex items-center"
+            role="img"
+            aria-label={`評分 ${Math.round(rating)} 顆星`}
+        >
             {Array.from({ length: Math.round(rating) }, (_, index) => (
-                <FaStar key={index} className="text-yellow-500 text-xl" />
+                <FaStar key={index} className="text-xl text-star" />
             ))}
         </div>
     )

@@ -25,7 +25,15 @@
       "Bash(echo \"build exit=$?\")",
       "PowerShell(Get-NetTCPConnection *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npm install *)",
+      "Bash(npx prettier *)",
+      "Bash(echo \"lint exit=$?\")",
+      "Bash(npx eslint *)",
+      "Bash(echo \"eslint exit=$?\")",
+      "Bash(npm run *)",
+      "Bash(git rm *)"
     ]
   }
 }

@@ -27,10 +27,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
     render() {
         if (this.state.hasError) {
-            return this.props.fallback ?? (
-                <div className="flex justify-center items-center min-h-screen">
-                    <p className="text-xl text-gray-500">發生錯誤，請重新整理頁面。</p>
-                </div>
+            return (
+                this.props.fallback ?? (
+                    <div className="flex min-h-screen items-center justify-center">
+                        <p className="text-xl text-muted-foreground">發生錯誤，請重新整理頁面。</p>
+                    </div>
+                )
             )
         }
         return this.props.children

@@ -4,7 +4,10 @@ import DashboardContent from './DashboardContent'
 
 const DashboardPage = async () => {
     const currentUser = await getUser()
-    console.log('[DashboardPage] currentUser:', currentUser ? `id=${currentUser.id}, email=${currentUser.email}` : 'NULL')
+    console.log(
+        '[DashboardPage] currentUser:',
+        currentUser ? `id=${currentUser.id}, email=${currentUser.email}` : 'NULL'
+    )
     if (!currentUser) {
         redirect('/login')
     }

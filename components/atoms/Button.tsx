@@ -1,39 +1,67 @@
 'use client'
 
 import { type ReactNode, type ButtonHTMLAttributes } from 'react'
+import { cn } from '@/libs/cn'
+
+type ButtonVariant =
+    | 'primary'
+    | 'outline'
+    | 'ghost'
+    | 'brand'
+    | 'social-facebook'
+    | 'social-google'
+    | 'social-github'
+
+type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     children: ReactNode
-    variant?: 'primary' | 'outline' | 'social-facebook' | 'social-google' | 'social-github'
+    variant?: ButtonVariant
+    size?: ButtonSize
+    fullWidth?: boolean
     icon?: ReactNode
 }
 
-const VARIANT_CLASSES: Record<NonNullable<ButtonProps['variant']>, string> = {
-    primary: 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed p-2 border-2 w-full rounded-xl hover:opacity-70',
-    outline: 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-2 rounded-md border border-gray-300 text-gray-400 hover:border-gray-700 hover:text-gray-700',
-    'social-facebook': 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed p-2 border-2 w-full rounded-xl border-none text-white hover:opacity-70 bg-blue-500',
-    'social-google': 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed p-2 border-2 w-full rounded-xl border-none text-white hover:opacity-70 bg-red-500',
-    'social-github': 'inline-flex items-center justify-center gap-1 cursor-pointer transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed p-2 border-2 w-full rounded-xl border-none text-white hover:opacity-70 bg-gray-600',
+const BASE_CLASSES =
+    'inline-flex cursor-pointer items-center justify-center gap-1 rounded-md transition duration-300 disabled:cursor-not-allowed disabled:opacity-50'
+
+const VARIANT_CLASSES: Record<ButtonVariant, string> = {
+    primary: 'rounded-xl border-2 hover:opacity-70',
+    outline:
+        'border border-input text-muted-foreground hover:border-foreground hover:text-foreground',
+    ghost: 'border border-input hover:bg-muted',
+    brand: 'rounded-lg bg-gradient-to-r from-brand-from to-brand-to font-medium text-white hover:opacity-90',
+    'social-facebook': 'rounded-xl bg-blue-500 text-white hover:opacity-70',
+    'social-google': 'rounded-xl bg-red-500 text-white hover:opacity-70',
+    'social-github': 'rounded-xl bg-gray-600 text-white hover:opacity-70',
+}
+
+const SIZE_CLASSES: Record<ButtonSize, string> = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2',
+    lg: 'px-6 py-2.5',
 }
 
 const Button = ({
     children,
-    className = '',
+    className,
     variant,
+    size = 'md',
+    fullWidth = false,
     type = 'button',
-    onClick,
-    disabled,
     icon,
     ...props
 }: ButtonProps) => {
-    const variantClass = variant ? VARIANT_CLASSES[variant] : ''
-
     return (
         <button
-            className={`${variantClass} ${className}`}
+            className={cn(
+                BASE_CLASSES,
+                SIZE_CLASSES[size],
+                variant && VARIANT_CLASSES[variant],
+                fullWidth && 'w-full',
+                className
+            )}
             type={type}
-            onClick={onClick}
-            disabled={disabled}
             {...props}
         >
             {children}

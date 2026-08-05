@@ -24,7 +24,8 @@ const SortDropdown = () => {
         <select
             value={sortType}
             onChange={(e) => setSortType(e.target.value as SortType)}
-            className="px-3 py-1.5 text-sm rounded-md border border-gray-300 bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200 cursor-pointer focus:outline-none focus:border-blue-400 transition-colors"
+            aria-label="排序方式"
+            className="cursor-pointer rounded-md border border-input bg-surface px-3 py-1.5 text-sm transition-colors focus:border-ring"
         >
             {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>

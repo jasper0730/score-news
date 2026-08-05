@@ -11,7 +11,7 @@ export default async function Layout({
     return (
         <>
             <NavBar session={session} />
-            <section className="pt-[--navH]">{children}</section>
+            <section className="pt-nav">{children}</section>
         </>
     )
 }

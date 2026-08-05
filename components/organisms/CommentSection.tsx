@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { toastBox } from '@/utils/toast'
-import { getCommentsByPostId, createCommentAction, deleteCommentAction } from '@/actions/commentActions'
+import {
+    getCommentsByPostId,
+    createCommentAction,
+    deleteCommentAction,
+} from '@/actions/commentActions'
 import CommentForm from '@/components/molecules/CommentForm'
 import CommentList from '@/components/organisms/CommentList'
 import type { CommentType } from '@/types/news'
@@ -15,7 +19,12 @@ interface CommentSectionProps {
     onRatingUpdate?: (postId: string, newRating: number) => void
 }
 
-const CommentSection = ({ postId, postTitle, initialRating = 0, onRatingUpdate }: CommentSectionProps) => {
+const CommentSection = ({
+    postId,
+    postTitle,
+    initialRating = 0,
+    onRatingUpdate,
+}: CommentSectionProps) => {
     const { data: session, status } = useSession()
     const isAuthenticated = status === 'authenticated'
     const currentUserId = (session?.user as { id?: string })?.id
@@ -52,7 +61,12 @@ const CommentSection = ({ postId, postTitle, initialRating = 0, onRatingUpdate }
                 onRatingUpdate?.(postId, rating)
             }
 
-            const result = await createCommentAction(postId, postTitle, content, rating > 0 ? rating : undefined)
+            const result = await createCommentAction(
+                postId,
+                postTitle,
+                content,
+                rating > 0 ? rating : undefined
+            )
 
             if (result.success) {
                 setComments((prev) => {
@@ -92,9 +106,7 @@ const CommentSection = ({ postId, postTitle, initialRating = 0, onRatingUpdate }
 
     return (
         <div className="mt-8 border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">
-                評論 ({comments.length})
-            </h3>
+            <h3 className="mb-4 text-lg font-semibold">評論 ({comments.length})</h3>
 
             {isAuthenticated && (
                 <CommentForm
@@ -106,7 +118,7 @@ const CommentSection = ({ postId, postTitle, initialRating = 0, onRatingUpdate }
             )}
 
             {isLoading ? (
-                <p className="text-gray-400 text-center py-4">載入評論中...</p>
+                <p className="py-4 text-center text-subtle">載入評論中...</p>
             ) : (
                 <CommentList comments={comments} onDelete={handleDelete} />
             )}

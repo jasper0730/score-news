@@ -2,29 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================
-   CSS Custom Properties
-   ============================================ */
-:root {
-    --navH: 80px;
-}
+@layer base {
+    /* ============================================
+       Design tokens
+       顏色只寫 RGB 數值，讓 Tailwind 的 <alpha-value> 能組出 rgb(r g b / a)
+       ============================================ */
+    :root {
+        --nav-height: 80px;
+        --home-nav-height: 189px;
 
-/* ============================================
-   Base Styles
-   ============================================ */
-body {
-    color: rgb(0, 0, 0);
-    background: rgb(255, 255, 255);
-}
+        --color-background: 255 255 255;
+        --color-foreground: 0 0 0;
+        --color-surface: 255 255 255;
+        --color-card: 249 250 251;
+        --color-muted: 243 244 246;
+        --color-muted-foreground: 107 114 128;
+        --color-subtle: 156 163 175;
+        --color-border: 229 231 235;
+        --color-input: 209 213 219;
+        --color-ring: 96 165 250;
+        --color-primary: 37 99 235;
+        --color-primary-foreground: 255 255 255;
+        --color-danger: 239 68 68;
+        --color-success: 34 197 94;
+        --color-star: 234 179 8;
+        --color-brand-from: 37 99 235;
+        --color-brand-to: 147 51 234;
+    }
 
-[class='dark'],
-[class='dark'] body {
-    color: rgb(255, 255, 255);
-    background: rgba(0, 0, 0);
-}
+    .dark {
+        --color-background: 0 0 0;
+        --color-foreground: 255 255 255;
+        --color-surface: 17 24 39;
+        --color-card: 31 41 55;
+        --color-muted: 30 41 59;
+        --color-muted-foreground: 156 163 175;
+        --color-subtle: 107 114 128;
+        --color-border: 55 65 81;
+        --color-input: 55 65 81;
+        --color-ring: 96 165 250;
+        --color-primary: 59 130 246;
+        --color-primary-foreground: 255 255 255;
+        --color-danger: 248 113 113;
+        --color-success: 74 222 128;
+        --color-star: 250 204 21;
+        --color-brand-from: 96 165 250;
+        --color-brand-to: 192 132 252;
+    }
 
-::backdrop {
-    display: none;
+    body {
+        @apply bg-background text-foreground;
+    }
+
+    /* 全站統一的鍵盤焦點樣式；元件內若要停用滑鼠點擊的外框，
+       請用 focus-visible 而不是 focus:outline-none，避免鍵盤使用者失去焦點提示 */
+    :focus-visible {
+        @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+    }
 }
 
 /* ============================================
@@ -36,21 +70,18 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    border-radius: 0px;
-    background: rgba(100, 100, 100, 0.1);
+    background: rgb(var(--color-muted-foreground) / 0.1);
 }
 
 ::-webkit-scrollbar-thumb {
     border-radius: 2em;
-    background: rgba(100, 100, 100, 0.2);
+    background: rgb(var(--color-muted-foreground) / 0.25);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(100, 100, 100, 0.3);
+    background: rgb(var(--color-muted-foreground) / 0.4);
 }
 
 ::-webkit-scrollbar-thumb:active {
-    background: rgba(100, 100, 100, 0.8);
+    background: rgb(var(--color-muted-foreground) / 0.7);
 }
-
-

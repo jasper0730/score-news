@@ -18,15 +18,9 @@ const DashboardContent = ({ user }: DashboardContentProps) => {
         <div className="min-h-screen">
             <DashboardTabs activeTab={activeTab} onTabChange={setActiveTab} />
             <div className="px-4">
-                {activeTab === 'favorites' && (
-                    <DashboardNewsList user={user} />
-                )}
-                {activeTab === 'comments' && (
-                    <DashboardCommentList userId={user.id} />
-                )}
-                {activeTab === 'profile' && (
-                    <ProfileForm />
-                )}
+                {activeTab === 'favorites' && <DashboardNewsList user={user} />}
+                {activeTab === 'comments' && <DashboardCommentList userId={user.id} />}
+                {activeTab === 'profile' && <ProfileForm />}
             </div>
         </div>
     )

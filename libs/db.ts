@@ -52,7 +52,9 @@ export async function getDb(): Promise<Db> {
     return client.db()
 }
 
-export async function getCollection<T extends object = object>(name: string): Promise<Collection<T>> {
+export async function getCollection<T extends object = object>(
+    name: string
+): Promise<Collection<T>> {
     const db = await getDb()
     return db.collection<T>(name)
 }

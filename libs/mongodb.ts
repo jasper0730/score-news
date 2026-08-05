@@ -44,9 +44,7 @@ async function createClient(): Promise<MongoClient> {
                     resolveTxt(host).catch(() => [] as string[][]),
                 ])
 
-                const hosts = srvRecords
-                    .map((r) => `${r.name}:${r.port}`)
-                    .join(',')
+                const hosts = srvRecords.map((r) => `${r.name}:${r.port}`).join(',')
 
                 // 從 TXT 記錄取得 authSource 和 replicaSet 等參數
                 const txtOptions = (txtRecords.flat() as string[])

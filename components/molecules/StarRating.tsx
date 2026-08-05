@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { FaStar } from 'react-icons/fa'
+import { cn } from '@/libs/cn'
 
 interface StarRatingProps {
     value: number
@@ -21,7 +22,10 @@ const StarRating = ({ value, onChange, maxStars = 5 }: StarRatingProps) => {
                 return (
                     <FaStar
                         key={starValue}
-                        className={`cursor-pointer text-2xl ${isActive ? 'text-yellow-500' : 'text-gray-400'}`}
+                        className={cn(
+                            'cursor-pointer text-2xl transition-colors',
+                            isActive ? 'text-star' : 'text-subtle'
+                        )}
                         onMouseEnter={() => setHoverValue(starValue)}
                         onMouseLeave={() => setHoverValue(0)}
                         onClick={() => onChange(value === starValue ? 0 : starValue)}

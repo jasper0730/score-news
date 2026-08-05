@@ -28,10 +28,10 @@ export default async function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
-            <body className={`${inter.variable} ${oswald.variable}`}>
+        <html lang="zh-TW" suppressHydrationWarning>
+            <body className={`${inter.variable} ${oswald.variable} font-sans`}>
                 <Providers>
-                    <main className="h-[100dvh] flex flex-col">{children}</main>
+                    <main className="flex min-h-dvh flex-col">{children}</main>
                 </Providers>
             </body>
         </html>

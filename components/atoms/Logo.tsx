@@ -1,7 +1,10 @@
 const Logo = () => {
     return (
-        <div className="w-10 h-10 flex justify-center items-center rounded-full bg-gradient-to-br from-blue-600 to-purple-600 shadow-md" aria-label="NewsScore">
-            <span className="text-white font-bold text-lg">N</span>
+        <div
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand-from to-brand-to shadow-md"
+            aria-hidden="true"
+        >
+            <span className="text-lg font-bold text-white">N</span>
         </div>
     )
 }

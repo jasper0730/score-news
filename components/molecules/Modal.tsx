@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'motion/react'
+import { cn } from '@/libs/cn'
 
 interface ModalProps {
     open: boolean
@@ -11,7 +12,7 @@ interface ModalProps {
     className?: string
 }
 
-const Modal = ({ children, open, className = '', onClose }: ModalProps) => {
+const Modal = ({ children, open, className, onClose }: ModalProps) => {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -41,7 +42,7 @@ const Modal = ({ children, open, className = '', onClose }: ModalProps) => {
                     onClick={onClose}
                 >
                     <motion.div
-                        className={`relative ${className}`}
+                        className={cn('relative', className)}
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}

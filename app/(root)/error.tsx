@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
+import Button from '@/components/atoms/Button'
 
 interface ErrorPageProps {
     error: Error & { digest?: string }
@@ -14,18 +15,15 @@ const RootErrorPage = ({ error, reset }: ErrorPageProps) => {
     }, [error])
 
     return (
-        <div className="flex flex-col justify-center items-center min-h-screen gap-4">
-            <p className="text-xl text-gray-500">發生錯誤，請稍後再試</p>
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+            <p className="text-xl text-muted-foreground">發生錯誤，請稍後再試</p>
             <div className="flex gap-3">
-                <Link href="/" className="px-4 py-2 border rounded-lg hover:opacity-80">
-                    回首頁
+                <Link href="/">
+                    <Button variant="outline">回首頁</Button>
                 </Link>
-                <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:opacity-80 cursor-pointer"
-                    onClick={reset}
-                >
+                <Button variant="brand" onClick={reset}>
                     重試
-                </button>
+                </Button>
             </div>
         </div>
     )
