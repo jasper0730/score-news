@@ -33,7 +33,7 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
         if (query) {
             filter.$or = [
                 { title: { $regex: query, $options: 'i' } },
-                { description: { $regex: query, $options: 'i' } }
+                { description: { $regex: query, $options: 'i' } },
             ]
         }
 
@@ -42,14 +42,14 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
         if (sortType === 'date') {
             sortOption = { pubDate: -1 } // newest first
         } else if (sortType === 'rating') {
-            // Because rating is dynamically calculated, doing this purely in Mongo with aggregation is best, 
+            // Because rating is dynamically calculated, doing this purely in Mongo with aggregation is best,
             // but for a simple find, we can't sort by virtual fields easily unless we do an aggregation pipeline.
             // For now, if rating sort is requested, we will handle it via aggregation below.
         }
 
         // Pagination setup
         const skip = (page - 1) * limit
-        
+
         let allData: Record<string, unknown>[] = []
         let total = 0
 
@@ -62,21 +62,21 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
                         from: 'ratings',
                         localField: 'article_id',
                         foreignField: 'postId',
-                        as: 'ratingsData'
-                    }
+                        as: 'ratingsData',
+                    },
                 },
                 {
                     $addFields: {
-                        avgRating: { $avg: '$ratingsData.rate' }
-                    }
+                        avgRating: { $avg: '$ratingsData.rate' },
+                    },
                 },
                 { $sort: { avgRating: -1, pubDate: -1 } },
                 {
                     $facet: {
                         metadata: [{ $count: 'total' }],
-                        data: [{ $skip: skip }, { $limit: limit }]
-                    }
-                }
+                        data: [{ $skip: skip }, { $limit: limit }],
+                    },
+                },
             ]
             const aggResult = await newsCollection.aggregate(pipeline).toArray()
             allData = (aggResult[0].data as Record<string, unknown>[]) || []
@@ -120,16 +120,19 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
                 const userRatings = await ratingsCollection
                     .find({ userId, postId: { $in: postIds } })
                     .toArray()
-                userRatingMap = new Map(userRatings.map((r) => [r.postId as string, r.rate as number]))
+                userRatingMap = new Map(
+                    userRatings.map((r) => [r.postId as string, r.rate as number])
+                )
             }
         }
 
         const enrichedData = allData.map((item) => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { _id, ...rest } = item
-            const rate = sortType === 'rating'
-                ? (item.avgRating as number)
-                : ratingMap.get(item.article_id as string)
+            const rate =
+                sortType === 'rating'
+                    ? (item.avgRating as number)
+                    : ratingMap.get(item.article_id as string)
             return {
                 ...rest,
                 favorite: favoriteSet.has(item.article_id as string),
@@ -143,7 +146,7 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
             success: true,
             data: enrichedData,
             hasMore: total > skip + enrichedData.length,
-            total
+            total,
         }
     } catch (error) {
         console.error('Failed to get news:', error)
@@ -152,12 +155,14 @@ export async function getNewsActions(params: GetNewsParams): Promise<NewsRespons
             data: [],
             message: error instanceof Error ? error.message : '發生未知錯誤',
             hasMore: false,
-            total: 0
+            total: 0,
         }
     }
 }
 
-export async function getNewsByIds(articleIds: string[]): Promise<{ success: boolean; data: NewsDataType[] }> {
+export async function getNewsByIds(
+    articleIds: string[]
+): Promise<{ success: boolean; data: NewsDataType[] }> {
     try {
         if (articleIds.length === 0) return { success: true, data: [] }
 

@@ -22,10 +22,7 @@ function serializeComment(c: CommentDocument & { _id?: ObjectId }): CommentType 
 export async function getCommentsByPostId(postId: string) {
     try {
         const commentsCollection = await getCollection<CommentDocument>('comments')
-        const comments = await commentsCollection
-            .find({ postId })
-            .sort({ createdAt: -1 })
-            .toArray()
+        const comments = await commentsCollection.find({ postId }).sort({ createdAt: -1 }).toArray()
 
         return { success: true as const, comments: comments.map(serializeComment) }
     } catch (error) {
@@ -37,10 +34,7 @@ export async function getCommentsByPostId(postId: string) {
 export async function getCommentsByUserId(userId: string) {
     try {
         const commentsCollection = await getCollection<CommentDocument>('comments')
-        const comments = await commentsCollection
-            .find({ userId })
-            .sort({ createdAt: -1 })
-            .toArray()
+        const comments = await commentsCollection.find({ userId }).sort({ createdAt: -1 }).toArray()
 
         return { success: true as const, comments: comments.map(serializeComment) }
     } catch (error) {
@@ -49,7 +43,12 @@ export async function getCommentsByUserId(userId: string) {
     }
 }
 
-export async function createCommentAction(postId: string, postTitle: string, content: string, rating?: number) {
+export async function createCommentAction(
+    postId: string,
+    postTitle: string,
+    content: string,
+    rating?: number
+) {
     try {
         const auth = await requireAuth()
         if (!auth.authenticated) {
@@ -68,8 +67,7 @@ export async function createCommentAction(postId: string, postTitle: string, con
         const userDoc = await usersCollection.findOne({
             _id: new ObjectId(currentUser.id) as unknown as UserDocument['_id'],
         })
-        const displayName =
-            userDoc?.nickname || currentUser.name || currentUser.email || '匿名用戶'
+        const displayName = userDoc?.nickname || currentUser.name || currentUser.email || '匿名用戶'
 
         const now = new Date().toISOString()
 
