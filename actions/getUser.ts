@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { options } from '@/app/api/auth/[...nextauth]/options'
 import { getServerSession } from 'next-auth'
 import getMongoClient from '@/libs/mongodb'
@@ -11,9 +12,11 @@ export interface UserType {
     bio?: string
 }
 
-export const getSession = async () => {
+// layout 與 page 會在同一次 render 中各自呼叫，用 cache() 去重，
+// 同一個 request 內只實際解析一次 session
+export const getSession = cache(async () => {
     return await getServerSession(options)
-}
+})
 
 export const getUser = async (): Promise<UserType | null> => {
     try {

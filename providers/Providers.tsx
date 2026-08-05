@@ -2,13 +2,16 @@ import { ReactNode } from 'react'
 import { ThemeProvider } from './ThemeProvider'
 import ToasterProvider from './ToastProvider'
 import SessionProvider from './SessionProvider'
+import type { Session } from 'next-auth'
 
 type ProvidersProps = {
     children: ReactNode
+    session: Session | null
 }
-const Providers = ({ children }: ProvidersProps) => {
+
+const Providers = ({ children, session }: ProvidersProps) => {
     return (
-        <SessionProvider>
+        <SessionProvider session={session}>
             <ToasterProvider />
             <ThemeProvider
                 attribute="class"
