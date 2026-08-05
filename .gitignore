@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code
+# 個人本機設定（權限允許清單等），不進版控。
+# 若日後要共用團隊設定，放 .claude/settings.json，那個檔案不受此規則影響。
+.claude/settings.local.json
