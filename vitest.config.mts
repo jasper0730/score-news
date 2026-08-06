@@ -53,6 +53,7 @@ export default defineConfig({
                         'libs/auth.test.ts',
                         'libs/mongodb.test.ts',
                         'libs/db.test.ts',
+                        'libs/rss/**/*.test.ts',
                     ],
                 },
             },

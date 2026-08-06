@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+     <title>中央社即時新聞 國內政治</title>
+     <link>https://www.cna.com.tw/list/aipl.aspx</link>
+     <description>中央社即時新聞 國內政治</description>
+     <language>zh-tw</language>
+     <copyright>中央通訊社</copyright>
+     <lastBuildDate>Thu, 06 Aug 2026 10:55:10 +0800</lastBuildDate>
+     <ttl>15</ttl>
+     <image>
+       <title>中央社即時新聞 國內政治</title>
+       <width>114</width>
+       <height>67</height>
+       <link>https://www.cna.com.tw/list/aipl.aspx</link>
+       <url>https://imgcdn.cna.com.tw/www/images/cna_info/cnalogo_176x117.jpg</url>
+     </image>
+     <item>
+     <title>9艘共艦6架次共機擾台　國軍嚴密監控</title>
+     <link>https://www.cna.com.tw/news/aipl/202608060028.aspx</link>
+     <guid isPermaLink="false">CNA/2026-08-06/202608060028</guid>
+     <pubDate>Thu, 06 Aug 2026 09:24:57 +0800</pubDate>
+     <description><![CDATA[（中央社記者游凱翔台北6日電）國防部今天發布共機艦動態，統計自昨天上午6時起至今天上午6時止，偵獲9艘共艦、7艘公務船，及6架次共機越中線侵擾中部、西南及東部空域，國軍運用任務機艦及岸置飛彈系統嚴密監控與應處。]]></description>
+     </item>
+<item>
+     <title>AIT公開台美海巡合作　余茂春：東亞最重要局勢發展</title>
+     <link>https://www.cna.com.tw/news/aipl/202608060022.aspx</link>
+     <guid isPermaLink="false">CNA/2026-08-06/202608060022</guid>
+     <pubDate>Thu, 06 Aug 2026 08:50:44 +0800</pubDate>
+     <description><![CDATA[（中央社記者侯姿瑩華盛頓5日專電）中國對台灰色地帶侵擾不斷之際，AIT公開美國海岸防衛隊與台灣海巡署海上編隊航行的畫面。川普1.0中國政策重要智囊余茂春形容，這是「今年東亞最重要的安全局勢發展」，他呼籲，華府透過持續的海上存在，攜手夥伴共同因應北京威脅。]]></description>
+     </item>
+<item>
+     <title>美次卿會谷立言：美台合作　確保AI關鍵供應鏈安全</title>
+     <link>https://www.cna.com.tw/news/aipl/202608060013.aspx</link>
+     <guid isPermaLink="false">CNA/2026-08-06/202608060013</guid>
+     <pubDate>Thu, 06 Aug 2026 07:31:23 +0800</pubDate>
+     <description><![CDATA[（中央社記者侯姿瑩華盛頓5日專電）美中兩國競逐全球人工智慧（AI）領導地位之際，美國國務院次卿海柏格（Jacob Helberg）與美國在台協會處長谷立言會面後發文表示，台灣與美國正透過「矽盛世」倡議展開合作，以確保推動AI革命的關鍵供應鏈安全。]]></description>
+     </item>
+</channel>
+</rss>
