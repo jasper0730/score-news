@@ -4,18 +4,31 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 import { AnimatePresence, motion } from 'motion/react'
-import { MdDashboard } from 'react-icons/md'
+import { MdDashboard, MdHome } from 'react-icons/md'
 import { RiLogoutBoxLine } from 'react-icons/ri'
 import Avatar from '@/components/atoms/Avatar'
 
+/**
+ * 選單裡的導覽項目要指向哪裡。
+ * 前台 header 指向後台，後台 header 指向前台——兩邊互為對方的去處。
+ */
+type NavTarget = 'dashboard' | 'home'
+
 interface UserMenuProps {
     image?: string | null
+    navTarget?: NavTarget
+}
+
+const NAV_ITEMS: Record<NavTarget, { href: string; label: string; Icon: typeof MdDashboard }> = {
+    dashboard: { href: '/dashboard', label: '前往後台', Icon: MdDashboard },
+    home: { href: '/', label: '前往前台', Icon: MdHome },
 }
 
 const ITEM_CLASSES =
     'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors duration-200 hover:bg-muted'
 
-const UserMenu = ({ image }: UserMenuProps) => {
+const UserMenu = ({ image, navTarget = 'dashboard' }: UserMenuProps) => {
+    const { href, label, Icon } = NAV_ITEMS[navTarget]
     const [open, setOpen] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
     const triggerRef = useRef<HTMLButtonElement>(null)
@@ -76,12 +89,12 @@ const UserMenu = ({ image }: UserMenuProps) => {
                     >
                         <Link
                             role="menuitem"
-                            href="/dashboard"
+                            href={href}
                             onClick={() => setOpen(false)}
                             className={ITEM_CLASSES}
                         >
-                            <MdDashboard size={16} />
-                            <span>前往後台</span>
+                            <Icon size={16} />
+                            <span>{label}</span>
                         </Link>
                         <button
                             role="menuitem"

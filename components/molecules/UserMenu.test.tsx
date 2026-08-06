@@ -35,7 +35,7 @@ describe('UserMenu', () => {
         expect(getTrigger()).toHaveAttribute('aria-expanded', 'false')
     })
 
-    it('提供前往後台的連結', async () => {
+    it('預設提供前往後台的連結', async () => {
         render(<UserMenu />)
 
         await userEvent.click(getTrigger())
@@ -44,6 +44,23 @@ describe('UserMenu', () => {
             'href',
             '/dashboard'
         )
+    })
+
+    it('navTarget=home 時改為前往前台——後台 header 用這個', async () => {
+        render(<UserMenu navTarget="home" />)
+
+        await userEvent.click(getTrigger())
+
+        expect(screen.getByRole('menuitem', { name: '前往前台' })).toHaveAttribute('href', '/')
+        expect(screen.queryByRole('menuitem', { name: '前往後台' })).not.toBeInTheDocument()
+    })
+
+    it('不論指向哪裡都有登出選項', async () => {
+        render(<UserMenu navTarget="home" />)
+
+        await userEvent.click(getTrigger())
+
+        expect(screen.getByRole('menuitem', { name: '登出' })).toBeInTheDocument()
     })
 
     it('點選單以外的地方會收合', async () => {

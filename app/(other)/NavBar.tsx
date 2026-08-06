@@ -1,12 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import BrandLink from '@/components/molecules/BrandLink'
 import ThemeSwitcher from '@/components/atoms/ThemeSwitcher'
 import RegisterButton from '@/components/organisms/RegisterButton'
-import Avatar from '@/components/atoms/Avatar'
+import UserMenu from '@/components/molecules/UserMenu'
 import type { UserType } from '@/types/user'
-import { IoArrowBack } from 'react-icons/io5'
 
 interface NavBarProps {
     session: UserType | null
@@ -18,20 +16,14 @@ const NavBar = ({ session }: NavBarProps) => {
             <div className="flex items-center">
                 <BrandLink />
             </div>
-            <div className="flex items-center gap-4">
-                {session && (
-                    <Link
-                        className="flex items-center gap-1 text-sm text-muted-foreground transition duration-300 hover:text-foreground"
-                        href="/"
-                    >
-                        <IoArrowBack size={16} />
-                        <span>前台</span>
-                    </Link>
-                )}
-                <div className="h-5 w-px bg-border" />
-                <RegisterButton type={session ? 'logout' : 'login'} />
+            <div className="flex items-center gap-3 md:gap-4">
                 <ThemeSwitcher />
-                {session && <Avatar src={session.image} size="md" priority />}
+                {/* 與前台一致：「前往前台」與「登出」都收進頭像下拉，未登入時只留登入鈕 */}
+                {session ? (
+                    <UserMenu image={session.image} navTarget="home" />
+                ) : (
+                    <RegisterButton type="login" />
+                )}
             </div>
         </nav>
     )

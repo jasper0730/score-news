@@ -38,6 +38,9 @@ export default defineConfig({
                         'store/**/*.test.{ts,tsx}',
                         'utils/**/*.test.{ts,tsx}',
                         'libs/cn.test.ts',
+                        // app/ 底下的元件測試。副檔名刻意與 server project 的
+                        // 'app/**/*.test.ts' 區隔，同一個目錄才能兩種環境並存
+                        'app/**/*.test.tsx',
                     ],
                 },
             },
