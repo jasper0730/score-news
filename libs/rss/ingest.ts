@@ -30,6 +30,8 @@ export interface IngestOptions {
     /** 同時抓取的文章頁數（補圖用） */
     imageConcurrency?: number
     now?: Date
+    /** 進度回報。首次匯入要補上千張圖，沒有它完全看不出是在跑還是卡住 */
+    onProgress?: (message: string) => void
     /** 測試注入用 */
     fetchFeed?: (url: string) => Promise<string>
     fetchImages?: typeof fetchOgImages
@@ -114,6 +116,7 @@ export async function ingestNews(options: IngestOptions = {}): Promise<IngestSta
         concurrency = 4,
         imageConcurrency = 5,
         now = new Date(),
+        onProgress = () => {},
         fetchFeed = defaultFetchFeed,
         fetchImages = fetchOgImages,
     } = options
@@ -154,6 +157,9 @@ export async function ingestNews(options: IngestOptions = {}): Promise<IngestSta
 
     const articles = [...byArticleId.values()]
     stats.uniqueArticles = articles.length
+    onProgress(
+        `抓取完成：${stats.feedsOk} 個 feed，${stats.itemsParsed} 則，去重後 ${articles.length} 篇`
+    )
     if (articles.length === 0) return stats
 
     const news = await getCollection<NewsDocument>('news')
@@ -172,11 +178,13 @@ export async function ingestNews(options: IngestOptions = {}): Promise<IngestSta
     const needImage = articles.filter(
         (a) => !existingIds.has(a.articleId) && a.source.imageSource === 'page' && !a.item.imageUrl
     )
+    onProgress(`需要補圖 ${needImage.length} 篇（已在庫的 ${existingIds.size} 篇略過）`)
     const imageMap = await fetchImages(
         needImage.map((a) => a.item.link),
         imageConcurrency
     )
     stats.imagesFetched = needImage.length
+    onProgress(`補圖完成：取得 ${imageMap.size} / ${needImage.length}`)
 
     // 4. 一次寫入
     const operations = articles.map((article) =>

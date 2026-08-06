@@ -78,4 +78,23 @@ export function getMongoClient(): Promise<MongoClient> {
     return globalWithMongo._mongoClientPromise
 }
 
+/**
+ * 關閉連線並清掉快取。
+ *
+ * 給一次性腳本用。連線會讓 Node 的 event loop 一直有事可做，
+ * 不關的話腳本即使工作做完也不會退出——在 CI 上就是跑到 timeout 被判失敗。
+ * 長駐的 Next.js server 不該呼叫這個，連線本來就要重複使用。
+ */
+export async function closeMongoClient(): Promise<void> {
+    const pending = globalWithMongo._mongoClientPromise
+    if (!pending) return
+    globalWithMongo._mongoClientPromise = undefined
+    try {
+        const client = await pending
+        await client.close()
+    } catch {
+        // 連線本來就失敗過的話沒有東西要關
+    }
+}
+
 export default getMongoClient
