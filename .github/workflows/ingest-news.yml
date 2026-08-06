@@ -1,0 +1,40 @@
+name: Ingest News
+
+on:
+  schedule:
+    # 每小時的第 5 分鐘。刻意避開整點——整點是 GitHub Actions 的排程尖峰，
+    # 免費 runner 的排隊延遲在那個時間最明顯。
+    - cron: '5 * * * *'
+  # 手動觸發，用於首次匯入或排查問題
+  workflow_dispatch:
+
+# 前一次還沒跑完就不要再開一個。ingestNews 用 upsert 本身可重入，
+# 但同時跑只會重複打各媒體的站台，沒有好處。
+concurrency:
+  group: ingest-news
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    # 正常約 1～2 分鐘；首次匯入要補約 685 張圖會久一些。
+    # 設上限避免某個來源卡住時空耗 runner 時數。
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ingest RSS feeds
+        run: npx tsx scripts/ingestNews.ts
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}

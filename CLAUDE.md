@@ -51,9 +51,18 @@ npm test -- --project server   # 只跑 server 那組
 
 ```bash
 npx tsx scripts/createIndexes.ts   # 建立查詢所需索引，冪等，可重複執行
-npx tsx scripts/seedNews.ts        # 從靜態資料匯入新聞
-npx tsx scripts/seedFromApi.ts     # 從 Newsdata.io 抓取；--force 可強制覆蓋
+npx tsx scripts/ingestNews.ts      # 從 RSS 抓取新聞（upsert，可重複執行）
+npx tsx scripts/checkFeeds.ts      # RSS 來源健康檢查，只讀不寫
 ```
+
+⚠️ 破壞性，需明確確認：
+
+```bash
+npx tsx scripts/resetNews.ts --yes-i-really-mean-it   # 清空新聞與所有評分／評論／收藏
+```
+
+`scripts/seedNews.ts` 與 `scripts/seedFromApi.ts` 是切換到 RSS 之前的舊工具，
+`seedFromApi` 會先 deleteMany 再 insert，不可在正式資料上執行。
 
 **送出前的自我檢查**：`npx tsc --noEmit && npm run lint && npm test`。
 CI（`.github/workflows/ci.yml`）跑的是 lint → test → build，三者皆須通過。
@@ -302,7 +311,39 @@ await commentsCollection.deleteOne({ _id: new ObjectId(commentId), userId: curre
   單一元件自己的樣式寫在元件裡。
 - 字級用 Tailwind 的 `text-*`——行高已為中文放寬過，不要另外覆寫 `leading`。
 
-### 5.5 測試
+### 5.5 新聞資料源（RSS）
+
+新聞來自 7 家台灣媒體公開的 RSS，共 43 個 feed，程式在 `libs/rss/`：
+
+| 檔案                | 職責                                           |
+| ------------------- | ---------------------------------------------- |
+| `sources.ts`        | 來源清單與各家的圖片取得策略                   |
+| `parser.ts`         | RSS 2.0／Atom → 統一的 `FeedItem`              |
+| `toNewsDocument.ts` | `FeedItem` → `NewsDocument`，產生 `article_id` |
+| `ogImage.ts`        | feed 沒給圖時抓文章頁的 OpenGraph              |
+| `ingest.ts`         | 抓取 → 去重 → 補圖 → upsert                    |
+
+**只存標題與摘要並連回原站，不抓全文。** 這是版權上站得住腳的做法，
+前端在 `content` 為空時本來就會顯示 `description` 並附「閱讀完整原文」連結。
+
+三條不能違反的規則：
+
+1. **`article_id` 的產生規則不可變更。** 它是 `ratings`／`comments`／`favorites`
+   唯一的關聯鍵，改了等於所有使用者的評分與留言變成孤兒資料。
+   規則是 `sha1(outlet + guid)`，沒有 guid 的來源退回 `sha1(outlet + link)`。
+2. **ingestion 只 upsert，永不刪除。** 刪掉新聞會讓關聯資料查不到對應內容。
+3. **`views` 與 `image_url` 不可被例行更新覆蓋。** `views` 只放 `$setOnInsert`；
+   `image_url` 只有這次真的拿到圖才 `$set`，否則補圖失敗會把好圖換成預設圖。
+   兩者不能同時出現在 `$set` 與 `$setOnInsert`，MongoDB 會拒絕衝突路徑。
+
+新增來源時：`sources.ts` 加一筆，跑 `checkFeeds.ts` 確認可解析，
+若圖片來源不同要一併確認 `parser.ts` 認得該欄位、`next.config.ts` 的
+`remotePatterns` 涵蓋該網域。測試一律用 `test/fixtures/rss/` 的真實 feed，不打網路。
+
+抓取由 GitHub Actions 每小時排程（`.github/workflows/ingest-news.yml`），
+來源健康檢查每週一次。
+
+### 5.6 測試
 
 細節見 README 的「測試」章節，此處只列硬規則：
 
