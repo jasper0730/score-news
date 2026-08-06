@@ -21,8 +21,11 @@ export interface FakeCollection {
     findOne: Mock
     countDocuments: Mock
     insertOne: Mock
+    insertMany: Mock
     updateOne: Mock
     deleteOne: Mock
+    deleteMany: Mock
+    bulkWrite: Mock
     findOneAndUpdate: Mock
     /** find() 回傳的 cursor，用來設定 toArray 的結果或斷言 sort/skip/limit */
     cursor: FakeCursor
@@ -51,8 +54,16 @@ function createFakeCollection(): FakeCollection {
         findOne: vi.fn(async () => null),
         countDocuments: vi.fn(async () => 0),
         insertOne: vi.fn(async () => ({ acknowledged: true, insertedId: 'inserted-id' })),
+        insertMany: vi.fn(async () => ({ acknowledged: true, insertedCount: 0 })),
         updateOne: vi.fn(async () => ({ acknowledged: true, modifiedCount: 1 })),
         deleteOne: vi.fn(async () => ({ acknowledged: true, deletedCount: 1 })),
+        deleteMany: vi.fn(async () => ({ acknowledged: true, deletedCount: 0 })),
+        bulkWrite: vi.fn(async () => ({
+            acknowledged: true,
+            upsertedCount: 0,
+            modifiedCount: 0,
+            matchedCount: 0,
+        })),
         findOneAndUpdate: vi.fn(async () => null),
     }
 }
