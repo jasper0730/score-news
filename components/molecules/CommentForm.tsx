@@ -37,6 +37,8 @@ const CommentForm = ({ initialRating = 0, initialContent = '', onSubmit }: Comme
     }
 
     const isDisabled = isLoading || rating === 0
+    // 帶著 initialRating 進來代表這篇已經評論過，這次是修改而非新增
+    const submitLabel = initialRating > 0 ? '修改評論' : '送出評論'
 
     return (
         <div className="mt-4 flex flex-col gap-3">
@@ -58,7 +60,7 @@ const CommentForm = ({ initialRating = 0, initialContent = '', onSubmit }: Comme
                     {content.length}/{MAX_LENGTH}
                 </span>
                 <Button variant="ghost" size="sm" disabled={isDisabled} onClick={handleSubmit}>
-                    {isLoading ? '傳送中...' : initialRating > 0 ? '修改評論' : '送出評論'}
+                    {isLoading ? '傳送中...' : submitLabel}
                 </Button>
             </div>
         </div>
