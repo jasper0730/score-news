@@ -53,6 +53,52 @@ describe('NewsCard 內容', () => {
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
     })
 
+    it('顯示點閱數', () => {
+        renderCard({ article: makeArticle({ views: 42 }) })
+
+        expect(screen.getByRole('img', { name: '點閱 42 次' })).toHaveTextContent('42')
+    })
+
+    it('點閱數加上千分位，數字大時才讀得出量級', () => {
+        renderCard({ article: makeArticle({ views: 12345 }) })
+
+        expect(screen.getByRole('img', { name: /點閱/ })).toHaveTextContent('12,345')
+    })
+
+    it('沒有人看過時顯示 0，不是空白也不是 undefined', () => {
+        renderCard({ article: makeArticle({ views: 0 }) })
+
+        expect(screen.getByRole('img', { name: '點閱 0 次' })).toBeInTheDocument()
+    })
+
+    it('資料缺少 views 欄位時補 0', () => {
+        // 剛從 RSS 匯入、還沒被開啟過的新聞會是這個狀態
+        renderCard({ article: makeArticle({ views: undefined }) })
+
+        expect(screen.getByRole('img', { name: '點閱 0 次' })).toBeInTheDocument()
+    })
+
+    it('點閱數更新時畫面跟著變——開啟新聞後列表會收到新數字', () => {
+        const { rerender } = render(
+            <NewsCard
+                article={makeArticle({ views: 10 })}
+                favorite={false}
+                onFavoriteClick={vi.fn()}
+            />
+        )
+        expect(screen.getByRole('img', { name: '點閱 10 次' })).toBeInTheDocument()
+
+        rerender(
+            <NewsCard
+                article={makeArticle({ views: 11 })}
+                favorite={false}
+                onFavoriteClick={vi.fn()}
+            />
+        )
+
+        expect(screen.getByRole('img', { name: '點閱 11 次' })).toBeInTheDocument()
+    })
+
     it('顯示評分星等', () => {
         renderCard()
 

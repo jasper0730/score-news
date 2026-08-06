@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
-import { FaHeart, FaRegHeart } from 'react-icons/fa'
+import { FaHeart, FaRegHeart, FaRegEye } from 'react-icons/fa'
 import { NewsDataType } from '@/types/news'
 import StarDisplay from '@/components/molecules/StarDisplay'
 import { cn } from '@/libs/cn'
@@ -18,6 +18,8 @@ interface NewsCardProps {
 const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardProps) => {
     const { status } = useSession()
     const isAuthenticated = status === 'authenticated'
+    // 剛匯入的新聞沒有 views 欄位，補 0 以免畫面出現 undefined
+    const views = article.views ?? 0
 
     return (
         <article className={cn(CARD_CLASSES, 'flex flex-col shadow-sm')}>
@@ -26,7 +28,20 @@ const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardP
                 <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                     {article.description}
                 </p>
-                <time className="mt-2 text-sm text-subtle">日期：{article.pubDate}</time>
+                {/* 日期與點閱數同屬次要資訊，併成一行避免卡片被撐高 */}
+                <div className="mt-2 flex items-center gap-3 text-sm text-subtle">
+                    <time>日期：{article.pubDate}</time>
+                    {/* 用 role="img" 給文字替代，與 StarDisplay 一致——
+                        圖示本身對螢幕閱讀器沒有意義，數字也需要單位才讀得懂 */}
+                    <span
+                        className="flex shrink-0 items-center gap-1 tabular-nums"
+                        role="img"
+                        aria-label={`點閱 ${views} 次`}
+                    >
+                        <FaRegEye />
+                        {views.toLocaleString('zh-TW')}
+                    </span>
+                </div>
 
                 <div className="mt-4 flex items-center">
                     {article.source_icon && (
