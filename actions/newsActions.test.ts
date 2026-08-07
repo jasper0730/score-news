@@ -52,12 +52,22 @@ describe('getNewsActions', () => {
         it.each([
             ['date_desc', { pubDate: -1 }],
             ['date_asc', { pubDate: 1 }],
+            ['views', { views: -1, pubDate: -1 }],
         ] as const)('sortType=%s 對應排序條件 %o', async (sortType, expected) => {
             const news = collection('news')
 
             await getNewsActions({ sortType })
 
             expect(news.cursor.sort).toHaveBeenCalledWith(expected)
+        })
+
+        it('最多點閱走一般查詢而非 aggregate——views 是文件上的欄位且有索引', async () => {
+            const news = collection('news')
+
+            await getNewsActions({ sortType: 'views' })
+
+            expect(news.find).toHaveBeenCalled()
+            expect(news.aggregate).not.toHaveBeenCalled()
         })
 
         it('第 3 頁會跳過前面兩頁的筆數', async () => {

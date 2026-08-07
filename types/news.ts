@@ -48,6 +48,7 @@ export type SortType =
     | 'date_asc'
     | 'rating_desc'
     | 'rating_asc'
+    | 'views'
     | 'favorites'
     | 'likes'
 

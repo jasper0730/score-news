@@ -60,9 +60,15 @@ type AggregatedSort = (typeof AGGREGATED_SORTS)[number]
 const usesAggregateSort = (sortType: SortType): sortType is AggregatedSort =>
     (AGGREGATED_SORTS as readonly string[]).includes(sortType)
 
+/**
+ * 可以直接用索引排序的選項。
+ * views 是新聞文件上的欄位（有 views_desc 索引），不像收藏與按讚
+ * 需要 $lookup 其他 collection，所以走一般查詢就好，成本低得多。
+ */
 const SORT_OPTIONS: Record<Exclude<SortType, AggregatedSort>, Sort> = {
     date_desc: { pubDate: -1 },
     date_asc: { pubDate: 1 },
+    views: { views: -1, pubDate: -1 },
 }
 
 /**

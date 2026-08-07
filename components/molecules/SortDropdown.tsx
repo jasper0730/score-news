@@ -9,6 +9,7 @@ const SORT_OPTIONS: { value: SortType; label: string }[] = [
     { value: 'date_asc', label: '最舊到最新' },
     { value: 'rating_desc', label: '評分：高到低' },
     { value: 'rating_asc', label: '評分：低到高' },
+    { value: 'views', label: '最多點閱數' },
     { value: 'favorites', label: '最多收藏' },
     { value: 'likes', label: '最多讚' },
 ]
