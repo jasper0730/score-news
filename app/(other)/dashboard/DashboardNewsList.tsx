@@ -113,7 +113,7 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
 
     return (
         <>
-            <div className="min-h-screen px-4 py-10">
+            <div className="px-4 py-10">
                 <div className={NEWS_GRID_CLASSES}>
                     {newsData.map((article) => (
                         <NewsCard

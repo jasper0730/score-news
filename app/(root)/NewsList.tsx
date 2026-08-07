@@ -31,7 +31,7 @@ const NewsList = ({ data }: NewsListProps) => {
     }
 
     return (
-        <div className="min-h-screen px-4 py-10">
+        <div className="px-4 pb-10 pt-4">
             <NewsInfiniteGrid
                 items={items}
                 total={total}
