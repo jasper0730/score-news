@@ -17,6 +17,10 @@ export const options: NextAuthOptions = {
         GoogleProvider({
             clientId: process.env.OAUTH_GOOGLE_ID as string,
             clientSecret: process.env.OAUTH_GOOGLE_SECRET as string,
+            // 強制顯示帳號選擇器。不加的話，瀏覽器已登入單一 Google 帳號時
+            // 會直接用那個帳號完成流程，使用者沒有機會選——而選錯帳號的症狀是
+            // OAuthAccountNotLinked，訊息完全看不出「你只是選到別的帳號」。
+            authorization: { params: { prompt: 'select_account' } },
         }),
         FacebookProvider({
             clientId: process.env.OAUTH_FACEBOOK_ID as string,
