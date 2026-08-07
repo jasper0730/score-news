@@ -23,8 +23,11 @@ function makeComment(overrides: Partial<CommentType> = {}): CommentType {
     }
 }
 
-const signedInAs = (id: string | undefined) =>
-    useSession.mockReturnValue({ data: id ? { user: { id } } : null, status: 'authenticated' })
+const signedInAs = (id: string | undefined, isAdmin = false) =>
+    useSession.mockReturnValue({
+        data: id ? { user: { id, isAdmin } } : null,
+        status: 'authenticated',
+    })
 
 describe('CommentList 顯示', () => {
     it('沒有評論時顯示邀請留言的提示', () => {
@@ -141,6 +144,43 @@ describe('CommentList 刪除', () => {
         render(<CommentList comments={[makeComment({ userId: 'u1' })]} />)
 
         expect(screen.queryByRole('button', { name: '刪除評論' })).not.toBeInTheDocument()
+    })
+
+    it('管理員可以刪任何人的留言', async () => {
+        signedInAs('u1', true)
+        render(
+            <CommentList
+                comments={[
+                    makeComment({ _id: 'mine', userId: 'u1' }),
+                    makeComment({ _id: 'others', userId: 'u2' }),
+                ]}
+                onDelete={vi.fn()}
+            />
+        )
+
+        expect(screen.getAllByRole('button', { name: /刪除評論/ })).toHaveLength(2)
+    })
+
+    it('管理員刪別人的留言時標示出來，避免誤按', async () => {
+        signedInAs('u1', true)
+        render(<CommentList comments={[makeComment({ userId: 'u2' })]} onDelete={vi.fn()} />)
+
+        expect(screen.getByRole('button', { name: '刪除評論（管理員）' })).toBeInTheDocument()
+    })
+
+    it('管理員刪自己的留言仍是一般的刪除', () => {
+        signedInAs('u1', true)
+        render(<CommentList comments={[makeComment({ userId: 'u1' })]} onDelete={vi.fn()} />)
+
+        expect(screen.getByRole('button', { name: '刪除評論' })).toBeInTheDocument()
+    })
+
+    it('未登入者即使 session 帶了 isAdmin 也看不到刪除鈕', () => {
+        // 這只是介面防護，真正的檢查在 server action
+        signedInAs(undefined)
+        render(<CommentList comments={[makeComment()]} onDelete={vi.fn()} />)
+
+        expect(screen.queryByRole('button', { name: /刪除評論/ })).not.toBeInTheDocument()
     })
 
     it('點刪除時帶出該評論的 id', async () => {

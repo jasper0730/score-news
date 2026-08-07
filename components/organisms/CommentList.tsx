@@ -34,6 +34,7 @@ const StarBadge = ({ rating }: { rating: number }) => (
 const CommentList = ({ comments, onDelete }: CommentListProps) => {
     const { data: session } = useSession()
     const currentUserId = session?.user?.id
+    const isAdmin = session?.user?.isAdmin === true
     const [filterRating, setFilterRating] = useState<number | null>(null)
 
     const filtered = filterRating ? comments.filter((c) => c.rating === filterRating) : comments
@@ -100,11 +101,17 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
                                     <time className="text-xs text-subtle">
                                         {formatDate(comment.createdAt)}
                                     </time>
-                                    {currentUserId === comment.userId && onDelete && (
+                                    {/* 管理員可以刪任何一則；一般使用者只能刪自己的。
+                                        這裡只是介面，真正的判斷在 deleteCommentAction 裡。 */}
+                                    {onDelete && (isAdmin || currentUserId === comment.userId) && (
                                         <button
                                             className="cursor-pointer text-danger transition duration-300 hover:opacity-70"
                                             onClick={() => onDelete(comment._id)}
-                                            aria-label="刪除評論"
+                                            aria-label={
+                                                currentUserId === comment.userId
+                                                    ? '刪除評論'
+                                                    : '刪除評論（管理員）'
+                                            }
                                         >
                                             <MdDeleteOutline size={18} />
                                         </button>

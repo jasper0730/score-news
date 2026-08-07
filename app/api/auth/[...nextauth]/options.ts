@@ -6,6 +6,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import getMongoClient from '@/libs/mongodb'
 import bcrypt from 'bcryptjs'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
+import { isAdminEmail } from '@/libs/admin'
 
 export const options: NextAuthOptions = {
     adapter: MongoDBAdapter(getMongoClient()),
@@ -75,6 +76,11 @@ export const options: NextAuthOptions = {
         async session({ session, token }) {
             if (session.user && token.sub) {
                 session.user.id = token.sub
+            }
+            // 讓前端知道要不要顯示管理員專用的操作。這只是介面用途——
+            // 真正的權限檢查在 server action 裡，不能只靠這個值。
+            if (session.user) {
+                session.user.isAdmin = isAdminEmail(session.user.email)
             }
             return session
         },

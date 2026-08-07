@@ -8,13 +8,19 @@ vi.mock('@/libs/db', async () => ({
 }))
 
 const requireAuth = vi.hoisted(() => vi.fn())
-vi.mock('@/libs/auth', () => ({ requireAuth }))
+const requireAuthWithRole = vi.hoisted(() => vi.fn())
+vi.mock('@/libs/auth', () => ({ requireAuth, requireAuthWithRole }))
 
 const { getCommentsByPostId, getCommentsByUserId, createCommentAction, deleteCommentAction } =
     await import('@/actions/commentActions')
 
 beforeEach(() => {
     requireAuth.mockResolvedValue({ authenticated: true, user: makeUser() })
+    requireAuthWithRole.mockResolvedValue({
+        authenticated: true,
+        user: makeUser(),
+        isAdmin: false,
+    })
 })
 
 describe('getCommentsByPostId', () => {
@@ -194,7 +200,10 @@ describe('deleteCommentAction', () => {
     const commentId = new ObjectId().toString()
 
     it('未登入時拒絕', async () => {
-        requireAuth.mockResolvedValue({ authenticated: false, error: 'User not authenticated' })
+        requireAuthWithRole.mockResolvedValue({
+            authenticated: false,
+            error: 'User not authenticated',
+        })
 
         const result = await deleteCommentAction(commentId)
 
@@ -240,6 +249,40 @@ describe('deleteCommentAction', () => {
         expect(await deleteCommentAction('not-an-object-id')).toEqual({
             success: false,
             error: 'Internal server error',
+        })
+    })
+
+    describe('管理員', () => {
+        it('可以刪任何人的留言——刪除條件不綁 userId', async () => {
+            requireAuthWithRole.mockResolvedValue({
+                authenticated: true,
+                user: makeUser(),
+                isAdmin: true,
+            })
+
+            await deleteCommentAction(commentId)
+
+            expect(collection('comments').deleteOne).toHaveBeenCalledWith({
+                _id: new ObjectId(commentId),
+            })
+        })
+
+        it('一般使用者的條件仍然綁 userId，刪不掉別人的', async () => {
+            // 這是整個功能最重要的一條：server action 是公開端點，
+            // 前端不顯示按鈕擋不住任何人帶著別人的 commentId 呼叫
+            await deleteCommentAction(commentId)
+
+            expect(collection('comments').deleteOne).toHaveBeenCalledWith({
+                _id: new ObjectId(commentId),
+                userId: USER_ID,
+            })
+        })
+
+        it('權限判定完全來自伺服器，呼叫端無從影響', async () => {
+            // deleteCommentAction 只收 commentId，沒有任何參數能左右權限
+            await deleteCommentAction(commentId)
+
+            expect(requireAuthWithRole).toHaveBeenCalledWith()
         })
     })
 })

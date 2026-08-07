@@ -264,7 +264,23 @@ await commentsCollection.deleteOne({ _id: new ObjectId(commentId), userId: curre
 
 **（5）`ObjectId` 不得跨越 server／client 邊界。**回傳前 `.toString()`。
 
-**（6）新增查詢時同步更新 `scripts/createIndexes.ts`。**
+**（6）管理員權限由環境變數決定，不放進資料庫。**
+
+`ADMIN_EMAILS`（逗號分隔）列出的 Email 即為管理員，判定收在 `libs/admin.ts`
+的 `isAdminEmail()`，呼叫端一律經過它、不直接讀環境變數。
+
+這樣做是為了把權限留在資料平面之外：連線字串外流時，攻擊者仍無法把自己改成
+管理員——他還需要部署權限這一道獨立的關卡。代價是換人要重新部署，以目前
+只有一位管理員的規模可以接受。日後若要改成 `UserDocument.role`，只需改那個
+函式與它的測試。
+
+⚠️ `/api/signup` 沒有驗證 Email 所有權，**把某個 Email 加進清單前務必先用它
+註冊完帳號**，否則等於留下一個無主的管理員身分讓人認領。
+
+`session.user.isAdmin` 只供介面決定要不要顯示管理員操作，**不是授權依據**——
+server action 必須自己再判一次（見 `deleteCommentAction`）。
+
+**（7）新增查詢時同步更新 `scripts/createIndexes.ts`。**
 
 ### 5.3 元件撰寫
 

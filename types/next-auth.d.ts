@@ -12,6 +12,12 @@ declare module 'next-auth' {
     interface Session {
         user: {
             id?: string
+            /**
+             * 是否為管理員。僅供介面判斷要不要顯示管理員專用操作，
+             * 真正的權限檢查在 server action 內重做一次——
+             * 這個值來自 client 端的 session，不能當作授權依據。
+             */
+            isAdmin?: boolean
         } & DefaultSession['user']
     }
 }

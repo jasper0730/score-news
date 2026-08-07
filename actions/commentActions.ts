@@ -1,7 +1,7 @@
 'use server'
 
 import { ObjectId } from 'mongodb'
-import { requireAuth } from '@/libs/auth'
+import { requireAuth, requireAuthWithRole } from '@/libs/auth'
 import { getCollection, CommentDocument, UserDocument } from '@/libs/db'
 import type { CommentType } from '@/types/news'
 
@@ -102,12 +102,10 @@ export async function createCommentAction(
 
 export async function deleteCommentAction(commentId: string) {
     try {
-        const auth = await requireAuth()
+        const auth = await requireAuthWithRole()
         if (!auth.authenticated) {
             return { success: false as const, error: auth.error }
         }
-
-        const currentUser = auth.user
 
         if (!commentId) {
             return { success: false as const, error: 'commentId is required' }
@@ -115,10 +113,16 @@ export async function deleteCommentAction(commentId: string) {
 
         const commentsCollection = await getCollection<CommentDocument>('comments')
 
-        const result = await commentsCollection.deleteOne({
-            _id: new ObjectId(commentId),
-            userId: currentUser.id,
-        })
+        // 一般使用者的刪除條件必須綁 userId——不能「先查出來、比對擁有者、再刪」，
+        // 那中間有時間差，也多一次查詢。管理員則不受這個條件限制。
+        //
+        // 這個判斷一定要在伺服器端做：前端不顯示按鈕只是介面，
+        // server action 是公開端點，任何人都能帶任意 commentId 呼叫。
+        const result = await commentsCollection.deleteOne(
+            auth.isAdmin
+                ? { _id: new ObjectId(commentId) }
+                : { _id: new ObjectId(commentId), userId: auth.user.id }
+        )
 
         if (result.deletedCount === 0) {
             return { success: false as const, error: 'Comment not found or unauthorized' }
