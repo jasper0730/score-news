@@ -10,7 +10,16 @@
     /* 日間：和紙。以生成り（未漂白的紙白）打底，避免純白的刺眼與廉價感，
        重點色取自日本傳統色，統一壓低彩度，讓畫面安靜下來。 */
     :root {
-        --nav-height: 80px;
+        /* 固定導覽列的高度，供內容區與 sticky 元素讓位。
+           寫成 calc 是為了把來源攤在明面上：值必須等於該列的實際高度，
+           少一點內容會被蓋住，多一點就會在列底下留一道縫，
+           捲動中的內容會從那道縫穿出來（後台的分頁列曾經就是這樣）。 */
+
+        /* 後台 NavBar：py-3 上下各 0.75rem + Logo 的 h-10 */
+        --nav-height: calc(0.75rem * 2 + 2.5rem);
+        /* 手機版首頁上排 bar：py-4 上下各 1rem + Logo 的 h-10。
+           比後台高，所以不能跟 --nav-height 共用一個值 */
+        --home-mobile-nav-height: calc(1rem * 2 + 2.5rem);
         --home-nav-height: 189px;
 
         --color-background: 247 245 241; /* #F7F5F1 生成り */

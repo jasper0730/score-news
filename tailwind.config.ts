@@ -71,6 +71,8 @@ export default {
             spacing: {
                 // 固定導覽列高度，供內容區塊讓位使用
                 nav: 'var(--nav-height)',
+                // 手機版首頁的上排 bar 比後台 NavBar 高，另開一個
+                'home-mobile-nav': 'var(--home-mobile-nav-height)',
                 // 首頁 header 較高（多了搜尋列與排序列）
                 'home-nav': 'var(--home-nav-height)',
             },

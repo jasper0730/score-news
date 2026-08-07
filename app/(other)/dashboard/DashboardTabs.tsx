@@ -2,6 +2,7 @@
 
 import { FaRegBookmark, FaRegComment, FaRegUser } from 'react-icons/fa6'
 import { cn } from '@/libs/cn'
+import { HEADER_FADE_CLASSES } from '@/libs/styles'
 import type { DashboardTab } from '@/types/news'
 
 interface DashboardTabsProps {
@@ -23,9 +24,14 @@ const TABS: { key: DashboardTab; label: string; Icon: typeof FaRegBookmark }[] =
     { key: 'profile', label: '個人資料', Icon: FaRegUser },
 ]
 
+/**
+ * 分頁列緊貼在 NavBar 下緣，兩者合起來才是使用者眼中的「後台 header」，
+ * 所以下緣的漸層收邊掛在這裡。NavBar 自己也有一個，但會被這排整片蓋掉，
+ * 那個是留給日後 (other) 群組裡沒有分頁列的頁面用的。
+ */
 const DashboardTabs = ({ activeTab, onTabChange }: DashboardTabsProps) => {
     return (
-        <div className="sticky top-nav z-[5] flex border-b bg-background">
+        <div className="sticky top-nav z-[5] flex bg-background">
             {TABS.map(({ key, label, Icon }) => (
                 <button
                     key={key}
@@ -41,6 +47,7 @@ const DashboardTabs = ({ activeTab, onTabChange }: DashboardTabsProps) => {
                     {label}
                 </button>
             ))}
+            <div className={HEADER_FADE_CLASSES} aria-hidden />
         </div>
     )
 }

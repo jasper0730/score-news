@@ -6,6 +6,8 @@ import UserMenu from '@/components/molecules/UserMenu'
 import RegisterButton from '@/components/organisms/RegisterButton'
 import ThemeSwitcher from '@/components/atoms/ThemeSwitcher'
 import SortDropdown from '@/components/molecules/SortDropdown'
+import { HEADER_FADE_CLASSES } from '@/libs/styles'
+import { cn } from '@/libs/cn'
 import { useSession } from 'next-auth/react'
 
 const HomeHeader = () => {
@@ -13,8 +15,8 @@ const HomeHeader = () => {
     const isAuthenticated = status === 'authenticated'
 
     return (
-        <header className="left-0 top-0 z-10 w-full bg-background/95 backdrop-blur-md md:fixed md:border-b md:shadow-sm">
-            <div className="fixed z-10 flex w-full items-start justify-between gap-5 border-b bg-background/95 px-5 py-4 shadow-sm backdrop-blur-md md:static md:border-none md:shadow-none">
+        <header className="relative left-0 top-0 z-10 w-full bg-background/95 backdrop-blur-md md:fixed">
+            <div className="fixed z-10 flex w-full items-start justify-between gap-5 bg-background/95 px-5 py-4 backdrop-blur-md md:static">
                 <div className="flex shrink-0 flex-col gap-1">
                     <BrandLink hideTextOnMobile />
                     <p className="hidden max-w-[280px] text-xs text-subtle md:block">
@@ -31,13 +33,18 @@ const HomeHeader = () => {
                         <RegisterButton type="login" />
                     )}
                 </div>
+                {/* 手機版收邊掛在這層：此時只有這條 bar 是固定的，
+                    外層 header 會跟著頁面往上捲 */}
+                <div className={cn(HEADER_FADE_CLASSES, 'md:hidden')} aria-hidden />
             </div>
-            <div className="px-5 pt-nav md:mt-3 md:hidden md:pt-0">
+            <div className="px-5 pt-home-mobile-nav md:mt-3 md:hidden md:pt-0">
                 <SearchBar />
             </div>
             <div className="mt-3 flex justify-center px-5 pb-2 md:justify-end">
                 <SortDropdown />
             </div>
+            {/* 桌機版整個 header（含搜尋列與排序列）才是固定的，收邊掛最外層 */}
+            <div className={cn(HEADER_FADE_CLASSES, 'hidden md:block')} aria-hidden />
         </header>
     )
 }
