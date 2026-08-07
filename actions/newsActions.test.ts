@@ -52,7 +52,6 @@ describe('getNewsActions', () => {
         it.each([
             ['date_desc', { pubDate: -1 }],
             ['date_asc', { pubDate: 1 }],
-            ['views', { views: -1 }],
         ] as const)('sortType=%s 對應排序條件 %o', async (sortType, expected) => {
             const news = collection('news')
 
@@ -95,7 +94,21 @@ describe('getNewsActions', () => {
 
             const pipeline = news.aggregate.mock.calls[0]?.[0] as Record<string, unknown>[]
             const sortStage = pipeline.find((stage) => '$sort' in stage)
-            expect(sortStage).toEqual({ $sort: { avgRating: direction, pubDate: -1 } })
+            expect(sortStage).toEqual({ $sort: { sortValue: direction, pubDate: -1 } })
+        })
+
+        it('同分時以發佈時間為次要條件，翻頁順序才穩定', async () => {
+            // 沒有次要條件的話，同分文章在不同頁的排序不保證一致，
+            // 無限捲動會出現重複或漏掉的項目
+            const news = collection('news')
+
+            await getNewsActions({ sortType: 'likes' })
+
+            const pipeline = news.aggregate.mock.calls[0]?.[0] as Record<string, unknown>[]
+            const sortStage = pipeline.find((stage) => '$sort' in stage) as {
+                $sort: Record<string, number>
+            }
+            expect(Object.keys(sortStage.$sort)).toEqual(['sortValue', 'pubDate'])
         })
 
         it('分頁在 $facet 內完成，總數與資料一次取回', async () => {
@@ -112,6 +125,48 @@ describe('getNewsActions', () => {
             }
             expect(facetStage.$facet.data).toEqual([{ $skip: 12 }, { $limit: 12 }])
             expect(result.total).toBe(30)
+        })
+
+        it('最多讚：從 likes collection 算數量', async () => {
+            const news = collection('news')
+
+            await getNewsActions({ sortType: 'likes' })
+
+            const pipeline = news.aggregate.mock.calls[0]?.[0] as Record<string, unknown>[]
+            const lookup = pipeline.find((s) => '$lookup' in s) as {
+                $lookup: { from: string; foreignField?: string }
+            }
+            const addFields = pipeline.find((s) => '$addFields' in s) as {
+                $addFields: { sortValue: unknown }
+            }
+            expect(lookup.$lookup.from).toBe('likes')
+            expect(lookup.$lookup.foreignField).toBe('postId')
+            expect(addFields.$addFields.sortValue).toEqual({ $size: '$sortSource' })
+        })
+
+        it('最多收藏：收藏是陣列結構，要用 pipeline 形式的 $lookup 比對', async () => {
+            // favorites 是「一位使用者一份文件、postIds 陣列」，
+            // 沒辦法像 likes 那樣用 localField/foreignField 直接對應
+            const news = collection('news')
+
+            await getNewsActions({ sortType: 'favorites' })
+
+            const pipeline = news.aggregate.mock.calls[0]?.[0] as Record<string, unknown>[]
+            const lookup = pipeline.find((s) => '$lookup' in s) as {
+                $lookup: { from: string; pipeline?: unknown[]; localField?: string }
+            }
+            expect(lookup.$lookup.from).toBe('favorites')
+            expect(lookup.$lookup.localField).toBeUndefined()
+            expect(lookup.$lookup.pipeline).toBeDefined()
+        })
+
+        it('lookup 的中介欄位不會被送回前端', async () => {
+            const news = collection('news')
+
+            await getNewsActions({ sortType: 'likes' })
+
+            const pipeline = news.aggregate.mock.calls[0]?.[0] as Record<string, unknown>[]
+            expect(pipeline).toContainEqual({ $project: { sortSource: 0 } })
         })
 
         it('aggregate 回空陣列時不會炸掉，總數為 0', async () => {

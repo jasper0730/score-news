@@ -50,13 +50,74 @@ export interface GetNewsParams {
     limit?: number
 }
 
-/** 依評分排序必須走 aggregate，因為 avgRating 是算出來的欄位，無法用一般索引排序 */
-const usesRatingSort = (sortType: SortType) => sortType.startsWith('rating')
+/**
+ * 這些排序依據都不是新聞文件上的欄位，得先 $lookup 其他 collection 算出來，
+ * 因此無法用一般索引排序，只能走 aggregate。
+ */
+const AGGREGATED_SORTS = ['rating_desc', 'rating_asc', 'favorites', 'likes'] as const
+type AggregatedSort = (typeof AGGREGATED_SORTS)[number]
 
-const SORT_OPTIONS: Record<Exclude<SortType, 'rating_desc' | 'rating_asc'>, Sort> = {
+const usesAggregateSort = (sortType: SortType): sortType is AggregatedSort =>
+    (AGGREGATED_SORTS as readonly string[]).includes(sortType)
+
+const SORT_OPTIONS: Record<Exclude<SortType, AggregatedSort>, Sort> = {
     date_desc: { pubDate: -1 },
     date_asc: { pubDate: 1 },
-    views: { views: -1 },
+}
+
+/**
+ * 算出排序依據的欄位，以及要 $lookup 哪個 collection。
+ *
+ * 收藏的結構是「一位使用者一份文件、postIds 陣列」，所以比對條件是
+ * 「該文件的 postIds 包含這篇的 article_id」，與按讚／評分的 localField
+ * 對 foreignField 不同，得用 pipeline 形式的 $lookup。
+ */
+const AGGREGATE_STAGES: Record<
+    AggregatedSort,
+    { lookup: Record<string, unknown>; field: Record<string, unknown>; direction: 1 | -1 }
+> = {
+    rating_desc: {
+        lookup: {
+            from: 'ratings',
+            localField: 'article_id',
+            foreignField: 'postId',
+            as: 'sortSource',
+        },
+        field: { $avg: '$sortSource.rate' },
+        direction: -1,
+    },
+    rating_asc: {
+        lookup: {
+            from: 'ratings',
+            localField: 'article_id',
+            foreignField: 'postId',
+            as: 'sortSource',
+        },
+        field: { $avg: '$sortSource.rate' },
+        direction: 1,
+    },
+    likes: {
+        lookup: {
+            from: 'likes',
+            localField: 'article_id',
+            foreignField: 'postId',
+            as: 'sortSource',
+        },
+        field: { $size: '$sortSource' },
+        direction: -1,
+    },
+    favorites: {
+        lookup: {
+            from: 'favorites',
+            let: { articleId: '$article_id' },
+            pipeline: [
+                { $match: { $expr: { $in: ['$$articleId', { $ifNull: ['$postIds', []] }] } } },
+            ],
+            as: 'sortSource',
+        },
+        field: { $size: '$sortSource' },
+        direction: -1,
+    },
 }
 
 export type NewsResponse = {
@@ -92,29 +153,24 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
         }
 
         const skip = (page - 1) * limit
-        const byRating = usesRatingSort(sortType)
+        const byAggregate = usesAggregateSort(sortType)
+        // 依評分排序時 pipeline 已經算出平均，enrich 階段不必再查一次
+        const byRating = sortType === 'rating_desc' || sortType === 'rating_asc'
 
         let allData: NewsQueryDocument[] = []
         let total = 0
 
-        if (byRating) {
-            // Aggregation pipeline to sort by average rating
+        if (byAggregate) {
+            const stage = AGGREGATE_STAGES[sortType]
             const pipeline = [
                 { $match: filter },
-                {
-                    $lookup: {
-                        from: 'ratings',
-                        localField: 'article_id',
-                        foreignField: 'postId',
-                        as: 'ratingsData',
-                    },
-                },
-                {
-                    $addFields: {
-                        avgRating: { $avg: '$ratingsData.rate' },
-                    },
-                },
-                { $sort: { avgRating: sortType === 'rating_asc' ? 1 : -1, pubDate: -1 } },
+                { $lookup: stage.lookup },
+                { $addFields: { sortValue: stage.field, avgRating: { $avg: '$sortSource.rate' } } },
+                // 次要條件用 pubDate，否則同分的文章在不同頁之間順序不穩定，
+                // 無限捲動會出現重複或漏掉的項目
+                { $sort: { sortValue: stage.direction, pubDate: -1 } },
+                // 中介欄位不需要送回來，它可能是整包 lookup 的結果
+                { $project: { sortSource: 0 } },
                 {
                     $facet: {
                         metadata: [{ $count: 'total' }],
@@ -133,9 +189,9 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
             total = await newsCollection.countDocuments(filter)
             allData = await newsCollection
                 .find(filter)
-                // byRating 為 false 已排除兩個 rating 選項，但 TS 無法從布林值收窄
-                // sortType，因此在這裡明確斷言剩餘的聯集
-                .sort(SORT_OPTIONS[sortType as keyof typeof SORT_OPTIONS])
+                // usesAggregateSort 是型別守衛，走到這裡 sortType 已被收窄成
+                // 只剩日期兩種，直接查表不需要斷言
+                .sort(SORT_OPTIONS[sortType])
                 .skip(skip)
                 .limit(limit)
                 .toArray()

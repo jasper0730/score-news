@@ -44,7 +44,8 @@ const OUTLETS = {
         outlet: 'cna',
         outletName: '中央社',
         siteUrl: 'https://www.cna.com.tw',
-        iconUrl: 'https://www.cna.com.tw/favicon.ico',
+        // 官方 /favicon.ico 是 404，正確位址取自首頁的 <link rel=icon>
+        iconUrl: 'https://imgcdn.cna.com.tw/www/website/img/fav-icon.png',
     },
     udn: {
         outlet: 'udn',
@@ -62,7 +63,7 @@ const OUTLETS = {
         outlet: 'ltn',
         outletName: '自由時報',
         siteUrl: 'https://news.ltn.com.tw',
-        iconUrl: 'https://news.ltn.com.tw/favicon.ico',
+        iconUrl: 'https://www.ltn.com.tw/assets/images/favicon.ico',
     },
     newtalk: {
         outlet: 'newtalk',
@@ -74,7 +75,7 @@ const OUTLETS = {
         outlet: 'twreporter',
         outletName: '報導者',
         siteUrl: 'https://www.twreporter.org',
-        iconUrl: 'https://www.twreporter.org/favicon.ico',
+        iconUrl: 'https://www.twreporter.org/asset/favicon.png',
     },
     pts: {
         outlet: 'pts',

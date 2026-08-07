@@ -12,7 +12,7 @@ describe('SortDropdown', () => {
 
     const getSelect = () => screen.getByRole('combobox', { name: '排序方式' })
 
-    it('提供全部五種排序方式', () => {
+    it('提供全部六種排序方式', () => {
         render(<SortDropdown />)
 
         expect(screen.getAllByRole('option').map((o) => o.getAttribute('value'))).toEqual([
@@ -20,15 +20,23 @@ describe('SortDropdown', () => {
             'date_asc',
             'rating_desc',
             'rating_asc',
-            'views',
+            'favorites',
+            'likes',
         ])
     })
 
-    it('顯示 store 目前的排序方式', () => {
-        useNewsStore.setState({ sortType: 'views' })
+    it('收藏與按讚的選項文字', () => {
         render(<SortDropdown />)
 
-        expect(getSelect()).toHaveValue('views')
+        expect(screen.getByRole('option', { name: '最多收藏' })).toBeInTheDocument()
+        expect(screen.getByRole('option', { name: '最多讚' })).toBeInTheDocument()
+    })
+
+    it('顯示 store 目前的排序方式', () => {
+        useNewsStore.setState({ sortType: 'likes' })
+        render(<SortDropdown />)
+
+        expect(getSelect()).toHaveValue('likes')
     })
 
     it('選擇後更新 store', async () => {

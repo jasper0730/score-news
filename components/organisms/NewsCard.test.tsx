@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { NewsDataType } from '@/types/news'
 
@@ -113,10 +113,41 @@ describe('NewsCard 內容', () => {
         expect(screen.queryByRole('img', { name: /評分/ })).not.toBeInTheDocument()
     })
 
-    it('沒有來源圖示時不渲染圖片', () => {
-        renderCard({ article: makeArticle({ source_icon: '' }) })
+    describe('來源 logo', () => {
+        it('有圖示時顯示圖片', () => {
+            renderCard()
 
-        expect(screen.queryByRole('img', { name: '' })).not.toBeInTheDocument()
+            expect(document.querySelector('img[src*="icon.png"]')).toBeInTheDocument()
+        })
+
+        it('沒有圖示時退回媒體名稱首字，不留空白', () => {
+            renderCard({ article: makeArticle({ source_icon: '', source_name: '中央社' }) })
+
+            expect(screen.getByText('中')).toBeInTheDocument()
+        })
+
+        it('圖片載入失敗時也退回文字，不留破圖', () => {
+            // 媒體的 favicon 位址會改，實測就有 3 家的 /favicon.ico 是 404
+            renderCard({ article: makeArticle({ source_name: '自由時報' }) })
+
+            const img = document.querySelector('img[src*="icon.png"]') as HTMLImageElement
+            fireEvent.error(img)
+
+            expect(screen.getByText('自')).toBeInTheDocument()
+            expect(document.querySelector('img[src*="icon.png"]')).not.toBeInTheDocument()
+        })
+
+        it('連媒體名稱都沒有時顯示問號，不會變成空方塊', () => {
+            renderCard({ article: makeArticle({ source_icon: '', source_name: '' }) })
+
+            expect(screen.getByText('?')).toBeInTheDocument()
+        })
+
+        it('替代文字對無障礙樹隱藏——旁邊的連結已經寫著媒體名稱', () => {
+            renderCard({ article: makeArticle({ source_icon: '', source_name: '中央社' }) })
+
+            expect(screen.getByText('中')).toHaveAttribute('aria-hidden', 'true')
+        })
     })
 })
 

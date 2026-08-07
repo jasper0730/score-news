@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { FaHeart, FaRegHeart, FaRegEye } from 'react-icons/fa'
@@ -7,6 +8,7 @@ import { FaBookmark, FaRegBookmark } from 'react-icons/fa6'
 import { IoShareSocialOutline } from 'react-icons/io5'
 import { NewsDataType } from '@/types/news'
 import StarDisplay from '@/components/molecules/StarDisplay'
+import Tooltip from '@/components/atoms/Tooltip'
 import { cn } from '@/libs/cn'
 import { CARD_CLASSES } from '@/libs/styles'
 
@@ -33,6 +35,12 @@ const NewsCard = ({
     const isAuthenticated = status === 'authenticated'
     // 剛匯入的新聞沒有 views 欄位，補 0 以免畫面出現 undefined
     const views = article.views ?? 0
+    // 媒體的 favicon 位址會改，載不到時退回文字標記而不是留一個破圖
+    const [iconFailed, setIconFailed] = useState(false)
+    const showIcon = Boolean(article.source_icon) && !iconFailed
+    // 提示文字與 aria-label 用同一份，兩者不該說不一樣的話
+    const likeLabel = article.liked ? '取消按讚' : '按讚'
+    const favoriteLabel = favorite ? '取消收藏' : '加入收藏'
 
     return (
         <article className={cn(CARD_CLASSES, 'flex flex-col shadow-sm')}>
@@ -58,10 +66,24 @@ const NewsCard = ({
                 </div>
 
                 <div className="mt-4 flex items-center">
-                    {article.source_icon && (
-                        <div className="relative mr-2 h-6 w-6">
-                            <Image src={article.source_icon} alt="" sizes="24px" fill />
+                    {showIcon ? (
+                        <div className="relative mr-2 h-6 w-6 shrink-0">
+                            <Image
+                                src={article.source_icon}
+                                alt=""
+                                sizes="24px"
+                                fill
+                                onError={() => setIconFailed(true)}
+                            />
                         </div>
+                    ) : (
+                        /* 沒有 logo 就用媒體名稱首字，比放一張通用的灰色方塊好認 */
+                        <span
+                            aria-hidden
+                            className="mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded bg-muted text-xs font-semibold text-muted-foreground"
+                        >
+                            {article.source_name?.trim().charAt(0) || '?'}
+                        </span>
                     )}
                     <a
                         href={article.source_url}
@@ -91,44 +113,50 @@ const NewsCard = ({
                             分享不需要身分，所以不受登入狀態限制 */}
                         {isAuthenticated && (
                             <>
-                                <button
-                                    onClick={() => onLikeClick?.(article.article_id)}
-                                    className={cn(
-                                        ACTION_CLASSES,
-                                        'flex items-center gap-1 text-danger'
-                                    )}
-                                    type="button"
-                                    aria-label={article.liked ? '取消按讚' : '按讚'}
-                                    aria-pressed={article.liked}
-                                >
-                                    {article.liked ? <FaHeart /> : <FaRegHeart />}
-                                    {article.likes > 0 && (
-                                        <span className="text-sm tabular-nums text-subtle">
-                                            {article.likes.toLocaleString('zh-TW')}
-                                        </span>
-                                    )}
-                                </button>
+                                <Tooltip label={likeLabel}>
+                                    <button
+                                        onClick={() => onLikeClick?.(article.article_id)}
+                                        className={cn(
+                                            ACTION_CLASSES,
+                                            'flex items-center gap-1 text-danger'
+                                        )}
+                                        type="button"
+                                        aria-label={likeLabel}
+                                        aria-pressed={article.liked}
+                                    >
+                                        {article.liked ? <FaHeart /> : <FaRegHeart />}
+                                        {article.likes > 0 && (
+                                            <span className="text-sm tabular-nums text-subtle">
+                                                {article.likes.toLocaleString('zh-TW')}
+                                            </span>
+                                        )}
+                                    </button>
+                                </Tooltip>
 
-                                <button
-                                    onClick={() => onFavoriteClick(article.article_id)}
-                                    className={cn(ACTION_CLASSES, 'text-primary')}
-                                    type="button"
-                                    aria-label={favorite ? '取消收藏' : '加入收藏'}
-                                    aria-pressed={favorite}
-                                >
-                                    {favorite ? <FaBookmark /> : <FaRegBookmark />}
-                                </button>
+                                <Tooltip label={favoriteLabel}>
+                                    <button
+                                        onClick={() => onFavoriteClick(article.article_id)}
+                                        className={cn(ACTION_CLASSES, 'text-primary')}
+                                        type="button"
+                                        aria-label={favoriteLabel}
+                                        aria-pressed={favorite}
+                                    >
+                                        {favorite ? <FaBookmark /> : <FaRegBookmark />}
+                                    </button>
+                                </Tooltip>
                             </>
                         )}
 
-                        <button
-                            onClick={() => onShareClick?.(article)}
-                            className={cn(ACTION_CLASSES, 'text-muted-foreground')}
-                            type="button"
-                            aria-label="分享"
-                        >
-                            <IoShareSocialOutline />
-                        </button>
+                        <Tooltip label="分享">
+                            <button
+                                onClick={() => onShareClick?.(article)}
+                                className={cn(ACTION_CLASSES, 'text-muted-foreground')}
+                                type="button"
+                                aria-label="分享"
+                            >
+                                <IoShareSocialOutline />
+                            </button>
+                        </Tooltip>
                     </div>
                 </div>
             </div>
