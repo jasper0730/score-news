@@ -60,8 +60,12 @@ const confirmWith = (name: string) => userEvent.click(screen.getByRole('button',
 beforeEach(() => {
     signIn('u1')
     getCommentsByPostId.mockResolvedValue({ success: true, comments: [] })
-    createCommentAction.mockResolvedValue({ success: true, comment: makeComment() })
-    deleteCommentAction.mockResolvedValue({ success: true })
+    createCommentAction.mockResolvedValue({
+        success: true,
+        comment: makeComment(),
+        averageRating: 4.5,
+    })
+    deleteCommentAction.mockResolvedValue({ success: true, averageRating: 0 })
 })
 
 describe('CommentSection 載入', () => {
@@ -150,7 +154,8 @@ describe('CommentSection 送出評論', () => {
         await waitFor(() =>
             expect(createCommentAction).toHaveBeenCalledWith('news-1', '標題', '很棒', 5)
         )
-        expect(onRatingUpdate).toHaveBeenCalledWith('news-1', 5)
+        // 平均由伺服器算好回傳，不是前端拿使用者剛給的分數當平均
+        expect(onRatingUpdate).toHaveBeenCalledWith('news-1', 4.5)
     })
 
     it('取消就不打 API', async () => {

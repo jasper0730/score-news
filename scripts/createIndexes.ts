@@ -54,18 +54,6 @@ const PLANS: IndexPlan[] = [
         reason: '「最熱門」排序',
     },
     {
-        collection: 'ratings',
-        keys: { postId: 1 },
-        options: { name: 'postId' },
-        reason: '平均評分聚合的 $match { postId: { $in: [...] } }',
-    },
-    {
-        collection: 'ratings',
-        keys: { userId: 1, postId: 1 },
-        options: { unique: true, name: 'userId_postId_unique' },
-        reason: '查使用者個人評分；唯一性可從資料層擋掉同一人重複評分',
-    },
-    {
         collection: 'favorites',
         keys: { userId: 1 },
         options: { unique: true, name: 'userId_unique' },

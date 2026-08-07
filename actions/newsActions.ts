@@ -5,7 +5,7 @@ import {
     getCollection,
     type NewsDocument,
     type FavoriteDocument,
-    type RatingDocument,
+    type CommentDocument,
     type LikeDocument,
 } from '@/libs/db'
 import type { NewsDataType, SortType } from '@/types/news'
@@ -175,6 +175,32 @@ function buildAggregatePlan(sortType: AggregatedSort, now: Date): AggregatePlan 
 }
 
 /**
+ * 計入平均評分的條件。
+ *
+ * 評分只存在於評論裡，所以 comments 是唯一來源。已刪除的評論不計入——
+ * 包含管理員下架的：畫面上留墓碑，但因違規而隱藏的內容其評分沒有理由還算數。
+ *
+ * 這個常數與 commentActions 的 RATED_FILTER 是同一套規則。兩處分別宣告是因為
+ * server action 之間互相 import 會把整個模組的相依一起拉進來，
+ * 而這裡只需要一個查詢條件。
+ */
+const RATED_COMMENT_FILTER = { deletedAt: { $exists: false }, rating: { $gt: 0 } }
+
+/** 一次算出多篇文章的平均評分 */
+async function averageRatings(
+    comments: Collection<CommentDocument>,
+    postIds: string[]
+): Promise<Map<string, number>> {
+    const rows = await comments
+        .aggregate([
+            { $match: { postId: { $in: postIds }, ...RATED_COMMENT_FILTER } },
+            { $group: { _id: '$postId', avgRating: { $avg: '$rating' } } },
+        ])
+        .toArray()
+    return new Map(rows.map((r) => [r._id as string, r.avgRating as number]))
+}
+
+/**
  * 算出每篇文章被幾位使用者收藏。
  *
  * 收藏的結構是「一位使用者一份文件、postIds 陣列」，所以得先把陣列攤開。
@@ -216,7 +242,7 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
 
         const newsCollection = await getCollection<NewsDocument>('news')
         const favoritesCollection = await getCollection<FavoriteDocument>('favorites')
-        const ratingsCollection = await getCollection<RatingDocument>('ratings')
+        const commentsCollection = await getCollection<CommentDocument>('comments')
         const likesCollection = await getCollection<LikeDocument>('likes')
 
         // Build Query
@@ -307,21 +333,14 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
                 likedSet = new Set(userLikes.map((l) => l.postId))
             }
 
-            const avgRatings = await ratingsCollection
-                .aggregate([
-                    { $match: { postId: { $in: postIds } } },
-                    { $group: { _id: '$postId', avgRating: { $avg: '$rate' } } },
-                ])
-                .toArray()
-            ratingMap = new Map(avgRatings.map((r) => [r._id as string, r.avgRating as number]))
+            ratingMap = await averageRatings(commentsCollection, postIds)
 
             if (userId) {
-                const userRatings = await ratingsCollection
-                    .find({ userId, postId: { $in: postIds } })
+                // 使用者自己的評分同樣來自他的評論，已刪除的不算
+                const ownComments = await commentsCollection
+                    .find({ userId, postId: { $in: postIds }, ...RATED_COMMENT_FILTER })
                     .toArray()
-                userRatingMap = new Map(
-                    userRatings.map((r) => [r.postId as string, r.rate as number])
-                )
+                userRatingMap = new Map(ownComments.map((c) => [c.postId, c.rating as number]))
             }
         }
 
@@ -364,21 +383,13 @@ export async function getNewsByIds(
         const userId = session?.user?.id ?? null
 
         const newsCollection = await getCollection<NewsDocument>('news')
-        const ratingsCollection = await getCollection<RatingDocument>('ratings')
+        const commentsCollection = await getCollection<CommentDocument>('comments')
         const likesCollection = await getCollection<LikeDocument>('likes')
         const favoritesCollection = await getCollection<FavoriteDocument>('favorites')
 
         const docs = await newsCollection.find({ article_id: { $in: articleIds } }).toArray()
         const favoriteCountMap = await countFavorites(favoritesCollection, articleIds)
-
-        const ratings = await ratingsCollection
-            .aggregate([
-                { $match: { postId: { $in: articleIds } } },
-                { $group: { _id: '$postId', avgRating: { $avg: '$rate' } } },
-            ])
-            .toArray()
-
-        const ratingMap = new Map(ratings.map((r) => [r._id as string, r.avgRating as number]))
+        const ratingMap = await averageRatings(commentsCollection, articleIds)
 
         const likeCounts = await likesCollection
             .aggregate([

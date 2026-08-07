@@ -17,8 +17,13 @@ const requireAuth = vi.hoisted(() => vi.fn())
 const requireAuthWithRole = vi.hoisted(() => vi.fn())
 vi.mock('@/libs/auth', () => ({ requireAuth, requireAuthWithRole }))
 
-const { getCommentsByPostId, getCommentsByUserId, createCommentAction, deleteCommentAction } =
-    await import('@/actions/commentActions')
+const {
+    getCommentsByPostId,
+    getCommentsByUserId,
+    createCommentAction,
+    deleteCommentAction,
+    getAverageRating,
+} = await import('@/actions/commentActions')
 
 beforeEach(() => {
     requireAuth.mockResolvedValue({ authenticated: true, user: makeUser() })
@@ -134,6 +139,43 @@ describe('getCommentsByUserId', () => {
             comments: [],
             error: 'Internal server error',
         })
+    })
+})
+
+describe('getAverageRating', () => {
+    it('只算沒有被刪除、且有給分的評論', async () => {
+        // 評分只存在於評論裡，這是唯一來源
+        await getAverageRating('news-1')
+
+        const pipeline = collection('comments').aggregate.mock.calls[0]?.[0] as Record<
+            string,
+            unknown
+        >[]
+        expect(pipeline[0]).toEqual({
+            $match: { postId: 'news-1', deletedAt: { $exists: false }, rating: { $gt: 0 } },
+        })
+    })
+
+    it('管理員下架的評論也不計入——因違規而隱藏的內容其評分不該還算數', async () => {
+        await getAverageRating('news-1')
+
+        const pipeline = collection('comments').aggregate.mock.calls[0]?.[0] as {
+            $match: Record<string, unknown>
+        }[]
+        // 只用 deletedAt 判斷，不區分是誰刪的，兩種刪除都排除
+        expect(pipeline[0]?.$match).not.toHaveProperty('deletedByAdmin')
+    })
+
+    it('回傳計算出的平均', async () => {
+        collection('comments').aggregateCursor.toArray.mockResolvedValue([{ _id: null, avg: 3.5 }])
+
+        expect(await getAverageRating('news-1')).toBe(3.5)
+    })
+
+    it('一則評論都沒有時回 0，而不是 null 或 NaN', async () => {
+        collection('comments').aggregateCursor.toArray.mockResolvedValue([])
+
+        expect(await getAverageRating('news-1')).toBe(0)
     })
 })
 
@@ -378,11 +420,21 @@ describe('deleteCommentAction', () => {
         })
     })
 
-    it('刪除成功', async () => {
+    it('刪除成功，並回傳更新後的平均評分', async () => {
+        // 刪掉評論等於也移除了它的評分，呼叫端要能把星等換掉
+        collection('comments').aggregateCursor.toArray.mockResolvedValue([{ _id: null, avg: 4 }])
+
         expect(await deleteCommentAction(commentId)).toEqual({
             success: true,
             message: 'Comment deleted',
+            averageRating: 4,
         })
+    })
+
+    it('刪掉最後一則評論後平均歸零', async () => {
+        collection('comments').aggregateCursor.toArray.mockResolvedValue([])
+
+        expect(await deleteCommentAction(commentId)).toMatchObject({ averageRating: 0 })
     })
 
     it('commentId 格式不合法時不會讓 ObjectId 的例外外洩', async () => {

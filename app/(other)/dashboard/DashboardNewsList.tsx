@@ -6,7 +6,6 @@ import { toastBox } from '@/utils/toast'
 import { getFavoriteNewsAction } from '@/actions/newsActions'
 import { toggleFavoriteAction } from '@/actions/favoriteActions'
 import { toggleLikeAction } from '@/actions/likeActions'
-import { rateNewsAction } from '@/actions/rateNewsAction'
 import { shareArticle } from '@/libs/share'
 import type { NewsDataType } from '@/types/news'
 import Loader from '@/components/atoms/Loader'
@@ -44,26 +43,16 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
         fetchData()
     }, [fetchData])
 
-    const handleRatingUpdate = async (postId: string, newRating: number) => {
-        try {
-            const result = await rateNewsAction(postId, newRating)
-
-            if (result.success) {
-                const updatedRating = result.rate
-
-                setNewsData((prevData) =>
-                    prevData.map((news) =>
-                        news.article_id === postId ? { ...news, rate: updatedRating } : news
-                    )
-                )
-
-                if (selectedNews?.article_id === postId) {
-                    setSelectedNews((prev) => (prev ? { ...prev, rate: updatedRating } : null))
-                }
-            }
-        } catch (error) {
-            console.error('Failed to update rating:', error)
-        }
+    /** 平均評分由 comment action 算好回傳，這裡只負責換掉畫面上的星等 */
+    const handleRatingUpdate = (postId: string, averageRating: number) => {
+        setNewsData((prev) =>
+            prev.map((news) =>
+                news.article_id === postId ? { ...news, rate: averageRating } : news
+            )
+        )
+        setSelectedNews((prev) =>
+            prev?.article_id === postId ? { ...prev, rate: averageRating } : prev
+        )
     }
 
     const handleLikeClick = async (id: string) => {

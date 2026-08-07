@@ -40,6 +40,33 @@ const VISIBLE_FILTER = {
     $or: [{ deletedAt: { $exists: false } }, { deletedByAdmin: true }],
 }
 
+/**
+ * 計入平均評分的條件。
+ *
+ * 與顯示用的 VISIBLE_FILTER 刻意不同：管理員下架的評論在畫面上留墓碑，
+ * 但它的分數不該繼續影響公開的平均——因違規而隱藏的內容，
+ * 其評分沒有理由還算數。自刪的當然也不算。
+ */
+const RATED_FILTER = { deletedAt: { $exists: false }, rating: { $gt: 0 } }
+
+/**
+ * 算出一篇文章的平均評分。
+ *
+ * 評分只存在於評論裡（前端也只有評論表單能給分），所以 comments 是唯一來源。
+ * 先前另有一個 ratings collection 存同一份資料，兩邊會不同步——
+ * 刪掉評論後那筆評分還留著，導致「只有一則 4 星評論卻顯示 3 星」。
+ */
+export async function getAverageRating(postId: string): Promise<number> {
+    const comments = await getCollection<CommentDocument>('comments')
+    const result = await comments
+        .aggregate([
+            { $match: { postId, ...RATED_FILTER } },
+            { $group: { _id: null, avg: { $avg: '$rating' } } },
+        ])
+        .toArray()
+    return (result[0]?.avg as number | undefined) ?? 0
+}
+
 export async function getCommentsByPostId(postId: string) {
     try {
         const commentsCollection = await getCollection<CommentDocument>('comments')
@@ -157,6 +184,8 @@ export async function createCommentAction(
         return {
             success: true as const,
             comment: serializeComment(result as CommentDocument & { _id: ObjectId }),
+            // 一併回傳新的平均，呼叫端不必為了更新星等再打一次
+            averageRating: await getAverageRating(postId),
         }
     } catch (error) {
         console.error('Error in createCommentAction:', error)
@@ -204,7 +233,12 @@ export async function deleteCommentAction(commentId: string) {
             },
         })
 
-        return { success: true as const, message: 'Comment deleted' }
+        // 刪掉評論等於也移除了它的評分，平均要跟著變
+        return {
+            success: true as const,
+            message: 'Comment deleted',
+            averageRating: await getAverageRating(existing.postId),
+        }
     } catch (error) {
         console.error('Error in deleteCommentAction:', error)
         return { success: false as const, error: 'Internal server error' }

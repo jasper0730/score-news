@@ -6,13 +6,11 @@ import type { NewsResponse } from '@/actions/newsActions'
 
 const getNewsActions = vi.hoisted(() => vi.fn())
 const toggleFavoriteAction = vi.hoisted(() => vi.fn())
-const rateNewsAction = vi.hoisted(() => vi.fn())
 const incrementViewAction = vi.hoisted(() => vi.fn())
 const toastBox = vi.hoisted(() => vi.fn())
 
 vi.mock('@/actions/newsActions', () => ({ getNewsActions }))
 vi.mock('@/actions/favoriteActions', () => ({ toggleFavoriteAction }))
-vi.mock('@/actions/rateNewsAction', () => ({ rateNewsAction }))
 vi.mock('@/actions/viewActions', () => ({ incrementViewAction }))
 vi.mock('@/utils/toast', () => ({ toastBox }))
 
@@ -87,7 +85,6 @@ beforeEach(() => {
     observers().length = 0
     getNewsActions.mockResolvedValue(makeResponse())
     toggleFavoriteAction.mockResolvedValue({ success: true, favorited: true, favorites: 1 })
-    rateNewsAction.mockResolvedValue({ success: true, rate: 4 })
     incrementViewAction.mockResolvedValue({ success: true, views: 1 })
 })
 
@@ -332,13 +329,12 @@ describe('useNewsFeed 收藏', () => {
 })
 
 describe('useNewsFeed 評分', () => {
-    it('評分後更新列表中的平均分數', async () => {
+    // 評分只存在於評論裡，沒有獨立的「送出評分」動作——
+    // 平均由 comment action 算好回傳，這裡只負責換掉畫面上的數字
+    it('套用伺服器算好的平均分數', () => {
         const feed = renderFeed(makeResponse({ data: [makeItem({ article_id: 'a', rate: 1 })] }))
-        rateNewsAction.mockResolvedValue({ success: true, rate: 4.5 })
 
-        await act(async () => {
-            await feed.current.handleRatingUpdate('a', 5)
-        })
+        act(() => feed.current.handleRatingUpdate('a', 4.5))
 
         expect(feed.current.items[0]?.rate).toBe(4.5)
     })
@@ -350,23 +346,33 @@ describe('useNewsFeed 評分', () => {
         await act(async () => {
             await feed.current.handleSelectNews(item)
         })
-        rateNewsAction.mockResolvedValue({ success: true, rate: 4.5 })
-        await act(async () => {
-            await feed.current.handleRatingUpdate('a', 5)
-        })
+        act(() => feed.current.handleRatingUpdate('a', 4.5))
 
         expect(feed.current.selectedNews?.rate).toBe(4.5)
     })
 
-    it('評分失敗時不動畫面上的分數', async () => {
-        const feed = renderFeed(makeResponse({ data: [makeItem({ article_id: 'a', rate: 1 })] }))
-        rateNewsAction.mockResolvedValue({ success: false, rate: 0 })
+    it('只動指定的那一篇，其他文章不受影響', () => {
+        const feed = renderFeed(
+            makeResponse({
+                data: [
+                    makeItem({ article_id: 'a', rate: 1 }),
+                    makeItem({ article_id: 'b', rate: 2 }),
+                ],
+            })
+        )
 
-        await act(async () => {
-            await feed.current.handleRatingUpdate('a', 5)
-        })
+        act(() => feed.current.handleRatingUpdate('a', 4.5))
 
-        expect(feed.current.items[0]?.rate).toBe(1)
+        expect(feed.current.items[0]?.rate).toBe(4.5)
+        expect(feed.current.items[1]?.rate).toBe(2)
+    })
+
+    it('評論被刪光後平均歸零——刪除評論等於也移除了它的評分', () => {
+        const feed = renderFeed(makeResponse({ data: [makeItem({ article_id: 'a', rate: 4 })] }))
+
+        act(() => feed.current.handleRatingUpdate('a', 0))
+
+        expect(feed.current.items[0]?.rate).toBe(0)
     })
 })
 

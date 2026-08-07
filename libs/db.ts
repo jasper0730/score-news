@@ -21,12 +21,6 @@ export interface FavoriteDocument {
     postIds: string[]
 }
 
-export interface RatingDocument {
-    userId: string
-    postId: string
-    rate: number
-}
-
 /**
  * 按讚。
  *

@@ -7,7 +7,6 @@ import { toastBox } from '@/utils/toast'
 import { getNewsActions, type NewsResponse } from '@/actions/newsActions'
 import { toggleFavoriteAction } from '@/actions/favoriteActions'
 import { toggleLikeAction } from '@/actions/likeActions'
-import { rateNewsAction } from '@/actions/rateNewsAction'
 import { incrementViewAction } from '@/actions/viewActions'
 import { shareArticle } from '@/libs/share'
 import type { NewsDataType } from '@/types/news'
@@ -123,20 +122,20 @@ export function useNewsFeed(initial: NewsResponse) {
         }
     }, [])
 
-    const handleRatingUpdate = async (postId: string, newRating: number) => {
-        try {
-            const result = await rateNewsAction(postId, newRating)
-            if (!result.success) return
-
-            setItems((prev) =>
-                prev.map((n) => (n.article_id === postId ? { ...n, rate: result.rate } : n))
-            )
-            if (selectedNews?.article_id === postId) {
-                setSelectedNews((prev) => (prev ? { ...prev, rate: result.rate } : null))
-            }
-        } catch (error) {
-            console.error('Failed to update rating:', error)
-        }
+    /**
+     * 套用新的平均評分。
+     *
+     * 評分只存在於評論裡，所以不再有獨立的「送出評分」動作——
+     * 平均由 createCommentAction / deleteCommentAction 算好回傳，
+     * 這裡只負責把畫面上的星等換掉。
+     */
+    const handleRatingUpdate = (postId: string, averageRating: number) => {
+        setItems((prev) =>
+            prev.map((n) => (n.article_id === postId ? { ...n, rate: averageRating } : n))
+        )
+        setSelectedNews((prev) =>
+            prev?.article_id === postId ? { ...prev, rate: averageRating } : prev
+        )
     }
 
     /**

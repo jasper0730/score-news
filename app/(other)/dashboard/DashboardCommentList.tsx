@@ -7,7 +7,6 @@ import { getNewsByIds } from '@/actions/newsActions'
 import type { CommentType, NewsDataType } from '@/types/news'
 import Loader from '@/components/atoms/Loader'
 import NewsModal from '@/components/organisms/NewsModal'
-import { rateNewsAction } from '@/actions/rateNewsAction'
 import { CARD_CLASSES } from '@/libs/styles'
 import { FiEye } from 'react-icons/fi'
 
@@ -67,24 +66,14 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
         }
     }
 
-    const handleRatingUpdate = async (postId: string, newRating: number) => {
-        try {
-            const result = await rateNewsAction(postId, newRating)
-
-            if (result.success) {
-                const updatedRating = result.rate
-
-                setAllNews((prev) =>
-                    prev.map((n) => (n.article_id === postId ? { ...n, rate: updatedRating } : n))
-                )
-
-                if (selectedNews?.article_id === postId) {
-                    setSelectedNews((prev) => (prev ? { ...prev, rate: updatedRating } : null))
-                }
-            }
-        } catch (error) {
-            console.error('Failed to update rating:', error)
-        }
+    /** 平均評分由 comment action 算好回傳，這裡只負責換掉畫面上的星等 */
+    const handleRatingUpdate = (postId: string, averageRating: number) => {
+        setAllNews((prev) =>
+            prev.map((n) => (n.article_id === postId ? { ...n, rate: averageRating } : n))
+        )
+        setSelectedNews((prev) =>
+            prev?.article_id === postId ? { ...prev, rate: averageRating } : prev
+        )
     }
 
     const handleDelete = async (commentId: string) => {

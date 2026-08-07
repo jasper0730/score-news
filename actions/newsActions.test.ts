@@ -271,10 +271,9 @@ describe('getNewsActions', () => {
             await getNewsActions({ userId: OTHER_USER_ID } as never)
 
             expect(collection('favorites').findOne).toHaveBeenCalledWith({ userId: USER_ID })
-            expect(collection('ratings').find).toHaveBeenCalledWith({
-                userId: USER_ID,
-                postId: { $in: ['news-1'] },
-            })
+            expect(collection('comments').find).toHaveBeenCalledWith(
+                expect.objectContaining({ userId: USER_ID, postId: { $in: ['news-1'] } })
+            )
         })
 
         it('未登入時不查收藏，所有項目 favorite 為 false', async () => {
@@ -314,11 +313,11 @@ describe('getNewsActions', () => {
         it('帶入平均評分與使用者自己的評分', async () => {
             signedIn()
             collection('news').cursor.toArray.mockResolvedValue([makeNewsDoc({ article_id: 'a' })])
-            collection('ratings').aggregateCursor.toArray.mockResolvedValue([
+            collection('comments').aggregateCursor.toArray.mockResolvedValue([
                 { _id: 'a', avgRating: 3.5 },
             ])
-            collection('ratings').cursor.toArray.mockResolvedValue([
-                { userId: USER_ID, postId: 'a', rate: 5 },
+            collection('comments').cursor.toArray.mockResolvedValue([
+                { userId: USER_ID, postId: 'a', rating: 5 },
             ])
 
             const result = await getNewsActions()
@@ -340,8 +339,8 @@ describe('getNewsActions', () => {
 
             await getNewsActions()
 
-            expect(collection('ratings').aggregate).not.toHaveBeenCalled()
-            expect(collection('ratings').find).not.toHaveBeenCalled()
+            expect(collection('comments').aggregate).not.toHaveBeenCalled()
+            expect(collection('comments').find).not.toHaveBeenCalled()
         })
     })
 
@@ -425,7 +424,7 @@ describe('getNewsByIds', () => {
 
     it('依 id 取新聞並帶上平均評分', async () => {
         collection('news').cursor.toArray.mockResolvedValue([makeNewsDoc({ article_id: 'a' })])
-        collection('ratings').aggregateCursor.toArray.mockResolvedValue([
+        collection('comments').aggregateCursor.toArray.mockResolvedValue([
             { _id: 'a', avgRating: 2 },
         ])
 
