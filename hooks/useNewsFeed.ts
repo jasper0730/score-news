@@ -9,7 +9,7 @@ import { toggleFavoriteAction } from '@/actions/favoriteActions'
 import { toggleLikeAction } from '@/actions/likeActions'
 import { incrementViewAction } from '@/actions/viewActions'
 import { shareArticle } from '@/libs/share'
-import type { NewsDataType } from '@/types/news'
+import type { NewsDataType, RatingSummaryType } from '@/types/news'
 
 import { NEWS_PAGE_SIZE } from '@/constants/common'
 
@@ -123,19 +123,16 @@ export function useNewsFeed(initial: NewsResponse) {
     }, [])
 
     /**
-     * 套用新的平均評分。
+     * 套用新的評分現況。
      *
      * 評分只存在於評論裡，所以不再有獨立的「送出評分」動作——
-     * 平均由 createCommentAction / deleteCommentAction 算好回傳，
-     * 這裡只負責把畫面上的星等換掉。
+     * 平均與使用者自己的分數都由 createCommentAction / deleteCommentAction
+     * 算好回傳，這裡只負責把畫面上的星等換掉。
      */
-    const handleRatingUpdate = (postId: string, averageRating: number) => {
-        setItems((prev) =>
-            prev.map((n) => (n.article_id === postId ? { ...n, rate: averageRating } : n))
-        )
-        setSelectedNews((prev) =>
-            prev?.article_id === postId ? { ...prev, rate: averageRating } : prev
-        )
+    const handleRatingUpdate = (postId: string, rating: RatingSummaryType) => {
+        const patch = { rate: rating.averageRating, userRate: rating.userRating }
+        setItems((prev) => prev.map((n) => (n.article_id === postId ? { ...n, ...patch } : n)))
+        setSelectedNews((prev) => (prev?.article_id === postId ? { ...prev, ...patch } : prev))
     }
 
     /**

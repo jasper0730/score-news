@@ -331,12 +331,15 @@ describe('useNewsFeed 收藏', () => {
 describe('useNewsFeed 評分', () => {
     // 評分只存在於評論裡，沒有獨立的「送出評分」動作——
     // 平均由 comment action 算好回傳，這裡只負責換掉畫面上的數字
-    it('套用伺服器算好的平均分數', () => {
-        const feed = renderFeed(makeResponse({ data: [makeItem({ article_id: 'a', rate: 1 })] }))
+    it('套用伺服器算好的平均分數與使用者自己的分數', () => {
+        const feed = renderFeed(
+            makeResponse({ data: [makeItem({ article_id: 'a', rate: 1, userRate: 1 })] })
+        )
 
-        act(() => feed.current.handleRatingUpdate('a', 4.5))
+        act(() => feed.current.handleRatingUpdate('a', { averageRating: 4.5, userRating: 5 }))
 
         expect(feed.current.items[0]?.rate).toBe(4.5)
+        expect(feed.current.items[0]?.userRate).toBe(5)
     })
 
     it('同時更新開啟中的新聞詳情', async () => {
@@ -346,9 +349,10 @@ describe('useNewsFeed 評分', () => {
         await act(async () => {
             await feed.current.handleSelectNews(item)
         })
-        act(() => feed.current.handleRatingUpdate('a', 4.5))
+        act(() => feed.current.handleRatingUpdate('a', { averageRating: 4.5, userRating: 5 }))
 
         expect(feed.current.selectedNews?.rate).toBe(4.5)
+        expect(feed.current.selectedNews?.userRate).toBe(5)
     })
 
     it('只動指定的那一篇，其他文章不受影響', () => {
@@ -361,18 +365,21 @@ describe('useNewsFeed 評分', () => {
             })
         )
 
-        act(() => feed.current.handleRatingUpdate('a', 4.5))
+        act(() => feed.current.handleRatingUpdate('a', { averageRating: 4.5, userRating: 5 }))
 
         expect(feed.current.items[0]?.rate).toBe(4.5)
         expect(feed.current.items[1]?.rate).toBe(2)
     })
 
-    it('評論被刪光後平均歸零——刪除評論等於也移除了它的評分', () => {
-        const feed = renderFeed(makeResponse({ data: [makeItem({ article_id: 'a', rate: 4 })] }))
+    it('刪掉自己的評論後，平均與自己的星等一起歸零', () => {
+        // 只歸零平均而留著 userRate 的話，評論表單會亮著已經不存在的分數
+        const item = makeItem({ article_id: 'a', rate: 4, userRate: 4 })
+        const feed = renderFeed(makeResponse({ data: [item] }))
 
-        act(() => feed.current.handleRatingUpdate('a', 0))
+        act(() => feed.current.handleRatingUpdate('a', { averageRating: 0, userRating: 0 }))
 
         expect(feed.current.items[0]?.rate).toBe(0)
+        expect(feed.current.items[0]?.userRate).toBe(0)
     })
 })
 

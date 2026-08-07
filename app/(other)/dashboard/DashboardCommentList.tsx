@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { toastBox } from '@/utils/toast'
 import { getCommentsByUserId, deleteCommentAction } from '@/actions/commentActions'
 import { getNewsByIds } from '@/actions/newsActions'
-import type { CommentType, NewsDataType } from '@/types/news'
+import type { CommentType, NewsDataType, RatingSummaryType } from '@/types/news'
 import Loader from '@/components/atoms/Loader'
 import NewsModal from '@/components/organisms/NewsModal'
 import { CARD_CLASSES } from '@/libs/styles'
@@ -66,22 +66,23 @@ const DashboardCommentList = ({ userId }: DashboardCommentListProps) => {
         }
     }
 
-    /** 平均評分由 comment action 算好回傳，這裡只負責換掉畫面上的星等 */
-    const handleRatingUpdate = (postId: string, averageRating: number) => {
-        setAllNews((prev) =>
-            prev.map((n) => (n.article_id === postId ? { ...n, rate: averageRating } : n))
-        )
-        setSelectedNews((prev) =>
-            prev?.article_id === postId ? { ...prev, rate: averageRating } : prev
-        )
+    /** 評分由 comment action 算好回傳，這裡只負責換掉畫面上的星等 */
+    const handleRatingUpdate = (postId: string, rating: RatingSummaryType) => {
+        const patch = { rate: rating.averageRating, userRate: rating.userRating }
+        setAllNews((prev) => prev.map((n) => (n.article_id === postId ? { ...n, ...patch } : n)))
+        setSelectedNews((prev) => (prev?.article_id === postId ? { ...prev, ...patch } : prev))
     }
 
     const handleDelete = async (commentId: string) => {
+        const target = comments.find((c) => c._id === commentId)
         try {
             const result = await deleteCommentAction(commentId)
 
             if (result.success) {
                 setComments((prev) => prev.filter((c) => c._id !== commentId))
+                // 這裡刪掉的評論帶著評分，等一下點「查看文章」開的是同一份
+                // allNews 資料，不同步的話星等會停在刪除前的數字
+                if (target) handleRatingUpdate(target.postId, result.rating)
                 toastBox('評論已刪除', 'success')
             }
         } catch (error) {

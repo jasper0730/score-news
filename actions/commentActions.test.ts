@@ -22,7 +22,7 @@ const {
     getCommentsByUserId,
     createCommentAction,
     deleteCommentAction,
-    getAverageRating,
+    getRatingSummary,
 } = await import('@/actions/commentActions')
 
 beforeEach(() => {
@@ -142,10 +142,10 @@ describe('getCommentsByUserId', () => {
     })
 })
 
-describe('getAverageRating', () => {
-    it('只算沒有被刪除、且有給分的評論', async () => {
+describe('getRatingSummary', () => {
+    it('平均只算沒有被刪除、且有給分的評論', async () => {
         // 評分只存在於評論裡，這是唯一來源
-        await getAverageRating('news-1')
+        await getRatingSummary('news-1', 'user-1')
 
         const pipeline = collection('comments').aggregate.mock.calls[0]?.[0] as Record<
             string,
@@ -157,7 +157,7 @@ describe('getAverageRating', () => {
     })
 
     it('管理員下架的評論也不計入——因違規而隱藏的內容其評分不該還算數', async () => {
-        await getAverageRating('news-1')
+        await getRatingSummary('news-1', 'user-1')
 
         const pipeline = collection('comments').aggregate.mock.calls[0]?.[0] as {
             $match: Record<string, unknown>
@@ -166,16 +166,36 @@ describe('getAverageRating', () => {
         expect(pipeline[0]?.$match).not.toHaveProperty('deletedByAdmin')
     })
 
-    it('回傳計算出的平均', async () => {
+    it('回傳計算出的平均與使用者自己的分數', async () => {
         collection('comments').aggregateCursor.toArray.mockResolvedValue([{ _id: null, avg: 3.5 }])
+        collection('comments').findOne.mockResolvedValue(makeCommentDoc({ rating: 5 }))
 
-        expect(await getAverageRating('news-1')).toBe(3.5)
+        expect(await getRatingSummary('news-1', 'user-1')).toEqual({
+            averageRating: 3.5,
+            userRating: 5,
+        })
     })
 
-    it('一則評論都沒有時回 0，而不是 null 或 NaN', async () => {
+    it('一則評論都沒有時兩個值都回 0，而不是 null 或 NaN', async () => {
         collection('comments').aggregateCursor.toArray.mockResolvedValue([])
+        collection('comments').findOne.mockResolvedValue(null)
 
-        expect(await getAverageRating('news-1')).toBe(0)
+        expect(await getRatingSummary('news-1', 'user-1')).toEqual({
+            averageRating: 0,
+            userRating: 0,
+        })
+    })
+
+    it('自己的評論已刪除時 userRating 回 0——表單不該還亮著已經不存在的星等', async () => {
+        collection('comments').findOne.mockResolvedValue(null)
+
+        await getRatingSummary('news-1', 'user-1')
+
+        expect(collection('comments').findOne).toHaveBeenCalledWith({
+            postId: 'news-1',
+            userId: 'user-1',
+            deletedAt: { $exists: false },
+        })
     })
 })
 
@@ -420,21 +440,30 @@ describe('deleteCommentAction', () => {
         })
     })
 
-    it('刪除成功，並回傳更新後的平均評分', async () => {
+    it('刪除成功，並回傳更新後的評分現況', async () => {
         // 刪掉評論等於也移除了它的評分，呼叫端要能把星等換掉
         collection('comments').aggregateCursor.toArray.mockResolvedValue([{ _id: null, avg: 4 }])
+        // 第一次 findOne 是刪除前的查詢，第二次是 getRatingSummary 找自己的評論
+        collection('comments')
+            .findOne.mockResolvedValueOnce(makeCommentDoc())
+            .mockResolvedValue(null)
 
         expect(await deleteCommentAction(commentId)).toEqual({
             success: true,
             message: 'Comment deleted',
-            averageRating: 4,
+            rating: { averageRating: 4, userRating: 0 },
         })
     })
 
-    it('刪掉最後一則評論後平均歸零', async () => {
+    it('刪掉自己那則後 userRating 歸零，表單不會還亮著星等', async () => {
         collection('comments').aggregateCursor.toArray.mockResolvedValue([])
+        collection('comments')
+            .findOne.mockResolvedValueOnce(makeCommentDoc())
+            .mockResolvedValue(null)
 
-        expect(await deleteCommentAction(commentId)).toMatchObject({ averageRating: 0 })
+        expect(await deleteCommentAction(commentId)).toMatchObject({
+            rating: { averageRating: 0, userRating: 0 },
+        })
     })
 
     it('commentId 格式不合法時不會讓 ObjectId 的例外外洩', async () => {

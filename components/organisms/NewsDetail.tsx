@@ -1,14 +1,14 @@
 'use client'
 
 import Image from 'next/image'
-import { NewsDataType } from '@/types/news'
+import { NewsDataType, RatingSummaryType } from '@/types/news'
 import { IoIosCloseCircle } from 'react-icons/io'
 import CommentSection from '@/components/organisms/CommentSection'
 
 interface NewsDetailProps {
     data: NewsDataType | null
     onClose: () => void
-    onRatingUpdate: (postId: string, newRating: number) => void
+    onRatingUpdate: (postId: string, rating: RatingSummaryType) => void
 }
 
 const NewsDetail = ({ data, onClose, onRatingUpdate }: NewsDetailProps) => {

@@ -11,13 +11,13 @@ import {
 import CommentForm from '@/components/molecules/CommentForm'
 import ConfirmDialog from '@/components/molecules/ConfirmDialog'
 import CommentList from '@/components/organisms/CommentList'
-import type { CommentType } from '@/types/news'
+import type { CommentType, RatingSummaryType } from '@/types/news'
 
 interface CommentSectionProps {
     postId: string
     postTitle: string
     initialRating?: number
-    onRatingUpdate?: (postId: string, newRating: number) => void
+    onRatingUpdate?: (postId: string, rating: RatingSummaryType) => void
 }
 
 /** 待確認的動作。送出、修改、刪除都要先經過彈窗才會打 API */
@@ -114,8 +114,8 @@ const CommentSection = ({
                 return
             }
 
-            // 平均評分由伺服器算好回傳，前端不再自行推測
-            onRatingUpdate?.(postId, result.averageRating)
+            // 評分由伺服器算好回傳，前端不再自行推測
+            onRatingUpdate?.(postId, result.rating)
             await fetchComments()
             setEditingId(null)
             setFormKey((k) => k + 1)
@@ -134,8 +134,8 @@ const CommentSection = ({
                 return
             }
 
-            // 刪掉評論等於也移除了它的評分，平均要跟著更新
-            onRatingUpdate?.(postId, result.averageRating)
+            // 刪掉評論等於也移除了它的評分，平均與自己的星等都要跟著更新
+            onRatingUpdate?.(postId, result.rating)
             // 重新取一次而不是在本地移除：軟刪除後這則可能消失（本人自刪）
             // 也可能變成墓碑（管理員下架），由伺服器決定比在前端猜可靠
             await fetchComments()

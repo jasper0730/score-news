@@ -63,9 +63,12 @@ beforeEach(() => {
     createCommentAction.mockResolvedValue({
         success: true,
         comment: makeComment(),
-        averageRating: 4.5,
+        rating: { averageRating: 4.5, userRating: 5 },
     })
-    deleteCommentAction.mockResolvedValue({ success: true, averageRating: 0 })
+    deleteCommentAction.mockResolvedValue({
+        success: true,
+        rating: { averageRating: 0, userRating: 0 },
+    })
 })
 
 describe('CommentSection 載入', () => {
@@ -155,7 +158,7 @@ describe('CommentSection 送出評論', () => {
             expect(createCommentAction).toHaveBeenCalledWith('news-1', '標題', '很棒', 5)
         )
         // 平均由伺服器算好回傳，不是前端拿使用者剛給的分數當平均
-        expect(onRatingUpdate).toHaveBeenCalledWith('news-1', 4.5)
+        expect(onRatingUpdate).toHaveBeenCalledWith('news-1', { averageRating: 4.5, userRating: 5 })
     })
 
     it('取消就不打 API', async () => {

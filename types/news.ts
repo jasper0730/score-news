@@ -48,6 +48,19 @@ export interface CommentType {
     isRemovedByAdmin?: boolean
 }
 
+/**
+ * 一篇文章的評分現況。
+ *
+ * 兩個值要一起更新：averageRating 決定卡片與詳情頁顯示幾顆星，
+ * userRating 決定評分表單裡有幾顆是亮的。只更新前者的話，
+ * 刪掉自己的評論後表單仍會亮著已經不存在的分數。
+ */
+export interface RatingSummaryType {
+    averageRating: number
+    /** 目前使用者自己給的分數；沒評過或已刪除為 0 */
+    userRating: number
+}
+
 export interface CommentApiResponse {
     success: boolean
     comments: CommentType[]

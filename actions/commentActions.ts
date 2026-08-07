@@ -3,7 +3,7 @@
 import { ObjectId } from 'mongodb'
 import { requireAuth, requireAuthWithRole } from '@/libs/auth'
 import { getCollection, CommentDocument, CommentEditHistoryDocument, UserDocument } from '@/libs/db'
-import type { CommentType } from '@/types/news'
+import type { CommentType, RatingSummaryType } from '@/types/news'
 
 /**
  * 轉成前端型別。
@@ -50,21 +50,31 @@ const VISIBLE_FILTER = {
 const RATED_FILTER = { deletedAt: { $exists: false }, rating: { $gt: 0 } }
 
 /**
- * 算出一篇文章的平均評分。
+ * 算出一篇文章的評分現況：公開的平均，以及這位使用者自己給的分。
  *
  * 評分只存在於評論裡（前端也只有評論表單能給分），所以 comments 是唯一來源。
  * 先前另有一個 ratings collection 存同一份資料，兩邊會不同步——
  * 刪掉評論後那筆評分還留著，導致「只有一則 4 星評論卻顯示 3 星」。
+ *
+ * 兩個值一起回傳是因為它們一定同時變動：評論一改，平均與自己的分數
+ * 都得跟著換。分開查會讓呼叫端漏掉其中一個（表單亮著已刪除的星等就是這樣來的）。
  */
-export async function getAverageRating(postId: string): Promise<number> {
+export async function getRatingSummary(postId: string, userId: string): Promise<RatingSummaryType> {
     const comments = await getCollection<CommentDocument>('comments')
-    const result = await comments
-        .aggregate([
-            { $match: { postId, ...RATED_FILTER } },
-            { $group: { _id: null, avg: { $avg: '$rating' } } },
-        ])
-        .toArray()
-    return (result[0]?.avg as number | undefined) ?? 0
+    const [rows, own] = await Promise.all([
+        comments
+            .aggregate([
+                { $match: { postId, ...RATED_FILTER } },
+                { $group: { _id: null, avg: { $avg: '$rating' } } },
+            ])
+            .toArray(),
+        comments.findOne({ postId, userId, deletedAt: { $exists: false } }),
+    ])
+
+    return {
+        averageRating: (rows[0]?.avg as number | undefined) ?? 0,
+        userRating: own?.rating ?? 0,
+    }
 }
 
 export async function getCommentsByPostId(postId: string) {
@@ -184,8 +194,8 @@ export async function createCommentAction(
         return {
             success: true as const,
             comment: serializeComment(result as CommentDocument & { _id: ObjectId }),
-            // 一併回傳新的平均，呼叫端不必為了更新星等再打一次
-            averageRating: await getAverageRating(postId),
+            // 一併回傳新的評分現況，呼叫端不必為了更新星等再打一次
+            rating: await getRatingSummary(postId, currentUser.id),
         }
     } catch (error) {
         console.error('Error in createCommentAction:', error)
@@ -233,11 +243,12 @@ export async function deleteCommentAction(commentId: string) {
             },
         })
 
-        // 刪掉評論等於也移除了它的評分，平均要跟著變
+        // 刪掉評論等於也移除了它的評分：平均要跟著變，刪自己那則時
+        // 表單裡亮著的星等也要熄掉，所以 userRating 一併回傳
         return {
             success: true as const,
             message: 'Comment deleted',
-            averageRating: await getAverageRating(existing.postId),
+            rating: await getRatingSummary(existing.postId, auth.user.id),
         }
     } catch (error) {
         console.error('Error in deleteCommentAction:', error)

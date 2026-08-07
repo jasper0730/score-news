@@ -7,7 +7,7 @@ import { getFavoriteNewsAction } from '@/actions/newsActions'
 import { toggleFavoriteAction } from '@/actions/favoriteActions'
 import { toggleLikeAction } from '@/actions/likeActions'
 import { shareArticle } from '@/libs/share'
-import type { NewsDataType } from '@/types/news'
+import type { NewsDataType, RatingSummaryType } from '@/types/news'
 import Loader from '@/components/atoms/Loader'
 import NewsCard from '@/components/organisms/NewsCard'
 import NewsModal from '@/components/organisms/NewsModal'
@@ -44,15 +44,12 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
     }, [fetchData])
 
     /** 平均評分由 comment action 算好回傳，這裡只負責換掉畫面上的星等 */
-    const handleRatingUpdate = (postId: string, averageRating: number) => {
+    const handleRatingUpdate = (postId: string, rating: RatingSummaryType) => {
+        const patch = { rate: rating.averageRating, userRate: rating.userRating }
         setNewsData((prev) =>
-            prev.map((news) =>
-                news.article_id === postId ? { ...news, rate: averageRating } : news
-            )
+            prev.map((news) => (news.article_id === postId ? { ...news, ...patch } : news))
         )
-        setSelectedNews((prev) =>
-            prev?.article_id === postId ? { ...prev, rate: averageRating } : prev
-        )
+        setSelectedNews((prev) => (prev?.article_id === postId ? { ...prev, ...patch } : prev))
     }
 
     const handleLikeClick = async (id: string) => {

@@ -1,4 +1,4 @@
-import { NewsDataType } from '@/types/news'
+import { NewsDataType, RatingSummaryType } from '@/types/news'
 import Modal from '@/components/molecules/Modal'
 import NewsDetail from '@/components/organisms/NewsDetail'
 
@@ -6,7 +6,7 @@ interface NewsModalProps {
     data: NewsDataType | null
     onClose: () => void
     open: boolean
-    onRatingUpdate: (postId: string, newRating: number) => void
+    onRatingUpdate: (postId: string, rating: RatingSummaryType) => void
 }
 
 const NewsModal = ({ data, open, onClose, onRatingUpdate }: NewsModalProps) => {
