@@ -6,9 +6,9 @@ import type { SortType } from '@/types/news'
 
 const SORT_OPTIONS: { value: SortType; label: string }[] = [
     { value: 'date_desc', label: '最新文章' },
+    { value: 'trending', label: '即時發燒' },
     { value: 'views', label: '最多瀏覽' },
     { value: 'favorites', label: '最多收藏' },
-    { value: 'rating_desc', label: '最高評分' },
     { value: 'likes', label: '最多讚' },
 ]
 

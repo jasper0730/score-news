@@ -53,7 +53,7 @@ export interface CommentApiResponse {
     comments: CommentType[]
 }
 
-export type SortType = 'date_desc' | 'views' | 'favorites' | 'rating_desc' | 'likes'
+export type SortType = 'date_desc' | 'trending' | 'views' | 'favorites' | 'likes'
 
 export type DashboardTab = 'favorites' | 'comments' | 'profile'
 

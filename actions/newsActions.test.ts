@@ -79,21 +79,21 @@ describe('getNewsActions', () => {
         })
     })
 
-    describe('依評分排序', () => {
-        it('改走 aggregate，因為 avgRating 是算出來的欄位無法用索引排序', async () => {
+    describe('需要 aggregate 的排序', () => {
+        it('改走 aggregate，因為互動數不是新聞文件上的欄位', async () => {
             const news = collection('news')
             news.aggregateCursor.toArray.mockResolvedValue([
-                { metadata: [{ total: 1 }], data: [makeNewsDoc({ avgRating: 4.5 })] },
+                { metadata: [{ total: 1 }], data: [makeNewsDoc()] },
             ])
 
-            const result = await getNewsActions({ sortType: 'rating_desc' })
+            const result = await getNewsActions({ sortType: 'likes' })
 
             expect(news.find).not.toHaveBeenCalled()
             expect(news.aggregate).toHaveBeenCalledOnce()
-            expect(result.data[0]?.rate).toBe(4.5)
+            expect(result.data).toHaveLength(1)
         })
 
-        it.each(['rating_desc', 'favorites', 'likes'] as const)(
+        it.each(['favorites', 'likes', 'trending'] as const)(
             '%s 由高到低排序',
             async (sortType) => {
                 const news = collection('news')
@@ -126,7 +126,7 @@ describe('getNewsActions', () => {
                 { metadata: [{ total: 30 }], data: [makeNewsDoc()] },
             ])
 
-            const result = await getNewsActions({ sortType: 'rating_desc', page: 2, limit: 12 })
+            const result = await getNewsActions({ sortType: 'likes', page: 2, limit: 12 })
 
             const pipeline = news.aggregate.mock.calls[0]?.[0] as Record<string, unknown>[]
             const facetStage = pipeline.find((stage) => '$facet' in stage) as {
@@ -169,6 +169,79 @@ describe('getNewsActions', () => {
             expect(lookup.$lookup.pipeline).toBeDefined()
         })
 
+        describe('即時發燒', () => {
+            /** 取出 pipeline 裡的各個 stage 方便斷言 */
+            const stages = () => {
+                const pipeline = collection('news').aggregate.mock.calls[0]?.[0] as Record<
+                    string,
+                    unknown
+                >[]
+                return {
+                    match: pipeline.find((s) => '$match' in s) as {
+                        $match: Record<string, unknown>
+                    },
+                    addFields: pipeline.find((s) => '$addFields' in s) as {
+                        $addFields: { sortValue: Record<string, unknown[]> }
+                    },
+                }
+            }
+
+            it('只看 24 小時內的文章——再舊的就不叫即時', async () => {
+                await getNewsActions({ sortType: 'trending' })
+
+                const pubDate = stages().match.$match.pubDate as { $gte: string }
+                expect(pubDate.$gte).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
+
+                // 時間窗的下界應該離現在約 24 小時
+                const cutoff = new Date(pubDate.$gte.replace(' ', 'T') + '+08:00')
+                const hoursAgo = (Date.now() - cutoff.getTime()) / 3_600_000
+                expect(hoursAgo).toBeGreaterThan(23.9)
+                expect(hoursAgo).toBeLessThan(24.1)
+            })
+
+            it('時間窗與搜尋條件並存，不會蓋掉彼此', async () => {
+                await getNewsActions({ sortType: 'trending', query: '颱風' })
+
+                const match = stages().match.$match
+                expect(match).toHaveProperty('$or')
+                expect(match).toHaveProperty('pubDate')
+            })
+
+            it('熱度 = (按讚數 + 瀏覽數) ÷ (發布至今時數 + 平滑常數)', async () => {
+                await getNewsActions({ sortType: 'trending' })
+
+                const [numerator, denominator] = stages().addFields.$addFields.sortValue
+                    .$divide as [Record<string, unknown[]>, Record<string, unknown[]>]
+
+                expect(numerator.$add).toEqual([
+                    { $size: '$sortSource' },
+                    { $ifNull: ['$views', 0] },
+                ])
+                // 分母的第二項就是平滑常數
+                expect(denominator.$add?.[1]).toBe(2)
+            })
+
+            it('分母加平滑常數，剛發布的文章才不會用極小分母洗版', async () => {
+                // 1 分鐘前發布、只有 1 次瀏覽的文章若不平滑，分數會是 60，
+                // 反而贏過 3 小時前累積 100 次瀏覽的文章
+                await getNewsActions({ sortType: 'trending' })
+
+                const denominator = (
+                    stages().addFields.$addFields.sortValue.$divide as Record<string, unknown[]>[]
+                )[1]
+                expect(denominator?.$add?.[1]).toBeGreaterThan(0)
+            })
+
+            it('沒有 views 欄位的文章當作 0，不會讓整個運算變成 null', async () => {
+                await getNewsActions({ sortType: 'trending' })
+
+                const numerator = (
+                    stages().addFields.$addFields.sortValue.$divide as Record<string, unknown[]>[]
+                )[0]
+                expect(numerator?.$add).toContainEqual({ $ifNull: ['$views', 0] })
+            })
+        })
+
         it('lookup 的中介欄位不會被送回前端', async () => {
             const news = collection('news')
 
@@ -181,7 +254,7 @@ describe('getNewsActions', () => {
         it('aggregate 回空陣列時不會炸掉，總數為 0', async () => {
             collection('news').aggregateCursor.toArray.mockResolvedValue([])
 
-            const result = await getNewsActions({ sortType: 'rating_desc' })
+            const result = await getNewsActions({ sortType: 'likes' })
 
             expect(result).toMatchObject({ success: true, data: [], total: 0, hasMore: false })
         })

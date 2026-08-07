@@ -136,11 +136,11 @@ describe('useNewsFeed 搜尋與排序', () => {
     it('排序改變時回到第一頁重查', async () => {
         renderFeed(makeResponse())
 
-        act(() => useNewsStore.getState().setSortType('rating_desc'))
+        act(() => useNewsStore.getState().setSortType('likes'))
 
         await waitFor(() =>
             expect(getNewsActions).toHaveBeenCalledWith(
-                expect.objectContaining({ sortType: 'rating_desc', page: 1 })
+                expect.objectContaining({ sortType: 'likes', page: 1 })
             )
         )
     })

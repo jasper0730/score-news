@@ -11,8 +11,8 @@ import {
 import type { NewsDataType, SortType } from '@/types/news'
 import { getSession } from '@/actions/getUser'
 
-/** 依評分排序時走 aggregate，結果會多帶一個算出來的 avgRating 欄位 */
-type NewsQueryDocument = WithId<NewsDocument> & { avgRating?: number }
+/** 走 aggregate 時會多帶一個算出來的 sortValue，但那不需要回傳給前端 */
+type NewsQueryDocument = WithId<NewsDocument>
 
 /**
  * 把資料庫 document 轉成前端型別。
@@ -51,11 +51,24 @@ export interface GetNewsParams {
     limit?: number
 }
 
+/** 發燒榜只看 24 小時內的文章——再舊的就不叫「即時」了 */
+const TRENDING_WINDOW_HOURS = 24
+
+/**
+ * 熱度公式分母的平滑常數（小時）。
+ *
+ * 純粹的「互動數 ÷ 發布至今的時數」會被剛發布的文章洗版：
+ * 1 分鐘前發布、只有 1 次瀏覽的文章，分數是 1 ÷ (1/60) = 60，
+ * 反而贏過 3 小時前累積 100 次瀏覽的文章（100 ÷ 3 = 33）。
+ * 分母加一個常數可以壓掉分母趨近 0 時的爆炸，是 Hacker News 排序的同一個做法。
+ */
+const TRENDING_SMOOTHING_HOURS = 2
+
 /**
  * 這些排序依據都不是新聞文件上的欄位，得先 $lookup 其他 collection 算出來，
  * 因此無法用一般索引排序，只能走 aggregate。
  */
-const AGGREGATED_SORTS = ['rating_desc', 'favorites', 'likes'] as const
+const AGGREGATED_SORTS = ['favorites', 'likes', 'trending'] as const
 type AggregatedSort = (typeof AGGREGATED_SORTS)[number]
 
 const usesAggregateSort = (sortType: SortType): sortType is AggregatedSort =>
@@ -71,49 +84,94 @@ const SORT_OPTIONS: Record<Exclude<SortType, AggregatedSort>, Sort> = {
     views: { views: -1, pubDate: -1 },
 }
 
+const LIKES_LOOKUP = {
+    from: 'likes',
+    localField: 'article_id',
+    foreignField: 'postId',
+    as: 'sortSource',
+}
+
 /**
- * 算出排序依據的欄位，以及要 $lookup 哪個 collection。
- *
- * 收藏的結構是「一位使用者一份文件、postIds 陣列」，所以比對條件是
- * 「該文件的 postIds 包含這篇的 article_id」，與按讚／評分的 localField
- * 對 foreignField 不同，得用 pipeline 形式的 $lookup。
+ * 收藏的結構是「一位使用者一份文件、postIds 陣列」，比對條件是
+ * 「該文件的 postIds 包含這篇的 article_id」，與按讚的 localField 對
+ * foreignField 不同，得用 pipeline 形式的 $lookup。
  */
-const AGGREGATE_STAGES: Record<
-    AggregatedSort,
-    { lookup: Record<string, unknown>; field: Record<string, unknown>; direction: 1 | -1 }
-> = {
-    rating_desc: {
-        lookup: {
-            from: 'ratings',
-            localField: 'article_id',
-            foreignField: 'postId',
-            as: 'sortSource',
-        },
-        field: { $avg: '$sortSource.rate' },
-        direction: -1,
-    },
-    likes: {
-        lookup: {
-            from: 'likes',
-            localField: 'article_id',
-            foreignField: 'postId',
-            as: 'sortSource',
-        },
-        field: { $size: '$sortSource' },
-        direction: -1,
-    },
-    favorites: {
-        lookup: {
-            from: 'favorites',
-            let: { articleId: '$article_id' },
-            pipeline: [
-                { $match: { $expr: { $in: ['$$articleId', { $ifNull: ['$postIds', []] }] } } },
+const FAVORITES_LOOKUP = {
+    from: 'favorites',
+    let: { articleId: '$article_id' },
+    pipeline: [{ $match: { $expr: { $in: ['$$articleId', { $ifNull: ['$postIds', []] }] } } }],
+    as: 'sortSource',
+}
+
+interface AggregatePlan {
+    lookup: Record<string, unknown>
+    /** 算出排序依據，結果放進 sortValue */
+    sortValue: Record<string, unknown>
+    /** 額外的篩選條件，例如發燒榜的時間窗 */
+    extraMatch?: Record<string, unknown>
+}
+
+/**
+ * pubDate 是 'YYYY-MM-DD HH:mm:ss' 的台北時間字串。
+ * 零填補的格式讓字典序等於時間序，所以時間窗可以直接用字串比大小。
+ */
+function taipeiTimestamp(date: Date): string {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Taipei',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+    }).formatToParts(date)
+    const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '00'
+    const hour = get('hour') === '24' ? '00' : get('hour')
+    return `${get('year')}-${get('month')}-${get('day')} ${hour}:${get('minute')}:${get('second')}`
+}
+
+/** 排序方式 → aggregate 的組成。發燒榜要用到「現在」，因此收成函式 */
+function buildAggregatePlan(sortType: AggregatedSort, now: Date): AggregatePlan {
+    if (sortType === 'likes') {
+        return { lookup: LIKES_LOOKUP, sortValue: { $size: '$sortSource' } }
+    }
+    if (sortType === 'favorites') {
+        return { lookup: FAVORITES_LOOKUP, sortValue: { $size: '$sortSource' } }
+    }
+
+    // 即時發燒：(按讚數 + 瀏覽數) ÷ (發布至今的小時數 + 平滑常數)
+    const cutoff = taipeiTimestamp(new Date(now.getTime() - TRENDING_WINDOW_HOURS * 3_600_000))
+    const hoursSincePublish = {
+        $divide: [
+            {
+                $subtract: [
+                    now,
+                    // pubDate 存成字串，要先轉回時間才能相減
+                    {
+                        $dateFromString: {
+                            dateString: '$pubDate',
+                            format: '%Y-%m-%d %H:%M:%S',
+                            timezone: 'Asia/Taipei',
+                            onError: now,
+                        },
+                    },
+                ],
+            },
+            3_600_000,
+        ],
+    }
+
+    return {
+        lookup: LIKES_LOOKUP,
+        extraMatch: { pubDate: { $gte: cutoff } },
+        sortValue: {
+            $divide: [
+                { $add: [{ $size: '$sortSource' }, { $ifNull: ['$views', 0] }] },
+                { $add: [hoursSincePublish, TRENDING_SMOOTHING_HOURS] },
             ],
-            as: 'sortSource',
         },
-        field: { $size: '$sortSource' },
-        direction: -1,
-    },
+    }
 }
 
 /**
@@ -172,21 +230,19 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
 
         const skip = (page - 1) * limit
         const byAggregate = usesAggregateSort(sortType)
-        // 依評分排序時 pipeline 已經算出平均，enrich 階段不必再查一次
-        const byRating = sortType === 'rating_desc'
 
         let allData: NewsQueryDocument[] = []
         let total = 0
 
         if (byAggregate) {
-            const stage = AGGREGATE_STAGES[sortType]
+            const plan = buildAggregatePlan(sortType, new Date())
             const pipeline = [
-                { $match: filter },
-                { $lookup: stage.lookup },
-                { $addFields: { sortValue: stage.field, avgRating: { $avg: '$sortSource.rate' } } },
+                { $match: plan.extraMatch ? { ...filter, ...plan.extraMatch } : filter },
+                { $lookup: plan.lookup },
+                { $addFields: { sortValue: plan.sortValue } },
                 // 次要條件用 pubDate，否則同分的文章在不同頁之間順序不穩定，
                 // 無限捲動會出現重複或漏掉的項目
-                { $sort: { sortValue: stage.direction, pubDate: -1 } },
+                { $sort: { sortValue: -1, pubDate: -1 } },
                 // 中介欄位不需要送回來，它可能是整包 lookup 的結果
                 { $project: { sortSource: 0 } },
                 {
@@ -251,15 +307,13 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
                 likedSet = new Set(userLikes.map((l) => l.postId))
             }
 
-            if (!byRating) {
-                const avgRatings = await ratingsCollection
-                    .aggregate([
-                        { $match: { postId: { $in: postIds } } },
-                        { $group: { _id: '$postId', avgRating: { $avg: '$rate' } } },
-                    ])
-                    .toArray()
-                ratingMap = new Map(avgRatings.map((r) => [r._id as string, r.avgRating as number]))
-            }
+            const avgRatings = await ratingsCollection
+                .aggregate([
+                    { $match: { postId: { $in: postIds } } },
+                    { $group: { _id: '$postId', avgRating: { $avg: '$rate' } } },
+                ])
+                .toArray()
+            ratingMap = new Map(avgRatings.map((r) => [r._id as string, r.avgRating as number]))
 
             if (userId) {
                 const userRatings = await ratingsCollection
@@ -273,7 +327,7 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
 
         const enrichedData: NewsDataType[] = allData.map((item) =>
             toNewsData(item, {
-                rate: (byRating ? item.avgRating : ratingMap.get(item.article_id)) ?? 0,
+                rate: ratingMap.get(item.article_id) ?? 0,
                 favorite: favoriteSet.has(item.article_id),
                 favorites: favoriteCountMap.get(item.article_id) ?? 0,
                 likes: likeCountMap.get(item.article_id) ?? 0,

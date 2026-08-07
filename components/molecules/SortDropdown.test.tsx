@@ -17,9 +17,9 @@ describe('SortDropdown', () => {
 
         expect(screen.getAllByRole('option').map((o) => o.getAttribute('value'))).toEqual([
             'date_desc',
+            'trending',
             'views',
             'favorites',
-            'rating_desc',
             'likes',
         ])
     })
@@ -29,9 +29,9 @@ describe('SortDropdown', () => {
 
         expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual([
             '最新文章',
+            '即時發燒',
             '最多瀏覽',
             '最多收藏',
-            '最高評分',
             '最多讚',
         ])
     })
@@ -46,9 +46,9 @@ describe('SortDropdown', () => {
     it('選擇後更新 store', async () => {
         render(<SortDropdown />)
 
-        await userEvent.selectOptions(getSelect(), 'rating_desc')
+        await userEvent.selectOptions(getSelect(), 'trending')
 
-        expect(useNewsStore.getState().sortType).toBe('rating_desc')
+        expect(useNewsStore.getState().sortType).toBe('trending')
     })
 
     it('store 從外部改變時跟著同步', () => {

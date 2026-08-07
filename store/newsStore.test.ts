@@ -24,9 +24,9 @@ describe('useNewsStore', () => {
 
     it('setSortType 更新排序且不影響搜尋字串', () => {
         useNewsStore.getState().setNewsQuery('颱風')
-        useNewsStore.getState().setSortType('rating_desc')
+        useNewsStore.getState().setSortType('likes')
 
-        expect(useNewsStore.getState().sortType).toBe('rating_desc')
+        expect(useNewsStore.getState().sortType).toBe('likes')
         expect(useNewsStore.getState().query).toBe('颱風')
     })
 
