@@ -1,0 +1,7 @@
+# 只跑 lint-staged：它對「已 staged 的檔案」執行 prettier --write 並重新 stage，
+# 所以格式問題在 commit 當下就修掉，不會拖到 CI 才紅。
+#
+# 刻意不在這裡跑 tsc、eslint 與測試。pre-commit 一旦要等上幾十秒，
+# 大家就會開始習慣性加 --no-verify，那比沒有 hook 更糟。
+# 那三項由 CI 把關（.github/workflows/ci.yml）。
+npx lint-staged

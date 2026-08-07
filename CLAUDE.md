@@ -428,8 +428,15 @@ npx tsc --noEmit && npm run lint && npm test
 - 依賴有變動時 `package-lock.json` 要一起提交。
 - 修 bug 時盡量附上會失敗的測試，證明它真的修好了。
 
-> **目前的缺口**：`package.json` 有 `lint-staged` 設定，但 `.husky/` 底下
-> 沒有任何被追蹤的 hook 檔案（只有 gitignore 掉的 `_/` 執行期目錄），
-> 所以 pre-commit 實際上不會執行任何檢查。
-> 另外 `prepare` script 用的 `husky install` 在 husky v9 已淘汰，應改為 `husky`。
-> 修好之前，格式與 lint 只能靠本地自行執行與 CI 把關。
+### pre-commit hook
+
+`.husky/pre-commit` 只跑 `lint-staged`，也就是對已 staged 的檔案執行
+`prettier --write` 並重新 stage。格式問題在 commit 當下就修掉，不會拖到 CI。
+
+刻意**不**在 hook 裡跑 `tsc`、`eslint` 與測試——pre-commit 一旦要等上幾十秒，
+大家就會習慣性加 `--no-verify`，那比沒有 hook 更糟。那三項由 CI 把關，
+本地送出前請自己跑一次 `npx tsc --noEmit && npm run lint && npm test`。
+
+hook 由 `prepare` script 安裝（husky v9 的指令就叫 `husky`，不是 `husky install`），
+`npm install` 時會自動執行。若 hook 沒作用，先確認 `git config core.hooksPath`
+是不是 `.husky/_`，不是的話重跑 `npm run prepare`。
