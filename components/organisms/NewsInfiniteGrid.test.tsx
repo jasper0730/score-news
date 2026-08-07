@@ -22,6 +22,8 @@ function makeArticle(id: string): NewsDataType {
         source_url: '',
         rate: 0,
         favorite: false,
+        likes: 0,
+        liked: false,
         views: 0,
     }
 }

@@ -21,6 +21,8 @@ const NewsList = ({ data }: NewsListProps) => {
         setSelectedNews,
         handleSelectNews,
         handleFavoriteClick,
+        handleLikeClick,
+        handleShareClick,
         handleRatingUpdate,
     } = useNewsFeed(data)
 
@@ -38,6 +40,8 @@ const NewsList = ({ data }: NewsListProps) => {
                 isLoading={isLoading}
                 sentinelRef={sentinelRef}
                 onFavoriteClick={handleFavoriteClick}
+                onLikeClick={handleLikeClick}
+                onShareClick={handleShareClick}
                 onMoreClick={handleSelectNews}
             />
 

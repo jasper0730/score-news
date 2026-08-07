@@ -72,6 +72,18 @@ const PLANS: IndexPlan[] = [
         reason: 'findOne({ userId })；一位使用者只該有一份收藏文件',
     },
     {
+        collection: 'likes',
+        keys: { postId: 1 },
+        options: { name: 'postId' },
+        reason: '按讚總數的 $match { postId: { $in: [...] } } 與 countDocuments',
+    },
+    {
+        collection: 'likes',
+        keys: { userId: 1, postId: 1 },
+        options: { unique: true, name: 'userId_postId_unique' },
+        reason: '查使用者按過哪些；唯一性可從資料層擋掉併發造成的重複計數',
+    },
+    {
         collection: 'comments',
         keys: { postId: 1, createdAt: -1 },
         options: { name: 'postId_createdAt' },

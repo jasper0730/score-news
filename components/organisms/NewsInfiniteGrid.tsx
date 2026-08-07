@@ -12,6 +12,8 @@ interface NewsInfiniteGridProps {
     isLoading: boolean
     sentinelRef: React.RefObject<HTMLDivElement | null>
     onFavoriteClick: (id: string) => void
+    onLikeClick?: (id: string) => void
+    onShareClick?: (article: NewsDataType) => void
     onMoreClick: (article: NewsDataType) => void
 }
 
@@ -23,6 +25,8 @@ const NewsInfiniteGrid = ({
     isLoading,
     sentinelRef,
     onFavoriteClick,
+    onLikeClick,
+    onShareClick,
     onMoreClick,
 }: NewsInfiniteGridProps) => {
     if (total === 0 && !isLoading) {
@@ -42,6 +46,8 @@ const NewsInfiniteGrid = ({
                         article={article}
                         favorite={favorites.includes(article.article_id)}
                         onFavoriteClick={onFavoriteClick}
+                        onLikeClick={onLikeClick}
+                        onShareClick={onShareClick}
                         onMoreClick={() => onMoreClick(article)}
                     />
                 ))}

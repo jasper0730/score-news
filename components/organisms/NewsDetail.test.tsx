@@ -23,6 +23,8 @@ function makeArticle(overrides: Partial<NewsDataType> = {}): NewsDataType {
         source_url: 'https://example.com',
         rate: 4,
         favorite: false,
+        likes: 0,
+        liked: false,
         views: 10,
         ...overrides,
     }

@@ -27,6 +27,18 @@ export interface RatingDocument {
     rate: number
 }
 
+/**
+ * 按讚。
+ *
+ * 刻意做成「一位使用者對一篇文章一份文件」而非比照 favorites 的
+ * 「一位使用者一份文件、postIds 陣列」——按讚要顯示總數，
+ * 陣列結構算某篇有幾個讚得掃過所有使用者的文件。
+ */
+export interface LikeDocument {
+    userId: string
+    postId: string
+}
+
 export interface CommentDocument {
     _id?: ObjectId
     userId: string

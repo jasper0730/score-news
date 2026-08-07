@@ -3,6 +3,8 @@
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { FaHeart, FaRegHeart, FaRegEye } from 'react-icons/fa'
+import { FaBookmark, FaRegBookmark } from 'react-icons/fa6'
+import { IoShareSocialOutline } from 'react-icons/io5'
 import { NewsDataType } from '@/types/news'
 import StarDisplay from '@/components/molecules/StarDisplay'
 import { cn } from '@/libs/cn'
@@ -12,10 +14,21 @@ interface NewsCardProps {
     article: NewsDataType
     favorite: boolean
     onFavoriteClick: (articleId: string) => void
+    onLikeClick?: (articleId: string) => void
+    onShareClick?: (article: NewsDataType) => void
     onMoreClick?: () => void
 }
 
-const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardProps) => {
+const ACTION_CLASSES = 'cursor-pointer transition duration-300 hover:opacity-70'
+
+const NewsCard = ({
+    article,
+    favorite,
+    onFavoriteClick,
+    onLikeClick,
+    onShareClick,
+    onMoreClick,
+}: NewsCardProps) => {
     const { status } = useSession()
     const isAuthenticated = status === 'authenticated'
     // 剛匯入的新聞沒有 views 欄位，補 0 以免畫面出現 undefined
@@ -28,6 +41,7 @@ const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardP
                 <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                     {article.description}
                 </p>
+
                 {/* 日期與點閱數同屬次要資訊，併成一行避免卡片被撐高 */}
                 <div className="mt-2 flex items-center gap-3 text-sm text-subtle">
                     <time>日期：{article.pubDate}</time>
@@ -65,22 +79,57 @@ const NewsCard = ({ article, favorite, onFavoriteClick, onMoreClick }: NewsCardP
 
                 <div className="mt-4 flex items-center justify-between">
                     <button
-                        className="cursor-pointer text-primary transition duration-300 hover:opacity-70"
+                        className={cn(ACTION_CLASSES, 'text-primary')}
                         onClick={onMoreClick}
                         type="button"
                     >
                         More
                     </button>
-                    {isAuthenticated && (
+
+                    <div className="flex items-center gap-4">
+                        {/* 按讚與收藏都是「對某人而言」的狀態，未登入沒有意義；
+                            分享不需要身分，所以不受登入狀態限制 */}
+                        {isAuthenticated && (
+                            <>
+                                <button
+                                    onClick={() => onLikeClick?.(article.article_id)}
+                                    className={cn(
+                                        ACTION_CLASSES,
+                                        'flex items-center gap-1 text-danger'
+                                    )}
+                                    type="button"
+                                    aria-label={article.liked ? '取消按讚' : '按讚'}
+                                    aria-pressed={article.liked}
+                                >
+                                    {article.liked ? <FaHeart /> : <FaRegHeart />}
+                                    {article.likes > 0 && (
+                                        <span className="text-sm tabular-nums text-subtle">
+                                            {article.likes.toLocaleString('zh-TW')}
+                                        </span>
+                                    )}
+                                </button>
+
+                                <button
+                                    onClick={() => onFavoriteClick(article.article_id)}
+                                    className={cn(ACTION_CLASSES, 'text-primary')}
+                                    type="button"
+                                    aria-label={favorite ? '取消收藏' : '加入收藏'}
+                                    aria-pressed={favorite}
+                                >
+                                    {favorite ? <FaBookmark /> : <FaRegBookmark />}
+                                </button>
+                            </>
+                        )}
+
                         <button
-                            onClick={() => onFavoriteClick(article.article_id)}
-                            className="cursor-pointer text-danger transition duration-300 hover:opacity-70"
+                            onClick={() => onShareClick?.(article)}
+                            className={cn(ACTION_CLASSES, 'text-muted-foreground')}
                             type="button"
-                            aria-label={favorite ? '取消收藏' : '加入收藏'}
+                            aria-label="分享"
                         >
-                            {favorite ? <FaHeart /> : <FaRegHeart />}
+                            <IoShareSocialOutline />
                         </button>
-                    )}
+                    </div>
                 </div>
             </div>
         </article>

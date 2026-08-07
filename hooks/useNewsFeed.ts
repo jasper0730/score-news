@@ -6,8 +6,10 @@ import { useShallow } from 'zustand/shallow'
 import { toastBox } from '@/utils/toast'
 import { getNewsActions, type NewsResponse } from '@/actions/newsActions'
 import { toggleFavoriteAction } from '@/actions/favoriteActions'
+import { toggleLikeAction } from '@/actions/likeActions'
 import { rateNewsAction } from '@/actions/rateNewsAction'
 import { incrementViewAction } from '@/actions/viewActions'
+import { shareArticle } from '@/libs/share'
 import type { NewsDataType } from '@/types/news'
 
 import { NEWS_PAGE_SIZE } from '@/constants/common'
@@ -137,6 +139,44 @@ export function useNewsFeed(initial: NewsResponse) {
         }
     }
 
+    /**
+     * 按讚。先更新畫面再送出，失敗還原。
+     *
+     * 樂觀更新的數字只是暫時的——伺服器會回傳真實總數，因為同一篇可能
+     * 同時有其他人在按，前端自己加減會越來越偏。
+     */
+    const handleLikeClick = async (id: string) => {
+        const previous = items.find((n) => n.article_id === id)
+        if (!previous) return
+
+        const optimistic = {
+            liked: !previous.liked,
+            likes: previous.likes + (previous.liked ? -1 : 1),
+        }
+        const applyLike = (patch: { liked: boolean; likes: number }) => {
+            setItems((prev) => prev.map((n) => (n.article_id === id ? { ...n, ...patch } : n)))
+            setSelectedNews((prev) => (prev?.article_id === id ? { ...prev, ...patch } : prev))
+        }
+
+        applyLike(optimistic)
+        try {
+            const result = await toggleLikeAction(id)
+            if (!result.success) throw new Error(result.error)
+            applyLike({ liked: result.liked, likes: result.likes })
+        } catch (error) {
+            console.error('Failed to toggle like:', error)
+            applyLike({ liked: previous.liked, likes: previous.likes })
+            toastBox('操作失敗，請稍後再試', 'error')
+        }
+    }
+
+    const handleShareClick = async (article: NewsDataType) => {
+        const result = await shareArticle(article)
+        if (result === 'copied') toastBox('連結已複製', 'success')
+        if (result === 'failed') toastBox('分享失敗', 'error')
+        // 'shared' 由系統面板自己給回饋，'cancelled' 是使用者的選擇，都不需要再提示
+    }
+
     const handleFavoriteClick = async (id: string) => {
         const previousFavorites = [...favorites]
         setFavorites((prev) =>
@@ -163,6 +203,8 @@ export function useNewsFeed(initial: NewsResponse) {
         setSelectedNews,
         handleSelectNews,
         handleFavoriteClick,
+        handleLikeClick,
+        handleShareClick,
         handleRatingUpdate,
     }
 }

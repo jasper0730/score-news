@@ -12,6 +12,10 @@ export interface NewsDataType {
     rate: number
     userRate?: number
     favorite: boolean
+    /** 這篇文章的按讚總數 */
+    likes: number
+    /** 目前使用者有沒有按過讚；未登入時一律 false */
+    liked: boolean
     views?: number
 }
 

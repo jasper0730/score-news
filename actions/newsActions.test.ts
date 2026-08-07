@@ -221,6 +221,8 @@ describe('getNewsActions', () => {
                     'description',
                     'favorite',
                     'image_url',
+                    'liked',
+                    'likes',
                     'link',
                     'pubDate',
                     'rate',

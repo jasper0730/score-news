@@ -5,7 +5,9 @@ import Link from 'next/link'
 import { toastBox } from '@/utils/toast'
 import { getFavoriteNewsAction } from '@/actions/newsActions'
 import { toggleFavoriteAction } from '@/actions/favoriteActions'
+import { toggleLikeAction } from '@/actions/likeActions'
 import { rateNewsAction } from '@/actions/rateNewsAction'
+import { shareArticle } from '@/libs/share'
 import type { NewsDataType } from '@/types/news'
 import Loader from '@/components/atoms/Loader'
 import NewsCard from '@/components/organisms/NewsCard'
@@ -64,6 +66,34 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
         }
     }
 
+    const handleLikeClick = async (id: string) => {
+        const previous = newsData.find((n) => n.article_id === id)
+        if (!previous) return
+
+        const applyLike = (patch: { liked: boolean; likes: number }) =>
+            setNewsData((prev) => prev.map((n) => (n.article_id === id ? { ...n, ...patch } : n)))
+
+        applyLike({
+            liked: !previous.liked,
+            likes: previous.likes + (previous.liked ? -1 : 1),
+        })
+        try {
+            const result = await toggleLikeAction(id)
+            if (!result.success) throw new Error(result.error)
+            applyLike({ liked: result.liked, likes: result.likes })
+        } catch (error) {
+            console.error('Failed to toggle like:', error)
+            applyLike({ liked: previous.liked, likes: previous.likes })
+            toastBox('操作失敗，請稍後再試', 'error')
+        }
+    }
+
+    const handleShareClick = async (article: NewsDataType) => {
+        const result = await shareArticle(article)
+        if (result === 'copied') toastBox('連結已複製', 'success')
+        if (result === 'failed') toastBox('分享失敗', 'error')
+    }
+
     const handleFavoriteClick = async (id: string) => {
         try {
             const result = await toggleFavoriteAction(id)
@@ -105,6 +135,8 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
                             article={article}
                             favorite
                             onFavoriteClick={handleFavoriteClick}
+                            onLikeClick={handleLikeClick}
+                            onShareClick={handleShareClick}
                             onMoreClick={() => setSelectedNews(article)}
                         />
                     ))}

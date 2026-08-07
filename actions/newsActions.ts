@@ -6,6 +6,7 @@ import {
     type NewsDocument,
     type FavoriteDocument,
     type RatingDocument,
+    type LikeDocument,
 } from '@/libs/db'
 import type { NewsDataType, SortType } from '@/types/news'
 import { getSession } from '@/actions/getUser'
@@ -20,7 +21,13 @@ type NewsQueryDocument = WithId<NewsDocument> & { avgRating?: number }
  */
 const toNewsData = (
     doc: NewsQueryDocument,
-    extra: { rate: number; favorite: boolean; userRate?: number }
+    extra: {
+        rate: number
+        favorite: boolean
+        likes: number
+        liked: boolean
+        userRate?: number
+    }
 ): NewsDataType => ({
     article_id: doc.article_id,
     title: doc.title,
@@ -73,6 +80,7 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
         const newsCollection = await getCollection<NewsDocument>('news')
         const favoritesCollection = await getCollection<FavoriteDocument>('favorites')
         const ratingsCollection = await getCollection<RatingDocument>('ratings')
+        const likesCollection = await getCollection<LikeDocument>('likes')
 
         // Build Query
         const filter: Record<string, unknown> = {}
@@ -145,9 +153,27 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
         // Enrich with ratings (avg + user's own rating)
         let ratingMap = new Map<string, number>()
         let userRatingMap = new Map<string, number>()
+        let likeCountMap = new Map<string, number>()
+        let likedSet = new Set<string>()
         const postIds = allData.map((item) => item.article_id)
 
         if (postIds.length > 0) {
+            // 只統計這一頁的文章，不要對整個 likes collection 做聚合
+            const likeCounts = await likesCollection
+                .aggregate([
+                    { $match: { postId: { $in: postIds } } },
+                    { $group: { _id: '$postId', count: { $sum: 1 } } },
+                ])
+                .toArray()
+            likeCountMap = new Map(likeCounts.map((l) => [l._id as string, l.count as number]))
+
+            if (userId) {
+                const userLikes = await likesCollection
+                    .find({ userId, postId: { $in: postIds } })
+                    .toArray()
+                likedSet = new Set(userLikes.map((l) => l.postId))
+            }
+
             if (!byRating) {
                 const avgRatings = await ratingsCollection
                     .aggregate([
@@ -172,6 +198,8 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
             toNewsData(item, {
                 rate: (byRating ? item.avgRating : ratingMap.get(item.article_id)) ?? 0,
                 favorite: favoriteSet.has(item.article_id),
+                likes: likeCountMap.get(item.article_id) ?? 0,
+                liked: likedSet.has(item.article_id),
                 userRate: userRatingMap.get(item.article_id),
             })
         )
@@ -200,8 +228,12 @@ export async function getNewsByIds(
     try {
         if (articleIds.length === 0) return { success: true, data: [] }
 
+        const session = await getSession()
+        const userId = session?.user?.id ?? null
+
         const newsCollection = await getCollection<NewsDocument>('news')
         const ratingsCollection = await getCollection<RatingDocument>('ratings')
+        const likesCollection = await getCollection<LikeDocument>('likes')
 
         const docs = await newsCollection.find({ article_id: { $in: articleIds } }).toArray()
 
@@ -214,8 +246,29 @@ export async function getNewsByIds(
 
         const ratingMap = new Map(ratings.map((r) => [r._id as string, r.avgRating as number]))
 
+        const likeCounts = await likesCollection
+            .aggregate([
+                { $match: { postId: { $in: articleIds } } },
+                { $group: { _id: '$postId', count: { $sum: 1 } } },
+            ])
+            .toArray()
+        const likeCountMap = new Map(likeCounts.map((l) => [l._id as string, l.count as number]))
+
+        let likedSet = new Set<string>()
+        if (userId) {
+            const userLikes = await likesCollection
+                .find({ userId, postId: { $in: articleIds } })
+                .toArray()
+            likedSet = new Set(userLikes.map((l) => l.postId))
+        }
+
         const data: NewsDataType[] = docs.map((item) =>
-            toNewsData(item, { rate: ratingMap.get(item.article_id) ?? 0, favorite: false })
+            toNewsData(item, {
+                rate: ratingMap.get(item.article_id) ?? 0,
+                favorite: false,
+                likes: likeCountMap.get(item.article_id) ?? 0,
+                liked: likedSet.has(item.article_id),
+            })
         )
 
         return { success: true, data }

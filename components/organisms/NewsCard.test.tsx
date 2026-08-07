@@ -21,6 +21,8 @@ function makeArticle(overrides: Partial<NewsDataType> = {}): NewsDataType {
         source_url: 'https://example.com',
         rate: 4,
         favorite: false,
+        likes: 0,
+        liked: false,
         views: 10,
         ...overrides,
     }
@@ -115,6 +117,72 @@ describe('NewsCard 內容', () => {
         renderCard({ article: makeArticle({ source_icon: '' }) })
 
         expect(screen.queryByRole('img', { name: '' })).not.toBeInTheDocument()
+    })
+})
+
+describe('NewsCard 按讚', () => {
+    it('未登入時不顯示按讚鈕', () => {
+        useSession.mockReturnValue({ status: 'unauthenticated', data: null })
+        renderCard()
+
+        expect(screen.queryByRole('button', { name: /按讚/ })).not.toBeInTheDocument()
+    })
+
+    it('尚未按讚時顯示「按讚」', () => {
+        renderCard({ article: makeArticle({ liked: false }) })
+
+        expect(screen.getByRole('button', { name: '按讚' })).toHaveAttribute(
+            'aria-pressed',
+            'false'
+        )
+    })
+
+    it('已按讚時改為「取消按讚」', () => {
+        renderCard({ article: makeArticle({ liked: true }) })
+
+        expect(screen.getByRole('button', { name: '取消按讚' })).toHaveAttribute(
+            'aria-pressed',
+            'true'
+        )
+    })
+
+    it('有人按過時顯示數量', () => {
+        renderCard({ article: makeArticle({ likes: 128 }) })
+
+        expect(screen.getByRole('button', { name: /按讚/ })).toHaveTextContent('128')
+    })
+
+    it('數量為 0 時不顯示數字，避免每張卡都掛一個 0', () => {
+        renderCard({ article: makeArticle({ likes: 0 }) })
+
+        expect(screen.getByRole('button', { name: '按讚' })).not.toHaveTextContent('0')
+    })
+
+    it('點擊時帶出文章 id', async () => {
+        const onLikeClick = vi.fn()
+        renderCard({ onLikeClick })
+
+        await userEvent.click(screen.getByRole('button', { name: /按讚/ }))
+
+        expect(onLikeClick).toHaveBeenCalledWith('news-1')
+    })
+})
+
+describe('NewsCard 分享', () => {
+    it('未登入也能分享——分享不需要身分', () => {
+        useSession.mockReturnValue({ status: 'unauthenticated', data: null })
+        renderCard()
+
+        expect(screen.getByRole('button', { name: '分享' })).toBeInTheDocument()
+    })
+
+    it('點擊時把整篇文章交給外層', async () => {
+        const onShareClick = vi.fn()
+        renderCard({ onShareClick })
+
+        await userEvent.click(screen.getByRole('button', { name: '分享' }))
+
+        expect(onShareClick).toHaveBeenCalledWith(expect.objectContaining({ article_id: 'news-1' }))
     })
 })
 
