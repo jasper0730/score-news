@@ -3,6 +3,7 @@
 import { ObjectId } from 'mongodb'
 import { requireAuth, requireAuthWithRole } from '@/libs/auth'
 import { getCollection, CommentDocument, CommentEditHistoryDocument, UserDocument } from '@/libs/db'
+import { maskEmail } from '@/libs/mask'
 import type { CommentType, RatingSummaryType } from '@/types/news'
 
 /**
@@ -11,6 +12,9 @@ import type { CommentType, RatingSummaryType } from '@/types/news'
  * 管理員下架的評論只留下墓碑：內容與評分一律清空，不讓原始內容
  * 透過 RSC payload 送到瀏覽器——下架的意思是「誰都不該再看到」，
  * 不是「畫面上不顯示但原始碼裡讀得到」。
+ *
+ * userName 退回 email 的情況在這裡就遮掉，理由同上：只在元件裡遮的話，
+ * 完整信箱仍然躺在 payload 裡，翻一下原始碼就撿得到。
  */
 function serializeComment(c: CommentDocument & { _id?: ObjectId }): CommentType {
     const isRemovedByAdmin = Boolean(c.deletedAt && c.deletedByAdmin)
@@ -18,7 +22,7 @@ function serializeComment(c: CommentDocument & { _id?: ObjectId }): CommentType 
     return {
         _id: c._id!.toString(),
         userId: c.userId,
-        userName: c.userName,
+        userName: maskEmail(c.userName),
         userImage: c.userImage,
         postId: c.postId,
         postTitle: c.postTitle,

@@ -68,6 +68,39 @@ describe('getCommentsByPostId', () => {
         })
     })
 
+    describe('顯示名稱脫敏', () => {
+        it('退回 email 的顯示名稱會遮蔽，完整信箱不進 payload', async () => {
+            collection('comments').cursor.toArray.mockResolvedValue([
+                makeCommentDoc({ userName: 'wilson0730@gmail.com' }),
+            ])
+
+            const result = await getCommentsByPostId('news-1')
+
+            expect(result.comments[0]?.userName).toBe('w***0@gmail.com')
+            expect(JSON.stringify(result)).not.toContain('wilson0730@gmail.com')
+        })
+
+        it('暱稱與 name 不是 email，原樣顯示', async () => {
+            collection('comments').cursor.toArray.mockResolvedValue([
+                makeCommentDoc({ userName: '阿明' }),
+            ])
+
+            const result = await getCommentsByPostId('news-1')
+
+            expect(result.comments[0]?.userName).toBe('阿明')
+        })
+
+        it('後台「我的評論」也一併脫敏', async () => {
+            collection('comments').cursor.toArray.mockResolvedValue([
+                makeCommentDoc({ userName: 'wilson0730@gmail.com' }),
+            ])
+
+            const result = await getCommentsByUserId(USER_ID)
+
+            expect(result.comments[0]?.userName).toBe('w***0@gmail.com')
+        })
+    })
+
     describe('軟刪除後的可見性', () => {
         it('查詢條件排除本人自刪、保留管理員下架的', async () => {
             await getCommentsByPostId('news-1')
