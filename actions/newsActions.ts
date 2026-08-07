@@ -67,7 +67,6 @@ const usesAggregateSort = (sortType: SortType): sortType is AggregatedSort =>
  */
 const SORT_OPTIONS: Record<Exclude<SortType, AggregatedSort>, Sort> = {
     date_desc: { pubDate: -1 },
-    date_asc: { pubDate: 1 },
     views: { views: -1, pubDate: -1 },
 }
 

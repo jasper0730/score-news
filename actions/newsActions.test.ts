@@ -51,7 +51,6 @@ describe('getNewsActions', () => {
 
         it.each([
             ['date_desc', { pubDate: -1 }],
-            ['date_asc', { pubDate: 1 }],
             ['views', { views: -1, pubDate: -1 }],
         ] as const)('sortType=%s 對應排序條件 %o', async (sortType, expected) => {
             const news = collection('news')

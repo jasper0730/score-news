@@ -12,12 +12,11 @@ describe('SortDropdown', () => {
 
     const getSelect = () => screen.getByRole('combobox', { name: '排序方式' })
 
-    it('提供全部七種排序方式', () => {
+    it('提供全部六種排序方式', () => {
         render(<SortDropdown />)
 
         expect(screen.getAllByRole('option').map((o) => o.getAttribute('value'))).toEqual([
             'date_desc',
-            'date_asc',
             'rating_desc',
             'rating_asc',
             'views',
@@ -53,9 +52,9 @@ describe('SortDropdown', () => {
         const { rerender } = render(<SortDropdown />)
         expect(getSelect()).toHaveValue('date_desc')
 
-        useNewsStore.setState({ sortType: 'date_asc' })
+        useNewsStore.setState({ sortType: 'views' })
         rerender(<SortDropdown />)
 
-        expect(getSelect()).toHaveValue('date_asc')
+        expect(getSelect()).toHaveValue('views')
     })
 })
