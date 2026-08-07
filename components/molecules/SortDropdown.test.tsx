@@ -12,25 +12,28 @@ describe('SortDropdown', () => {
 
     const getSelect = () => screen.getByRole('combobox', { name: '排序方式' })
 
-    it('提供全部六種排序方式', () => {
+    it('提供全部五種排序方式', () => {
         render(<SortDropdown />)
 
         expect(screen.getAllByRole('option').map((o) => o.getAttribute('value'))).toEqual([
             'date_desc',
-            'rating_desc',
-            'rating_asc',
             'views',
             'favorites',
+            'rating_desc',
             'likes',
         ])
     })
 
-    it('三種互動數的選項文字', () => {
+    it('選項文字', () => {
         render(<SortDropdown />)
 
-        expect(screen.getByRole('option', { name: '最多點閱數' })).toBeInTheDocument()
-        expect(screen.getByRole('option', { name: '最多收藏' })).toBeInTheDocument()
-        expect(screen.getByRole('option', { name: '最多讚' })).toBeInTheDocument()
+        expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual([
+            '最新文章',
+            '最多瀏覽',
+            '最多收藏',
+            '最高評分',
+            '最多讚',
+        ])
     })
 
     it('顯示 store 目前的排序方式', () => {

@@ -5,11 +5,10 @@ import { useNewsStore } from '@/store/newsStore'
 import type { SortType } from '@/types/news'
 
 const SORT_OPTIONS: { value: SortType; label: string }[] = [
-    { value: 'date_desc', label: '最新到最舊' },
-    { value: 'rating_desc', label: '評分：高到低' },
-    { value: 'rating_asc', label: '評分：低到高' },
-    { value: 'views', label: '最多點閱數' },
+    { value: 'date_desc', label: '最新文章' },
+    { value: 'views', label: '最多瀏覽' },
     { value: 'favorites', label: '最多收藏' },
+    { value: 'rating_desc', label: '最高評分' },
     { value: 'likes', label: '最多讚' },
 ]
 

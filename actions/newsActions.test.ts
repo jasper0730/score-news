@@ -93,18 +93,18 @@ describe('getNewsActions', () => {
             expect(result.data[0]?.rate).toBe(4.5)
         })
 
-        it.each([
-            ['rating_desc', -1],
-            ['rating_asc', 1],
-        ] as const)('%s 的 $sort 方向為 %i', async (sortType, direction) => {
-            const news = collection('news')
+        it.each(['rating_desc', 'favorites', 'likes'] as const)(
+            '%s 由高到低排序',
+            async (sortType) => {
+                const news = collection('news')
 
-            await getNewsActions({ sortType })
+                await getNewsActions({ sortType })
 
-            const pipeline = news.aggregate.mock.calls[0]?.[0] as Record<string, unknown>[]
-            const sortStage = pipeline.find((stage) => '$sort' in stage)
-            expect(sortStage).toEqual({ $sort: { sortValue: direction, pubDate: -1 } })
-        })
+                const pipeline = news.aggregate.mock.calls[0]?.[0] as Record<string, unknown>[]
+                const sortStage = pipeline.find((stage) => '$sort' in stage)
+                expect(sortStage).toEqual({ $sort: { sortValue: -1, pubDate: -1 } })
+            }
+        )
 
         it('同分時以發佈時間為次要條件，翻頁順序才穩定', async () => {
             // 沒有次要條件的話，同分文章在不同頁的排序不保證一致，

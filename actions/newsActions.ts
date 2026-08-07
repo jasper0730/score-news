@@ -54,7 +54,7 @@ export interface GetNewsParams {
  * 這些排序依據都不是新聞文件上的欄位，得先 $lookup 其他 collection 算出來，
  * 因此無法用一般索引排序，只能走 aggregate。
  */
-const AGGREGATED_SORTS = ['rating_desc', 'rating_asc', 'favorites', 'likes'] as const
+const AGGREGATED_SORTS = ['rating_desc', 'favorites', 'likes'] as const
 type AggregatedSort = (typeof AGGREGATED_SORTS)[number]
 
 const usesAggregateSort = (sortType: SortType): sortType is AggregatedSort =>
@@ -90,16 +90,6 @@ const AGGREGATE_STAGES: Record<
         },
         field: { $avg: '$sortSource.rate' },
         direction: -1,
-    },
-    rating_asc: {
-        lookup: {
-            from: 'ratings',
-            localField: 'article_id',
-            foreignField: 'postId',
-            as: 'sortSource',
-        },
-        field: { $avg: '$sortSource.rate' },
-        direction: 1,
     },
     likes: {
         lookup: {
@@ -160,7 +150,7 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
         const skip = (page - 1) * limit
         const byAggregate = usesAggregateSort(sortType)
         // 依評分排序時 pipeline 已經算出平均，enrich 階段不必再查一次
-        const byRating = sortType === 'rating_desc' || sortType === 'rating_asc'
+        const byRating = sortType === 'rating_desc'
 
         let allData: NewsQueryDocument[] = []
         let total = 0
