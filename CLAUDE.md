@@ -330,7 +330,9 @@ await commentsCollection.deleteOne({ _id: new ObjectId(commentId), userId: curre
 
 1. **`article_id` 的產生規則不可變更。** 它是 `ratings`／`comments`／`favorites`
    唯一的關聯鍵，改了等於所有使用者的評分與留言變成孤兒資料。
-   規則是 `sha1(outlet + guid)`，沒有 guid 的來源退回 `sha1(outlet + link)`。
+   種子的優先順序是 `guid` → `linkIdPattern` 萃取出的識別碼 → 完整連結，
+   再前綴 outlet 後取 sha1。`buildArticleId` 刻意收整個 source 而非 outlet 字串——
+   少傳參數就會悄悄退回用完整連結，重新製造重複文章且沒有任何錯誤訊息。
 2. **ingestion 只 upsert，永不刪除。** 刪掉新聞會讓關聯資料查不到對應內容。
 3. **`views` 與 `image_url` 不可被例行更新覆蓋。** `views` 只放 `$setOnInsert`；
    `image_url` 只有這次真的拿到圖才 `$set`，否則補圖失敗會把好圖換成預設圖。

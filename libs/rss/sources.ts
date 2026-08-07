@@ -27,9 +27,17 @@ export interface FeedSource {
     category: string
     url: string
     imageSource: ImageSource
+    /**
+     * 從文章連結萃取穩定識別碼的樣式，第一個捕捉群組就是識別碼。
+     *
+     * 只有沒提供 guid 的來源才需要。自由時報同一篇文章會掛在多個分類路徑下——
+     * /news/politics/breakingnews/5530552 與 /news/Tainan/breakingnews/5530552
+     * 是同一篇——用完整連結雜湊會把它算成兩篇，實測有 4% 的重複率。
+     */
+    linkIdPattern?: RegExp
 }
 
-type OutletMeta = Omit<FeedSource, 'category' | 'url' | 'imageSource'>
+type OutletMeta = Omit<FeedSource, 'category' | 'url' | 'imageSource' | 'linkIdPattern'>
 
 const OUTLETS = {
     cna: {
@@ -79,10 +87,20 @@ const OUTLETS = {
 function feeds(
     meta: OutletMeta,
     imageSource: ImageSource,
-    entries: [category: string, url: string][]
+    entries: [category: string, url: string][],
+    linkIdPattern?: RegExp
 ): FeedSource[] {
-    return entries.map(([category, url]) => ({ ...meta, category, url, imageSource }))
+    return entries.map(([category, url]) => ({
+        ...meta,
+        category,
+        url,
+        imageSource,
+        linkIdPattern,
+    }))
 }
+
+/** 網址最後一段的數字，自由時報的文章編號就在那裡（後面可能接 query 或 hash） */
+const TRAILING_ID = /\/(\d+)\/?(?:[?#]|$)/
 
 const cnaFeed = (slug: string) => `https://feeds.feedburner.com/rsscna/${slug}`
 const ltnFeed = (slug: string) => `https://news.ltn.com.tw/rss/${slug}.xml`
@@ -129,20 +147,25 @@ export const FEED_SOURCES: FeedSource[] = [
         ['遊戲', ettodayFeed('game')],
     ]),
 
-    // 自由時報：唯一沒有 guid 的來源，article_id 得靠 link 雜湊
-    ...feeds(OUTLETS.ltn, 'page', [
-        ['即時', ltnFeed('all')],
-        ['政治', ltnFeed('politics')],
-        ['社會', ltnFeed('society')],
-        ['生活', ltnFeed('life')],
-        ['國際', ltnFeed('world')],
-        ['財經', ltnFeed('business')],
-        ['體育', ltnFeed('sports')],
-        ['娛樂', ltnFeed('entertainment')],
-        ['藝文', ltnFeed('art')],
-        ['軍武', ltnFeed('def')],
-        ['地方', ltnFeed('local')],
-    ]),
+    // 自由時報：唯一沒有 guid 的來源，identity 得從連結末端的文章編號取
+    ...feeds(
+        OUTLETS.ltn,
+        'page',
+        [
+            ['即時', ltnFeed('all')],
+            ['政治', ltnFeed('politics')],
+            ['社會', ltnFeed('society')],
+            ['生活', ltnFeed('life')],
+            ['國際', ltnFeed('world')],
+            ['財經', ltnFeed('business')],
+            ['體育', ltnFeed('sports')],
+            ['娛樂', ltnFeed('entertainment')],
+            ['藝文', ltnFeed('art')],
+            ['軍武', ltnFeed('def')],
+            ['地方', ltnFeed('local')],
+        ],
+        TRAILING_ID
+    ),
 
     ...feeds(OUTLETS.newtalk, 'feed', [['全部', 'https://newtalk.tw/rss/all']]),
 

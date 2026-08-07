@@ -14,12 +14,29 @@ export const FALLBACK_IMAGE = '/images/no-image.jpg'
  * 全部變成孤兒資料。因此只能由「來源 + 該來源的穩定識別碼」決定，
  * 不可摻入時間、亂數或抓取順序。
  *
- * 優先用 feed 的 guid；自由時報沒有 guid，退回用文章連結。
- * 前綴 outlet 是為了避免不同媒體剛好用同一組 guid 而互相覆蓋。
+ * 種子的優先順序：
+ * 1. feed 的 guid
+ * 2. 從連結萃取的識別碼（`linkIdPattern`）
+ * 3. 完整連結
+ *
+ * 第 2 層是為了自由時報：它沒有 guid，而且同一篇文章會掛在多個分類路徑下，
+ * 用完整連結會把同一篇算成兩篇。
+ *
+ * 刻意收整個 source 而非只收 outlet 字串——少傳一個參數就會悄悄退回
+ * 用完整連結，重新製造出重複文章，而且不會有任何錯誤訊息。
  */
-export function buildArticleId(outlet: string, item: Pick<FeedItem, 'guid' | 'link'>): string {
-    const seed = item.guid ?? item.link
-    return createHash('sha1').update(`${outlet}:${seed}`).digest('hex')
+export function buildArticleId(
+    source: Pick<FeedSource, 'outlet' | 'linkIdPattern'>,
+    item: Pick<FeedItem, 'guid' | 'link'>
+): string {
+    const seed = item.guid ?? extractLinkId(item.link, source.linkIdPattern) ?? item.link
+    return createHash('sha1').update(`${source.outlet}:${seed}`).digest('hex')
+}
+
+/** 樣式的第一個捕捉群組就是識別碼；對不上時回 null 讓上層退回用完整連結 */
+export function extractLinkId(link: string, pattern?: RegExp): string | null {
+    if (!pattern) return null
+    return link.match(pattern)?.[1] ?? null
 }
 
 /**
@@ -63,7 +80,7 @@ export function toNewsDocument(
         absoluteUrl(item.imageUrl, source.siteUrl) ?? absoluteUrl(ogImage, source.siteUrl) ?? ''
 
     return {
-        article_id: buildArticleId(source.outlet, item),
+        article_id: buildArticleId(source, item),
         title: item.title,
         description: item.description,
         // 只存摘要並連回原站，不抓全文。前端在 content 為空時

@@ -142,7 +142,7 @@ export async function ingestNews(options: IngestOptions = {}): Promise<IngestSta
             stats.itemsParsed += items.length
 
             for (const item of items) {
-                const articleId = buildArticleId(source.outlet, item)
+                const articleId = buildArticleId(source, item)
                 // 同一篇常同時出現在「即時」與分類 feed 裡，只留第一次見到的
                 if (!byArticleId.has(articleId)) {
                     byArticleId.set(articleId, { item, source, articleId })
