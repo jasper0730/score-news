@@ -40,6 +40,7 @@ export default defineConfig({
                         'libs/cn.test.ts',
                         // 用到 navigator，需要 jsdom
                         'libs/share.test.ts',
+                        'libs/time.test.ts',
                         // app/ 底下的元件測試。副檔名刻意與 server project 的
                         // 'app/**/*.test.ts' 區隔，同一個目錄才能兩種環境並存
                         'app/**/*.test.tsx',

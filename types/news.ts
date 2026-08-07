@@ -38,6 +38,14 @@ export interface CommentType {
     content: string
     rating?: number
     createdAt: string
+    /** 最後一次編輯時間，用來顯示「已編輯」標記 */
+    editedAt?: string
+    /**
+     * 是否為管理員下架的墓碑。
+     * 只有這種狀態會被送到前端——本人自刪的評論在伺服器端就濾掉了。
+     * 為 true 時 content 與 rating 已被清空，不會外洩原始內容。
+     */
+    isRemovedByAdmin?: boolean
 }
 
 export interface CommentApiResponse {

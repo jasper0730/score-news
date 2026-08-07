@@ -49,6 +49,35 @@ export interface CommentDocument {
     content: string
     rating?: number
     createdAt: string
+    /** 最後一次編輯時間。沒有這個欄位代表從未編輯過 */
+    editedAt?: string
+    /**
+     * 軟刪除。留著文件而不是真的刪掉，是為了留下審核軌跡、
+     * 也才能區分「本人刪除」與「管理員下架」兩種顯示方式。
+     */
+    deletedAt?: string
+    /** 執行刪除的人 */
+    deletedBy?: string
+    /** 是否為管理員代為刪除。本人自刪為 false，畫面上直接不顯示 */
+    deletedByAdmin?: boolean
+}
+
+/**
+ * 評論的歷史版本。
+ *
+ * 每次編輯把「被取代掉的舊內容」寫進來，主表只保留最新版本——
+ * 讀取評論是熱路徑，不該為了偶爾才看的歷史去掃一堆版本。
+ */
+export interface CommentEditHistoryDocument {
+    _id?: ObjectId
+    commentId: ObjectId
+    userId: string
+    postId: string
+    /** 被取代掉的內容 */
+    content: string
+    rating?: number
+    /** 這個版本被取代的時間 */
+    replacedAt: string
 }
 
 export interface UserDocument {

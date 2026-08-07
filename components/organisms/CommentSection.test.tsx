@@ -35,9 +35,9 @@ function makeComment(overrides: Partial<CommentType> = {}): CommentType {
     }
 }
 
-const signIn = (id?: string) =>
+const signIn = (id?: string, isAdmin = false) =>
     useSession.mockReturnValue({
-        data: id ? { user: { id } } : null,
+        data: id ? { user: { id, isAdmin } } : null,
         status: id ? 'authenticated' : 'unauthenticated',
     })
 
@@ -188,19 +188,56 @@ describe('CommentSection 送出評論', () => {
 })
 
 describe('CommentSection 刪除評論', () => {
-    it('刪除成功後把該則從列表移除', async () => {
-        getCommentsByPostId.mockResolvedValue({
+    it('刪除成功後重新取一次列表——軟刪除的結果由伺服器決定', async () => {
+        // 本人自刪會消失、管理員下架會變成墓碑，在前端猜不如重新問一次
+        getCommentsByPostId.mockResolvedValueOnce({
             success: true,
             comments: [makeComment({ _id: 'c1', userId: 'u1', content: '要刪掉的' })],
         })
         renderSection()
         await findCommentText('要刪掉的')
 
+        getCommentsByPostId.mockResolvedValue({ success: true, comments: [] })
         await userEvent.click(screen.getByRole('button', { name: '刪除評論' }))
 
         await waitFor(() => expect(queryCommentText('要刪掉的')).not.toBeInTheDocument())
         expect(deleteCommentAction).toHaveBeenCalledWith('c1')
+        expect(getCommentsByPostId).toHaveBeenCalledTimes(2)
         expect(toastBox).toHaveBeenCalledWith('評論已刪除', 'success')
+    })
+
+    it('管理員下架後該則變成墓碑而不是消失', async () => {
+        signIn('u1', true)
+        getCommentsByPostId.mockResolvedValueOnce({
+            success: true,
+            comments: [makeComment({ _id: 'c1', userId: 'u2', content: '違規內容' })],
+        })
+        renderSection()
+        await findCommentText('違規內容')
+
+        getCommentsByPostId.mockResolvedValue({
+            success: true,
+            comments: [
+                makeComment({ _id: 'c1', userId: 'u2', content: '', isRemovedByAdmin: true }),
+            ],
+        })
+        await userEvent.click(screen.getByRole('button', { name: /刪除評論/ }))
+
+        expect(await screen.findByText('該評論因違反社群規範已被管理員隱藏')).toBeInTheDocument()
+        expect(queryCommentText('違規內容')).not.toBeInTheDocument()
+    })
+
+    it('自己的評論被下架時不給重新發表，表單換成說明', async () => {
+        getCommentsByPostId.mockResolvedValue({
+            success: true,
+            comments: [makeComment({ _id: 'c1', userId: 'u1', isRemovedByAdmin: true })],
+        })
+        renderSection()
+
+        expect(
+            await screen.findByText('你的評論因違反社群規範已被管理員隱藏，無法重新發表。')
+        ).toBeInTheDocument()
+        expect(screen.queryByRole('textbox', { name: '評論內容' })).not.toBeInTheDocument()
     })
 
     it('刪除失敗時保留該則評論', async () => {

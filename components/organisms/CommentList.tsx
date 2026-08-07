@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { FaStar, FaRegStar } from 'react-icons/fa'
-import { MdDeleteOutline } from 'react-icons/md'
+import { MdDeleteOutline, MdOutlineBlock } from 'react-icons/md'
 import Avatar from '@/components/atoms/Avatar'
 import { cn } from '@/libs/cn'
+import { formatRelativeTime } from '@/libs/time'
 import { CARD_CLASSES } from '@/libs/styles'
 import type { CommentType } from '@/types/news'
 
@@ -37,16 +38,8 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
     const isAdmin = session?.user?.isAdmin === true
     const [filterRating, setFilterRating] = useState<number | null>(null)
 
+    // 被管理員下架的評論沒有評分，篩星等時不該把它們也留下來
     const filtered = filterRating ? comments.filter((c) => c.rating === filterRating) : comments
-
-    const formatDate = (dateStr: string) =>
-        new Date(dateStr).toLocaleDateString('zh-TW', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-        })
 
     return (
         <div className="mt-4">
@@ -90,46 +83,74 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
                 </p>
             ) : (
                 <div className="flex flex-col gap-4">
-                    {filtered.map((comment) => (
-                        <div key={comment._id} className={CARD_CLASSES}>
-                            <div className="mb-2 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Avatar src={comment.userImage} size="sm" />
-                                    <span className="text-sm font-medium">{comment.userName}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <time className="text-xs text-subtle">
-                                        {formatDate(comment.createdAt)}
-                                    </time>
-                                    {/* 管理員可以刪任何一則；一般使用者只能刪自己的。
-                                        這裡只是介面，真正的判斷在 deleteCommentAction 裡。 */}
-                                    {onDelete && (isAdmin || currentUserId === comment.userId) && (
-                                        <button
-                                            className="cursor-pointer text-danger transition duration-300 hover:opacity-70"
-                                            onClick={() => onDelete(comment._id)}
-                                            aria-label={
-                                                currentUserId === comment.userId
-                                                    ? '刪除評論'
-                                                    : '刪除評論（管理員）'
-                                            }
-                                        >
-                                            <MdDeleteOutline size={18} />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                            {comment.rating != null && comment.rating > 0 && (
-                                <div className="mb-2">
-                                    <StarBadge rating={comment.rating} />
-                                </div>
-                            )}
-                            {comment.content && (
-                                <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                                    {comment.content}
+                    {filtered.map((comment) =>
+                        comment.isRemovedByAdmin ? (
+                            /* 下架的評論留一個墓碑。少一則但編號對不上，
+                               比留下說明更讓人困惑，也讓其他人知道確實有被處理。 */
+                            <div
+                                key={comment._id}
+                                className={cn(CARD_CLASSES, 'text-sm text-subtle')}
+                            >
+                                <p className="flex items-center gap-2">
+                                    <MdOutlineBlock size={16} className="shrink-0" />
+                                    該評論因違反社群規範已被管理員隱藏
                                 </p>
-                            )}
-                        </div>
-                    ))}
+                            </div>
+                        ) : (
+                            <div key={comment._id} className={CARD_CLASSES}>
+                                <div className="mb-2 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Avatar src={comment.userImage} size="sm" />
+                                        <span className="text-sm font-medium">
+                                            {comment.userName}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <time
+                                            className="text-xs text-subtle"
+                                            dateTime={comment.createdAt}
+                                        >
+                                            {formatRelativeTime(comment.createdAt)}
+                                        </time>
+                                        {comment.editedAt && (
+                                            <span
+                                                className="text-xs text-subtle"
+                                                title={`編輯於 ${formatRelativeTime(comment.editedAt)}`}
+                                            >
+                                                （已編輯）
+                                            </span>
+                                        )}
+                                        {/* 管理員可以刪任何一則；一般使用者只能刪自己的。
+                                            這裡只是介面，真正的判斷在 deleteCommentAction 裡。 */}
+                                        {onDelete &&
+                                            (isAdmin || currentUserId === comment.userId) && (
+                                                <button
+                                                    className="cursor-pointer text-danger transition duration-300 hover:opacity-70"
+                                                    onClick={() => onDelete(comment._id)}
+                                                    aria-label={
+                                                        currentUserId === comment.userId
+                                                            ? '刪除評論'
+                                                            : '刪除評論（管理員）'
+                                                    }
+                                                >
+                                                    <MdDeleteOutline size={18} />
+                                                </button>
+                                            )}
+                                    </div>
+                                </div>
+                                {comment.rating != null && comment.rating > 0 && (
+                                    <div className="mb-2">
+                                        <StarBadge rating={comment.rating} />
+                                    </div>
+                                )}
+                                {comment.content && (
+                                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                                        {comment.content}
+                                    </p>
+                                )}
+                            </div>
+                        )
+                    )}
                 </div>
             )}
         </div>

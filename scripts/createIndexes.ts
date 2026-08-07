@@ -102,6 +102,12 @@ const PLANS: IndexPlan[] = [
         reason: '後台「我的評論」',
     },
     {
+        collection: 'comment_edits_history',
+        keys: { commentId: 1, replacedAt: -1 },
+        options: { name: 'commentId_replacedAt' },
+        reason: '查某則評論的歷史版本，依時間由新到舊',
+    },
+    {
         collection: 'users',
         keys: { email: 1 },
         options: { unique: true, name: 'email_unique' },

@@ -1,7 +1,13 @@
 import { ObjectId } from 'mongodb'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { collection } from '@/test/helpers/db'
-import { makeCommentDoc, makeUser, makeUserDoc, USER_ID } from '@/test/helpers/fixtures'
+import {
+    makeCommentDoc,
+    makeUser,
+    makeUserDoc,
+    OTHER_USER_ID,
+    USER_ID,
+} from '@/test/helpers/fixtures'
 
 vi.mock('@/libs/db', async () => ({
     getCollection: (await import('@/test/helpers/db')).getCollection,
@@ -30,7 +36,9 @@ describe('getCommentsByPostId', () => {
 
         const result = await getCommentsByPostId('news-1')
 
-        expect(collection('comments').find).toHaveBeenCalledWith({ postId: 'news-1' })
+        expect(collection('comments').find).toHaveBeenCalledWith(
+            expect.objectContaining({ postId: 'news-1' })
+        )
         expect(collection('comments').cursor.sort).toHaveBeenCalledWith({ createdAt: -1 })
         expect(result.success).toBe(true)
         expect(result.comments[0]?._id).toBe(doc._id.toString())
@@ -54,6 +62,55 @@ describe('getCommentsByPostId', () => {
             error: 'Internal server error',
         })
     })
+
+    describe('軟刪除後的可見性', () => {
+        it('查詢條件排除本人自刪、保留管理員下架的', async () => {
+            await getCommentsByPostId('news-1')
+
+            const filter = collection('comments').find.mock.calls[0]?.[0]
+            expect(filter).toEqual({
+                postId: 'news-1',
+                $or: [{ deletedAt: { $exists: false } }, { deletedByAdmin: true }],
+            })
+        })
+
+        it('管理員下架的評論只回傳墓碑，原始內容不外洩', async () => {
+            // 下架的意思是誰都不該再看到，不是「畫面不顯示但原始碼讀得到」
+            collection('comments').cursor.toArray.mockResolvedValue([
+                makeCommentDoc({
+                    content: '違規內容',
+                    rating: 5,
+                    deletedAt: '2026-08-07T00:00:00.000Z',
+                    deletedByAdmin: true,
+                }),
+            ])
+
+            const result = await getCommentsByPostId('news-1')
+
+            expect(result.comments[0]).toMatchObject({ isRemovedByAdmin: true, content: '' })
+            expect(result.comments[0]?.rating).toBeUndefined()
+            expect(JSON.stringify(result)).not.toContain('違規內容')
+        })
+
+        it('正常評論不帶下架標記', async () => {
+            collection('comments').cursor.toArray.mockResolvedValue([makeCommentDoc()])
+
+            const result = await getCommentsByPostId('news-1')
+
+            expect(result.comments[0]?.isRemovedByAdmin).toBeUndefined()
+            expect(result.comments[0]?.content).toBe('很棒的報導')
+        })
+
+        it('後台「我的評論」套用同一套可見性規則', async () => {
+            await getCommentsByUserId(USER_ID)
+
+            const filter = collection('comments').find.mock.calls[0]?.[0]
+            expect(filter).toMatchObject({
+                userId: USER_ID,
+                $or: [{ deletedAt: { $exists: false } }, { deletedByAdmin: true }],
+            })
+        })
+    })
 })
 
 describe('getCommentsByUserId', () => {
@@ -62,7 +119,9 @@ describe('getCommentsByUserId', () => {
 
         const result = await getCommentsByUserId(USER_ID)
 
-        expect(collection('comments').find).toHaveBeenCalledWith({ userId: USER_ID })
+        expect(collection('comments').find).toHaveBeenCalledWith(
+            expect.objectContaining({ userId: USER_ID })
+        )
         expect(collection('comments').cursor.sort).toHaveBeenCalledWith({ createdAt: -1 })
         expect(result.comments).toHaveLength(1)
     })
@@ -169,6 +228,103 @@ describe('createCommentAction', () => {
         expect(update.$set).not.toHaveProperty('rating')
     })
 
+    describe('編輯歷史', () => {
+        it('第一次留言不寫歷史，也不標記已編輯', async () => {
+            collection('comments').findOne.mockResolvedValue(null)
+
+            await createCommentAction('news-1', '標題', '內容', 5)
+
+            expect(collection('comment_edits_history').insertOne).not.toHaveBeenCalled()
+            const update = collection('comments').findOneAndUpdate.mock.calls[0]?.[1]
+            expect(update.$set).not.toHaveProperty('editedAt')
+        })
+
+        it('修改時把舊內容寫進歷史表，主表只留最新版', async () => {
+            const existing = makeCommentDoc({ content: '舊內容', rating: 3 })
+            collection('comments').findOne.mockResolvedValue(existing)
+
+            await createCommentAction('news-1', '標題', '新內容', 5)
+
+            const history = collection('comment_edits_history').insertOne.mock.calls[0]?.[0]
+            expect(history).toMatchObject({
+                commentId: existing._id,
+                content: '舊內容',
+                rating: 3,
+            })
+            expect(history.replacedAt).toBeTruthy()
+        })
+
+        it('修改後主表標記 editedAt，畫面才知道要顯示「已編輯」', async () => {
+            collection('comments').findOne.mockResolvedValue(makeCommentDoc({ content: '舊內容' }))
+
+            await createCommentAction('news-1', '標題', '新內容', 4)
+
+            const update = collection('comments').findOneAndUpdate.mock.calls[0]?.[1]
+            expect(update.$set.editedAt).toBeTruthy()
+        })
+
+        it('內容與評分都沒變時不算編輯——重送一次不該留下歷史', async () => {
+            collection('comments').findOne.mockResolvedValue(
+                makeCommentDoc({ content: '一樣的內容', rating: 4 })
+            )
+
+            await createCommentAction('news-1', '標題', '一樣的內容', 4)
+
+            expect(collection('comment_edits_history').insertOne).not.toHaveBeenCalled()
+            const update = collection('comments').findOneAndUpdate.mock.calls[0]?.[1]
+            expect(update.$set).not.toHaveProperty('editedAt')
+        })
+
+        it('只改評分也算編輯', async () => {
+            collection('comments').findOne.mockResolvedValue(
+                makeCommentDoc({ content: '內容', rating: 3 })
+            )
+
+            await createCommentAction('news-1', '標題', '內容', 5)
+
+            expect(collection('comment_edits_history').insertOne).toHaveBeenCalledOnce()
+        })
+    })
+
+    describe('被下架後重新發表', () => {
+        it('管理員下架的評論不能靠再送一次蓋掉', async () => {
+            collection('comments').findOne.mockResolvedValue(
+                makeCommentDoc({ deletedAt: '2026-08-07T00:00:00.000Z', deletedByAdmin: true })
+            )
+
+            const result = await createCommentAction('news-1', '標題', '想要規避', 5)
+
+            expect(result).toEqual({
+                success: false,
+                error: '這則評論已被管理員下架，無法重新發表',
+            })
+            expect(collection('comments').findOneAndUpdate).not.toHaveBeenCalled()
+        })
+
+        it('本人自刪的可以重新發表，並清掉刪除標記', async () => {
+            collection('comments').findOne.mockResolvedValue(
+                makeCommentDoc({ deletedAt: '2026-08-07T00:00:00.000Z', deletedByAdmin: false })
+            )
+
+            await createCommentAction('news-1', '標題', '重新發表', 5)
+
+            const update = collection('comments').findOneAndUpdate.mock.calls[0]?.[1]
+            expect(update.$unset).toEqual({ deletedAt: '', deletedBy: '', deletedByAdmin: '' })
+        })
+
+        it('重新發表不算編輯，不會標記已編輯', async () => {
+            collection('comments').findOne.mockResolvedValue(
+                makeCommentDoc({ deletedAt: '2026-08-07T00:00:00.000Z', deletedByAdmin: false })
+            )
+
+            await createCommentAction('news-1', '標題', '重新發表', 5)
+
+            const update = collection('comments').findOneAndUpdate.mock.calls[0]?.[1]
+            expect(update.$set).not.toHaveProperty('editedAt')
+            expect(collection('comment_edits_history').insertOne).not.toHaveBeenCalled()
+        })
+    })
+
     it('createdAt 只在第一次建立時寫入，修改留言不會被更新', async () => {
         await createCommentAction('news-1', '標題', '內容', 5)
 
@@ -199,6 +355,10 @@ describe('createCommentAction', () => {
 describe('deleteCommentAction', () => {
     const commentId = new ObjectId().toString()
 
+    beforeEach(() => {
+        collection('comments').findOne.mockResolvedValue(makeCommentDoc({ userId: USER_ID }))
+    })
+
     it('未登入時拒絕', async () => {
         requireAuthWithRole.mockResolvedValue({
             authenticated: false,
@@ -218,27 +378,7 @@ describe('deleteCommentAction', () => {
         })
     })
 
-    it('刪除條件同時綁定 userId，避免刪到別人的留言', async () => {
-        await deleteCommentAction(commentId)
-
-        expect(collection('comments').deleteOne).toHaveBeenCalledWith({
-            _id: new ObjectId(commentId),
-            userId: USER_ID,
-        })
-    })
-
-    it('留言不存在或不屬於自己時回傳錯誤', async () => {
-        collection('comments').deleteOne.mockResolvedValue({ deletedCount: 0 })
-
-        expect(await deleteCommentAction(commentId)).toEqual({
-            success: false,
-            error: 'Comment not found or unauthorized',
-        })
-    })
-
     it('刪除成功', async () => {
-        collection('comments').deleteOne.mockResolvedValue({ deletedCount: 1 })
-
         expect(await deleteCommentAction(commentId)).toEqual({
             success: true,
             message: 'Comment deleted',
@@ -253,7 +393,7 @@ describe('deleteCommentAction', () => {
     })
 
     describe('管理員', () => {
-        it('可以刪任何人的留言——刪除條件不綁 userId', async () => {
+        it('可以刪任何人的留言——查詢條件不綁 userId', async () => {
             requireAuthWithRole.mockResolvedValue({
                 authenticated: true,
                 user: makeUser(),
@@ -262,7 +402,7 @@ describe('deleteCommentAction', () => {
 
             await deleteCommentAction(commentId)
 
-            expect(collection('comments').deleteOne).toHaveBeenCalledWith({
+            expect(collection('comments').findOne).toHaveBeenCalledWith({
                 _id: new ObjectId(commentId),
             })
         })
@@ -272,7 +412,7 @@ describe('deleteCommentAction', () => {
             // 前端不顯示按鈕擋不住任何人帶著別人的 commentId 呼叫
             await deleteCommentAction(commentId)
 
-            expect(collection('comments').deleteOne).toHaveBeenCalledWith({
+            expect(collection('comments').findOne).toHaveBeenCalledWith({
                 _id: new ObjectId(commentId),
                 userId: USER_ID,
             })
@@ -283,6 +423,78 @@ describe('deleteCommentAction', () => {
             await deleteCommentAction(commentId)
 
             expect(requireAuthWithRole).toHaveBeenCalledWith()
+        })
+    })
+
+    describe('軟刪除', () => {
+        it('不是真的刪掉，而是標記——留下審核軌跡也保住關聯', async () => {
+            await deleteCommentAction(commentId)
+
+            expect(collection('comments').deleteOne).not.toHaveBeenCalled()
+            const update = collection('comments').updateOne.mock.calls[0]?.[1]
+            expect(update.$set).toMatchObject({ deletedBy: USER_ID })
+            expect(update.$set.deletedAt).toBeTruthy()
+        })
+
+        it('本人自刪：deletedByAdmin 為 false', async () => {
+            collection('comments').findOne.mockResolvedValue(makeCommentDoc({ userId: USER_ID }))
+
+            await deleteCommentAction(commentId)
+
+            const update = collection('comments').updateOne.mock.calls[0]?.[1]
+            expect(update.$set.deletedByAdmin).toBe(false)
+        })
+
+        it('管理員刪別人的：deletedByAdmin 為 true', async () => {
+            requireAuthWithRole.mockResolvedValue({
+                authenticated: true,
+                user: makeUser(),
+                isAdmin: true,
+            })
+            collection('comments').findOne.mockResolvedValue(
+                makeCommentDoc({ userId: OTHER_USER_ID })
+            )
+
+            await deleteCommentAction(commentId)
+
+            const update = collection('comments').updateOne.mock.calls[0]?.[1]
+            expect(update.$set.deletedByAdmin).toBe(true)
+        })
+
+        it('管理員刪自己的仍算自刪，不會顯示成違規下架', async () => {
+            requireAuthWithRole.mockResolvedValue({
+                authenticated: true,
+                user: makeUser(),
+                isAdmin: true,
+            })
+            collection('comments').findOne.mockResolvedValue(makeCommentDoc({ userId: USER_ID }))
+
+            await deleteCommentAction(commentId)
+
+            const update = collection('comments').updateOne.mock.calls[0]?.[1]
+            expect(update.$set.deletedByAdmin).toBe(false)
+        })
+
+        it('已經刪過的不重複標記', async () => {
+            collection('comments').findOne.mockResolvedValue(
+                makeCommentDoc({ deletedAt: '2026-08-07T00:00:00.000Z' })
+            )
+
+            expect(await deleteCommentAction(commentId)).toEqual({
+                success: false,
+                error: 'Comment already deleted',
+            })
+            expect(collection('comments').updateOne).not.toHaveBeenCalled()
+        })
+
+        it('找不到或無權限時不做任何事', async () => {
+            collection('comments').findOne.mockResolvedValue(null)
+
+            expect(await deleteCommentAction(commentId)).toEqual({
+                success: false,
+                error: 'Comment not found or unauthorized',
+            })
+            expect(collection('comments').updateOne).not.toHaveBeenCalled()
         })
     })
 })
