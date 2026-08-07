@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { FaStar, FaRegStar } from 'react-icons/fa'
-import { MdDeleteOutline, MdOutlineBlock } from 'react-icons/md'
+import { MdDeleteOutline, MdOutlineBlock, MdOutlineEdit } from 'react-icons/md'
 import Avatar from '@/components/atoms/Avatar'
+import CommentForm from '@/components/molecules/CommentForm'
 import { cn } from '@/libs/cn'
 import { formatRelativeTime } from '@/libs/time'
 import { CARD_CLASSES } from '@/libs/styles'
@@ -13,6 +14,15 @@ import type { CommentType } from '@/types/news'
 interface CommentListProps {
     comments: CommentType[]
     onDelete?: (commentId: string) => void
+    /**
+     * 編輯狀態由外層控制而非留在這裡。
+     * 送出要先經過確認彈窗，成功後才該退出編輯模式——
+     * 那個時機只有發起 API 的那一層知道。
+     */
+    editingId?: string | null
+    onEditStart?: (commentId: string) => void
+    onEditCancel?: () => void
+    onEditSubmit?: (content: string, rating: number) => Promise<void>
 }
 
 const STAR_FILTERS = [1, 2, 3, 4, 5]
@@ -32,7 +42,14 @@ const StarBadge = ({ rating }: { rating: number }) => (
     </div>
 )
 
-const CommentList = ({ comments, onDelete }: CommentListProps) => {
+const CommentList = ({
+    comments,
+    onDelete,
+    editingId,
+    onEditStart,
+    onEditCancel,
+    onEditSubmit,
+}: CommentListProps) => {
     const { data: session } = useSession()
     const currentUserId = session?.user?.id
     const isAdmin = session?.user?.isAdmin === true
@@ -120,6 +137,18 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
                                                 （已編輯）
                                             </span>
                                         )}
+                                        {/* 編輯只有本人能做——管理員的權限是下架，不是改別人的話 */}
+                                        {onEditStart &&
+                                            currentUserId === comment.userId &&
+                                            editingId !== comment._id && (
+                                                <button
+                                                    className="cursor-pointer text-muted-foreground transition duration-300 hover:text-foreground"
+                                                    onClick={() => onEditStart(comment._id)}
+                                                    aria-label="編輯評論"
+                                                >
+                                                    <MdOutlineEdit size={18} />
+                                                </button>
+                                            )}
                                         {/* 管理員可以刪任何一則；一般使用者只能刪自己的。
                                             這裡只是介面，真正的判斷在 deleteCommentAction 裡。 */}
                                         {onDelete &&
@@ -138,15 +167,29 @@ const CommentList = ({ comments, onDelete }: CommentListProps) => {
                                             )}
                                     </div>
                                 </div>
-                                {comment.rating != null && comment.rating > 0 && (
-                                    <div className="mb-2">
-                                        <StarBadge rating={comment.rating} />
-                                    </div>
-                                )}
-                                {comment.content && (
-                                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                                        {comment.content}
-                                    </p>
+                                {editingId === comment._id && onEditSubmit ? (
+                                    /* 就地變成編輯表單。沿用 CommentForm，評分與字數限制
+                                       的行為才不會跟上方的新增表單分岔 */
+                                    <CommentForm
+                                        initialRating={comment.rating ?? 0}
+                                        initialContent={comment.content}
+                                        onSubmit={onEditSubmit}
+                                        onCancel={onEditCancel}
+                                        submitLabel="儲存修改"
+                                    />
+                                ) : (
+                                    <>
+                                        {comment.rating != null && comment.rating > 0 && (
+                                            <div className="mb-2">
+                                                <StarBadge rating={comment.rating} />
+                                            </div>
+                                        )}
+                                        {comment.content && (
+                                            <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                                                {comment.content}
+                                            </p>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )

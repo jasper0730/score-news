@@ -9,11 +9,20 @@ interface CommentFormProps {
     initialRating?: number
     initialContent?: string
     onSubmit: (content: string, rating: number) => Promise<void>
+    /** 有值時顯示取消鈕。列表裡的行內編輯需要退出的方法 */
+    onCancel?: () => void
+    submitLabel?: string
 }
 
 const MAX_LENGTH = 500
 
-const CommentForm = ({ initialRating = 0, initialContent = '', onSubmit }: CommentFormProps) => {
+const CommentForm = ({
+    initialRating = 0,
+    initialContent = '',
+    onSubmit,
+    onCancel,
+    submitLabel,
+}: CommentFormProps) => {
     const [content, setContent] = useState(initialContent)
     const [rating, setRating] = useState(initialRating)
     const [isLoading, setIsLoading] = useState(false)
@@ -38,7 +47,8 @@ const CommentForm = ({ initialRating = 0, initialContent = '', onSubmit }: Comme
 
     const isDisabled = isLoading || rating === 0
     // 帶著 initialRating 進來代表這篇已經評論過，這次是修改而非新增
-    const submitLabel = initialRating > 0 ? '修改評論' : '送出評論'
+    const defaultLabel = initialRating > 0 ? '修改評論' : '送出評論'
+    const buttonLabel = submitLabel ?? defaultLabel
 
     return (
         <div className="mt-4 flex flex-col gap-3">
@@ -59,9 +69,16 @@ const CommentForm = ({ initialRating = 0, initialContent = '', onSubmit }: Comme
                 <span className="text-sm tabular-nums text-subtle">
                     {content.length}/{MAX_LENGTH}
                 </span>
-                <Button variant="ghost" size="sm" disabled={isDisabled} onClick={handleSubmit}>
-                    {isLoading ? '傳送中...' : submitLabel}
-                </Button>
+                <div className="flex items-center gap-2">
+                    {onCancel && (
+                        <Button variant="outline" size="sm" onClick={onCancel} disabled={isLoading}>
+                            取消
+                        </Button>
+                    )}
+                    <Button variant="ghost" size="sm" disabled={isDisabled} onClick={handleSubmit}>
+                        {isLoading ? '傳送中...' : buttonLabel}
+                    </Button>
+                </div>
             </div>
         </div>
     )
