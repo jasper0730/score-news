@@ -136,12 +136,20 @@ const NewsCard = ({
                                 <Tooltip label={favoriteLabel}>
                                     <button
                                         onClick={() => onFavoriteClick(article.article_id)}
-                                        className={cn(ACTION_CLASSES, 'text-primary')}
+                                        className={cn(
+                                            ACTION_CLASSES,
+                                            'flex items-center gap-1 text-primary'
+                                        )}
                                         type="button"
                                         aria-label={favoriteLabel}
                                         aria-pressed={favorite}
                                     >
                                         {favorite ? <FaBookmark /> : <FaRegBookmark />}
+                                        {article.favorites > 0 && (
+                                            <span className="text-sm tabular-nums text-subtle">
+                                                {article.favorites.toLocaleString('zh-TW')}
+                                            </span>
+                                        )}
                                     </button>
                                 </Tooltip>
                             </>

@@ -179,16 +179,33 @@ export function useNewsFeed(initial: NewsResponse) {
 
     const handleFavoriteClick = async (id: string) => {
         const previousFavorites = [...favorites]
+        const previousCount = items.find((n) => n.article_id === id)?.favorites ?? 0
+        const wasFavorited = previousFavorites.includes(id)
+
+        const applyCount = (favoritesCount: number) => {
+            setItems((prev) =>
+                prev.map((n) => (n.article_id === id ? { ...n, favorites: favoritesCount } : n))
+            )
+            setSelectedNews((prev) =>
+                prev?.article_id === id ? { ...prev, favorites: favoritesCount } : prev
+            )
+        }
+
         setFavorites((prev) =>
             prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
         )
+        applyCount(previousCount + (wasFavorited ? -1 : 1))
+
         try {
             const result = await toggleFavoriteAction(id)
-            if (!result.success) throw new Error('Failed to update favorite')
-            toastBox(result.message === 'Favorite removed' ? '移除收藏' : '已收藏', 'success')
+            if (!result.success) throw new Error(result.error)
+            // 以伺服器算出的總數為準，其他人同時收藏時前端自己加減會失準
+            applyCount(result.favorites)
+            toastBox(result.favorited ? '已收藏' : '移除收藏', 'success')
         } catch (error) {
             console.error('Failed to update favorite:', error)
             setFavorites(previousFavorites)
+            applyCount(previousCount)
         }
     }
 

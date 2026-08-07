@@ -99,7 +99,7 @@ const DashboardNewsList = ({ user }: DashboardNewsListProps) => {
             const result = await toggleFavoriteAction(id)
 
             if (!result.success) {
-                throw new Error('Failed to update favorite')
+                throw new Error(result.error)
             }
 
             setNewsData((prev) => prev.filter((item) => item.article_id !== id))

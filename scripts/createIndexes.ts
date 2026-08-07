@@ -72,6 +72,12 @@ const PLANS: IndexPlan[] = [
         reason: 'findOne({ userId })；一位使用者只該有一份收藏文件',
     },
     {
+        collection: 'favorites',
+        keys: { postIds: 1 },
+        options: { name: 'postIds' },
+        reason: '收藏數統計的 $match { postIds: { $in: [...] } }（multikey 索引）',
+    },
+    {
         collection: 'likes',
         keys: { postId: 1 },
         options: { name: 'postId' },

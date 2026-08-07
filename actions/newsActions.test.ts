@@ -284,6 +284,7 @@ describe('getNewsActions', () => {
                     'content',
                     'description',
                     'favorite',
+                    'favorites',
                     'image_url',
                     'liked',
                     'likes',

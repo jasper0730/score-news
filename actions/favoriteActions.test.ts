@@ -42,7 +42,7 @@ describe('toggleFavoriteAction', () => {
             { $addToSet: { postIds: 'news-1' } },
             { upsert: true }
         )
-        expect(result).toEqual({ success: true, message: 'Favorite added' })
+        expect(result).toMatchObject({ success: true, favorited: true })
     })
 
     it('第一次收藏（還沒有收藏文件）時建立文件', async () => {
@@ -71,7 +71,19 @@ describe('toggleFavoriteAction', () => {
             { userId: USER_ID },
             { $pull: { postIds: 'news-1' } }
         )
-        expect(result).toEqual({ success: true, message: 'Favorite removed' })
+        expect(result).toMatchObject({ success: true, favorited: false })
+    })
+
+    it('回傳伺服器算出的收藏總數，而不是讓前端自行加減', async () => {
+        collection('favorites').findOne.mockResolvedValue(null)
+        collection('favorites').countDocuments.mockResolvedValue(37)
+
+        const result = await toggleFavoriteAction('news-1')
+
+        // 收藏是「一位使用者一份文件、postIds 陣列」，
+        // 所以某篇的收藏數 = 有幾份文件的 postIds 含有它
+        expect(collection('favorites').countDocuments).toHaveBeenCalledWith({ postIds: 'news-1' })
+        expect(result).toMatchObject({ favorites: 37 })
     })
 
     it('只操作自己的收藏文件', async () => {

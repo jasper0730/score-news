@@ -68,6 +68,7 @@ function makeItem(overrides: Partial<NewsDataType> = {}): NewsDataType {
         source_url: '',
         rate: 0,
         favorite: false,
+        favorites: 0,
         likes: 0,
         liked: false,
         views: 0,
@@ -85,7 +86,7 @@ beforeEach(() => {
     useNewsStore.setState(initialState, true)
     observers().length = 0
     getNewsActions.mockResolvedValue(makeResponse())
-    toggleFavoriteAction.mockResolvedValue({ success: true, message: 'Favorite added' })
+    toggleFavoriteAction.mockResolvedValue({ success: true, favorited: true, favorites: 1 })
     rateNewsAction.mockResolvedValue({ success: true, rate: 4 })
     incrementViewAction.mockResolvedValue({ success: true, views: 1 })
 })
@@ -288,14 +289,14 @@ describe('useNewsFeed 收藏', () => {
 
         expect(feed.current.favorites).toEqual(['a'])
 
-        await act(async () => resolveToggle({ success: true, message: 'Favorite added' }))
+        await act(async () => resolveToggle({ success: true, favorited: true, favorites: 1 }))
     })
 
     it('取消收藏會把項目移出清單', async () => {
         const feed = renderFeed(
             makeResponse({ data: [makeItem({ article_id: 'a', favorite: true })] })
         )
-        toggleFavoriteAction.mockResolvedValue({ success: true, message: 'Favorite removed' })
+        toggleFavoriteAction.mockResolvedValue({ success: true, favorited: false, favorites: 0 })
 
         await act(async () => {
             await feed.current.handleFavoriteClick('a')

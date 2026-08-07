@@ -21,6 +21,7 @@ function makeArticle(overrides: Partial<NewsDataType> = {}): NewsDataType {
         source_url: 'https://example.com',
         rate: 4,
         favorite: false,
+        favorites: 0,
         likes: 0,
         liked: false,
         views: 10,
@@ -244,6 +245,24 @@ describe('NewsCard 收藏', () => {
         await userEvent.click(screen.getByRole('button', { name: '加入收藏' }))
 
         expect(onFavoriteClick).toHaveBeenCalledWith('news-1')
+    })
+
+    it('有人收藏過時顯示數量', () => {
+        renderCard({ article: makeArticle({ favorites: 37 }) })
+
+        expect(screen.getByRole('button', { name: '加入收藏' })).toHaveTextContent('37')
+    })
+
+    it('數量為 0 時不顯示數字，避免每張卡都掛一個 0', () => {
+        renderCard({ article: makeArticle({ favorites: 0 }) })
+
+        expect(screen.getByRole('button', { name: '加入收藏' })).not.toHaveTextContent('0')
+    })
+
+    it('收藏數加上千分位', () => {
+        renderCard({ article: makeArticle({ favorites: 1234 }) })
+
+        expect(screen.getByRole('button', { name: /收藏/ })).toHaveTextContent('1,234')
     })
 })
 

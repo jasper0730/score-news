@@ -19,6 +19,7 @@ const article: NewsDataType = {
     source_url: '',
     rate: 0,
     favorite: false,
+    favorites: 0,
     likes: 0,
     liked: false,
     views: 0,

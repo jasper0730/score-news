@@ -1,6 +1,6 @@
 'use server'
 
-import type { Sort, WithId } from 'mongodb'
+import type { Collection, Sort, WithId } from 'mongodb'
 import {
     getCollection,
     type NewsDocument,
@@ -24,6 +24,7 @@ const toNewsData = (
     extra: {
         rate: number
         favorite: boolean
+        favorites: number
         likes: number
         liked: boolean
         userRate?: number
@@ -113,6 +114,28 @@ const AGGREGATE_STAGES: Record<
         field: { $size: '$sortSource' },
         direction: -1,
     },
+}
+
+/**
+ * 算出每篇文章被幾位使用者收藏。
+ *
+ * 收藏的結構是「一位使用者一份文件、postIds 陣列」，所以得先把陣列攤開。
+ * 兩次 $match 是必要的：第一次縮小要處理的文件數（可用 postIds 索引），
+ * 第二次濾掉攤開後那些不屬於本頁的收藏。
+ */
+async function countFavorites(
+    favorites: Collection<FavoriteDocument>,
+    postIds: string[]
+): Promise<Map<string, number>> {
+    const counts = await favorites
+        .aggregate([
+            { $match: { postIds: { $in: postIds } } },
+            { $unwind: '$postIds' },
+            { $match: { postIds: { $in: postIds } } },
+            { $group: { _id: '$postIds', count: { $sum: 1 } } },
+        ])
+        .toArray()
+    return new Map(counts.map((f) => [f._id as string, f.count as number]))
 }
 
 export type NewsResponse = {
@@ -206,9 +229,12 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
         let userRatingMap = new Map<string, number>()
         let likeCountMap = new Map<string, number>()
         let likedSet = new Set<string>()
+        let favoriteCountMap = new Map<string, number>()
         const postIds = allData.map((item) => item.article_id)
 
         if (postIds.length > 0) {
+            favoriteCountMap = await countFavorites(favoritesCollection, postIds)
+
             // 只統計這一頁的文章，不要對整個 likes collection 做聚合
             const likeCounts = await likesCollection
                 .aggregate([
@@ -249,6 +275,7 @@ export async function getNewsActions(params: GetNewsParams = {}): Promise<NewsRe
             toNewsData(item, {
                 rate: (byRating ? item.avgRating : ratingMap.get(item.article_id)) ?? 0,
                 favorite: favoriteSet.has(item.article_id),
+                favorites: favoriteCountMap.get(item.article_id) ?? 0,
                 likes: likeCountMap.get(item.article_id) ?? 0,
                 liked: likedSet.has(item.article_id),
                 userRate: userRatingMap.get(item.article_id),
@@ -285,8 +312,10 @@ export async function getNewsByIds(
         const newsCollection = await getCollection<NewsDocument>('news')
         const ratingsCollection = await getCollection<RatingDocument>('ratings')
         const likesCollection = await getCollection<LikeDocument>('likes')
+        const favoritesCollection = await getCollection<FavoriteDocument>('favorites')
 
         const docs = await newsCollection.find({ article_id: { $in: articleIds } }).toArray()
+        const favoriteCountMap = await countFavorites(favoritesCollection, articleIds)
 
         const ratings = await ratingsCollection
             .aggregate([
@@ -317,6 +346,7 @@ export async function getNewsByIds(
             toNewsData(item, {
                 rate: ratingMap.get(item.article_id) ?? 0,
                 favorite: false,
+                favorites: favoriteCountMap.get(item.article_id) ?? 0,
                 likes: likeCountMap.get(item.article_id) ?? 0,
                 liked: likedSet.has(item.article_id),
             })
